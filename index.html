@@ -1,304 +1,1108 @@
-<!DOCTYPE html>
+
+
+
+
+<! html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>代行なう - daiko-nau</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>代行なう</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f0f0f; font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; }
-    input::placeholder { color: #555; }
-    input:focus { border-color: #f97316 !important; }
-    a { -webkit-tap-highlight-color: transparent; }
-    button { -webkit-tap-highlight-color: transparent; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #080808; font-family: 'Noto Sans JP', sans-serif; }
+    #root { min-height: 100vh; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-    const { useState } = React;
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback, useMemo, memo } = React;
 
-    const INITIAL_OPERATORS = [
-      { id: 1, name: "代行A", status: "ready", phone: "090-0000-0001" },
-      { id: 2, name: "代行B", status: "available", phone: "090-0000-0002" },
-      { id: 3, name: "代行C", status: "ready", phone: "090-0000-0003" },
-    ];
 
-    const STATUS_CONFIG = {
-      available: { label: "空き", emoji: "🟢", color: "#22c55e", bg: "#14532d" },
-      ready:     { label: "すぐ行けます", emoji: "🔥", color: "#fb923c", bg: "#431407" },
-      busy:      { label: "対応中", emoji: "🔴", color: "#f87171", bg: "#450a0a" },
+    // window.storage polyfill for GitHub Pages
+    window.storage = window.storage || {
+      _data: {},
+      set: (k, v) => { try { localStorage.setItem(k, v); } catch(e){} return Promise.resolve({key:k,value:v}); },
+      get: (k) => { try { const v = localStorage.getItem(k); return Promise.resolve(v ? {key:k,value:v} : null); } catch(e){ return Promise.resolve(null); } },
+      delete: (k) => { try { localStorage.removeItem(k); } catch(e){} return Promise.resolve({key:k,deleted:true}); },
     };
 
-    const GLOBAL_STATUS = {
-      available: { label: "空き", emoji: "🟢", bg: "#16a34a" },
-      busy:      { label: "対応中", emoji: "🔴", bg: "#dc2626" },
-    };
 
-    const BBS_INITIAL = [
-      { id: 1, name: "田中様", content: "博多駅から出発予定です", time: "13:20" },
-      { id: 2, name: "鈴木様", content: "天神方面お願いします", time: "13:05" },
-    ];
 
-    function haversine(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = ((lat2 - lat1) * Math.PI) / 180;
-      const dLon = ((lon2 - lon1) * Math.PI) / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
 
-    async function geocode(place) {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place + " 福岡")}&format=json&limit=1`;
-      const res = await fetch(url, { headers: { "Accept-Language": "ja" } });
-      const data = await res.json();
-      if (!data.length) throw new Error(`「${place}」が見つかりませんでした`);
-      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), name: data[0].display_name };
-    }
+// ══ SUPABASE CONFIG ══
+// ⚠️ 以下の2行をSupabaseのProject URLとAnon Keyに書き換えてください
+const SUPABASE_URL = "https://your-project.supabase.co";
+const SUPABASE_ANON_KEY = "your-anon-key-here";
 
-    function DaikoNau() {
-      const [globalStatus, setGlobalStatus] = useState("available");
-      const [operators, setOperators] = useState(INITIAL_OPERATORS);
-      const [origin, setOrigin] = useState("");
-      const [dest, setDest] = useState("");
-      const [distResult, setDistResult] = useState(null);
-      const [calcLoading, setCalcLoading] = useState(false);
-      const [calcError, setCalcError] = useState("");
-      const [bbs, setBbs] = useState(BBS_INITIAL);
-      const [bbsName, setBbsName] = useState("");
-      const [bbsContent, setBbsContent] = useState("");
-      const [newOpName, setNewOpName] = useState("");
-      const [newOpPhone, setNewOpPhone] = useState("");
-      const [showAddOp, setShowAddOp] = useState(false);
-      const [tab, setTab] = useState("home");
 
-      const calcDistance = async () => {
-        if (!origin || !dest) return;
-        setCalcLoading(true);
-        setDistResult(null);
-        setCalcError("");
-        try {
-          const [from, to] = await Promise.all([geocode(origin), geocode(dest)]);
-          const km = haversine(from.lat, from.lon, to.lat, to.lon).toFixed(1);
-          const min = Math.round(km / 0.4);
-          setDistResult({ km, min, fromName: from.name.split(",")[0], toName: to.name.split(",")[0] });
-        } catch(e) {
-          setCalcError(e.message || "距離計算に失敗しました");
-        }
-        setCalcLoading(false);
-      };
+// Supabaseクライアント（CDN版・軽量ラッパー）
+const supabase = (() => {
+  const headers = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+  };
+  const authHeaders = (token) => ({
+    ...headers,
+    "Authorization": `Bearer ${token || SUPABASE_ANON_KEY}`,
+  });
+  const base = `${SUPABASE_URL}/rest/v1`;
+  const authBase = `${SUPABASE_URL}/auth/v1`;
 
-      const openMap = () => {
-        const q = [origin, dest].filter(Boolean).join(" から ");
-        if (!q) return;
-        window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, "_blank");
-      };
 
-      const postBbs = () => {
-        if (!bbsName.trim() || !bbsContent.trim()) return;
-        const now = new Date();
-        const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
-        setBbs([{ id: Date.now(), name: bbsName.trim(), content: bbsContent.trim(), time }, ...bbs]);
-        setBbsName(""); setBbsContent("");
-      };
+  // セッション管理
+  let _session = null;
+  const SESSION_KEY = "daiko_session";
+  const loadSession = () => {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
+  };
+  const saveSession = (s) => {
+    _session = s;
+    if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+    else localStorage.removeItem(SESSION_KEY);
+  };
+  _session = loadSession();
 
-      const addOperator = () => {
-        if (!newOpName.trim()) return;
-        setOperators([...operators, { id: Date.now(), name: newOpName.trim(), status: "available", phone: newOpPhone.trim() || "—" }]);
-        setNewOpName(""); setNewOpPhone(""); setShowAddOp(false);
-      };
 
-      const cycleStatus = (id) => {
-        const order = ["available","ready","busy"];
-        setOperators(ops => ops.map(op => {
-          if (op.id !== id) return op;
-          return { ...op, status: order[(order.indexOf(op.status)+1)%order.length] };
-        }));
-      };
+  return {
+    getSession: () => _session,
 
-      const removeOperator = (id) => setOperators(ops => ops.filter(o => o.id !== id));
 
-      const s = {
-        root: { background:"#0f0f0f", minHeight:"100vh", color:"#fff", maxWidth:480, margin:"0 auto", paddingBottom:40 },
-        header: { background:"#1a1a1a", padding:"14px 18px 10px", borderBottom:"1px solid #2a2a2a", display:"flex", alignItems:"baseline", gap:10 },
-        logoKanji: { fontSize:26, fontWeight:900, color:"#fff" },
-        logoNau: { fontSize:26, fontWeight:900, color:"#f97316" },
-        headerSub: { fontSize:13, color:"#555", letterSpacing:1 },
-        statusRow: { display:"flex" },
-        statusBtn: (key) => ({ flex:1, padding:"18px 8px", border:"none", cursor:"pointer", fontSize:18, fontWeight:700, color:"#fff", background: GLOBAL_STATUS[key].bg, opacity: globalStatus===key?1:0.3, boxShadow: globalStatus===key?`0 0 20px ${GLOBAL_STATUS[key].bg}88`:"none", transition:"all 0.2s", letterSpacing:1 }),
-        nav: { display:"flex", background:"#1a1a1a", borderBottom:"1px solid #2a2a2a" },
-        navBtn: (id) => ({ flex:1, padding:"12px 4px", background: tab===id?"#1a0f00":"none", border:"none", borderBottom: tab===id?"2px solid #f97316":"2px solid transparent", color: tab===id?"#f97316":"#555", fontSize:12, cursor:"pointer" }),
-        main: { padding:"16px 14px" },
-        section: { display:"flex", flexDirection:"column", gap:12 },
-        title: { fontSize:15, fontWeight:700, color:"#f97316", letterSpacing:1 },
-        hint: { fontSize:12, color:"#555" },
-        opGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 },
-        opCard: (color) => ({ background:"#1c1c1c", borderRadius:10, padding:12, display:"flex", flexDirection:"column", gap:8, border:`1px solid ${color}44` }),
-        opCardTop: { display:"flex", justifyContent:"space-between", alignItems:"center" },
-        opName: { fontSize:14, fontWeight:700, color:"#fff" },
-        removeBtn: { background:"none", border:"none", color:"#444", cursor:"pointer", fontSize:14, padding:2, lineHeight:1 },
-        statusTag: (bg, color) => ({ borderRadius:20, padding:"7px 10px", fontSize:12, fontWeight:700, border:"none", cursor:"pointer", textAlign:"center", background:bg, color }),
-        phoneLink: { color:"#60a5fa", fontSize:11, textDecoration:"none" },
-        phoneEmpty: { fontSize:11, color:"#444" },
-        addForm: { display:"flex", flexDirection:"column", gap:8, background:"#1c1c1c", padding:14, borderRadius:10, border:"1px solid #2a2a2a" },
-        addBtn: { background:"none", border:"1px dashed #f97316", color:"#f97316", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", width:"100%", fontWeight:700 },
-        input: { background:"#1c1c1c", border:"1px solid #2e2e2e", borderRadius:8, padding:"11px 12px", color:"#fff", fontSize:14, width:"100%", outline:"none" },
-        primaryBtn: (disabled) => ({ background:"#f97316", color:"#fff", border:"none", borderRadius:8, padding:"13px", fontSize:14, fontWeight:700, cursor: disabled?"not-allowed":"pointer", width:"100%", opacity: disabled?0.5:1 }),
-        ghostBtn: { background:"none", color:"#777", border:"1px solid #333", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", flex:1 },
-        btnRow: { display:"flex", gap:8 },
-        mapBtn: { background:"#1c1c1c", color:"#60a5fa", border:"1px solid #2a2a2a", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", width:"100%", fontWeight:600 },
-        errorBox: { background:"#2a0a0a", border:"1px solid #7f1d1d", borderRadius:8, padding:"12px", color:"#fca5a5", fontSize:13 },
-        distBox: { background:"#1c1c1c", borderRadius:10, padding:16, textAlign:"center", border:"1px solid #f9731644" },
-        distKm: { fontSize:32, fontWeight:900, color:"#f97316" },
-        distMin: { fontSize:18, color:"#aaa", marginTop:4 },
-        distNames: { fontSize:11, color:"#555", marginTop:8 },
-        opRow: { background:"#1c1c1c", borderRadius:10, padding:"13px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, border:"1px solid #2a2a2a" },
-        opPhone: { fontSize:11, color:"#555", marginTop:2 },
-        bbsCard: { background:"#1c1c1c", borderRadius:10, padding:12, border:"1px solid #2a2a2a" },
-        bbsTop: { display:"flex", justifyContent:"space-between", marginBottom:6 },
-        bbsName: { fontSize:13, fontWeight:700, color:"#f97316" },
-        bbsTime: { fontSize:11, color:"#555" },
-        bbsText: { fontSize:13, color:"#ccc" },
-      };
+    // 新規登録
+    signUp: async ({ email, password, name, address, role }) => {
+      const r = await fetch(`${authBase}/signup`, {
+        method: "POST", headers,
+        body: JSON.stringify({ email, password, data: { name } }),
+      }).then(r => r.json());
+      if (r.error) return { error: r.error };
+      saveSession(r);
+      // profilesテーブルに追加情報を保存
+      if (r.access_token) {
+        await fetch(`${base}/profiles`, {
+          method: "POST",
+          headers: { ...authHeaders(r.access_token), "Prefer": "return=minimal" },
+          body: JSON.stringify({ id: r.user.id, name, email, address: address || "", role: role || "user" }),
+        });
+      }
+      return { data: r };
+    },
 
-      return (
-        <div style={s.root}>
-          <header style={s.header}>
-            <span style={s.logoKanji}>代行</span>
-            <span style={s.logoNau}>なう</span>
-            <span style={s.headerSub}>daiko-nau</span>
-          </header>
 
-          <div style={s.statusRow}>
-            {Object.entries(GLOBAL_STATUS).map(([key, cfg]) => (
-              <button key={key} onClick={() => setGlobalStatus(key)} style={s.statusBtn(key)}>
-                {cfg.emoji} {cfg.label}
-              </button>
-            ))}
-          </div>
+    // ログイン
+    signIn: async ({ email, password }) => {
+      const r = await fetch(`${authBase}/token?grant_type=password`, {
+        method: "POST", headers,
+        body: JSON.stringify({ email, password }),
+      }).then(r => r.json());
+      if (r.error) return { error: r.error };
+      saveSession(r);
+      return { data: r };
+    },
 
-          <nav style={s.nav}>
-            {[["home","ホーム"],["map","地図・距離"],["ops","業者管理"],["bbs","掲示板"]].map(([id,label]) => (
-              <button key={id} onClick={() => setTab(id)} style={s.navBtn(id)}>{label}</button>
-            ))}
-          </nav>
 
-          <main style={s.main}>
+    // ログアウト
+    signOut: async () => {
+      const token = _session?.access_token;
+      saveSession(null);
+      if (token) await fetch(`${authBase}/logout`, {
+        method: "POST", headers: authHeaders(token),
+      }).catch(() => {});
+      return { error: null };
+    },
 
-            {tab === "home" && (
-              <div style={s.section}>
-                <h2 style={s.title}>業者一覧</h2>
-                <div style={s.opGrid}>
-                  {operators.map(op => {
-                    const st = STATUS_CONFIG[op.status];
-                    return (
-                      <div key={op.id} style={s.opCard(st.color)}>
-                        <div style={s.opCardTop}>
-                          <span style={s.opName}>{op.name}</span>
-                          <button onClick={() => removeOperator(op.id)} style={s.removeBtn}>✕</button>
-                        </div>
-                        <button onClick={() => cycleStatus(op.id)} style={s.statusTag(st.bg, st.color)}>
-                          {st.emoji} {st.label}
-                        </button>
-                        {op.phone !== "—"
-                          ? <a href={`tel:${op.phone.replace(/-/g,"")}`} style={s.phoneLink}>📞 {op.phone}</a>
-                          : <span style={s.phoneEmpty}>電話番号なし</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-                {showAddOp ? (
-                  <div style={s.addForm}>
-                    <input style={s.input} placeholder="業者名（例：代行D）" value={newOpName} onChange={e => setNewOpName(e.target.value)} />
-                    <input style={s.input} placeholder="電話番号（任意）" value={newOpPhone} onChange={e => setNewOpPhone(e.target.value)} type="tel" />
-                    <div style={s.btnRow}>
-                      <button style={s.primaryBtn(false)} onClick={addOperator}>追加する</button>
-                      <button style={s.ghostBtn} onClick={() => setShowAddOp(false)}>キャンセル</button>
-                    </div>
-                  </div>
-                ) : (
-                  <button style={s.addBtn} onClick={() => setShowAddOp(true)}>＋ 業者を追加</button>
-                )}
-              </div>
-            )}
 
-            {tab === "map" && (
-              <div style={s.section}>
-                <h2 style={s.title}>距離計算</h2>
-                <input style={s.input} placeholder="出発地（例：博多駅）" value={origin}
-                  onChange={e => { setOrigin(e.target.value); setDistResult(null); setCalcError(""); }} />
-                <input style={s.input} placeholder="目的地（例：宇美町）" value={dest}
-                  onChange={e => { setDest(e.target.value); setDistResult(null); setCalcError(""); }} />
-                <button style={s.primaryBtn(!origin || !dest || calcLoading)}
-                  onClick={calcDistance} disabled={!origin || !dest || calcLoading}>
-                  {calcLoading ? "🔍 計算中…" : "距離計算"}
-                </button>
-                {calcError && <div style={s.errorBox}>⚠️ {calcError}</div>}
-                {distResult && (
-                  <div style={s.distBox}>
-                    <div style={s.distKm}>📍 {distResult.km} km</div>
-                    <div style={s.distMin}>約 {distResult.min} 分</div>
-                    <div style={s.distNames}>{distResult.fromName} → {distResult.toName}</div>
-                  </div>
-                )}
-                <button style={s.mapBtn} onClick={openMap}>🗺 Googleマップで開く</button>
-              </div>
-            )}
+    // プロフィール取得
+    getProfile: async () => {
+      const token = _session?.access_token;
+      const uid = _session?.user?.id;
+      if (!token || !uid) return { data: null };
+      const r = await fetch(`${base}/profiles?id=eq.${uid}&select=*`, {
+        headers: authHeaders(token),
+      }).then(r => r.json());
+      return { data: Array.isArray(r) ? r[0] : null };
+    },
 
-            {tab === "ops" && (
-              <div style={s.section}>
-                <h2 style={s.title}>業者ステータス管理</h2>
-                <p style={s.hint}>ボタンをタップするとステータスが切り替わります</p>
-                {operators.length === 0 && <p style={{fontSize:13,color:"#555",textAlign:"center",padding:"20px 0"}}>業者が登録されていません</p>}
-                {operators.map(op => {
-                  const st = STATUS_CONFIG[op.status];
-                  return (
-                    <div key={op.id} style={s.opRow}>
-                      <div>
-                        <div style={s.opName}>{op.name}</div>
-                        <div style={s.opPhone}>{op.phone}</div>
-                      </div>
-                      <button onClick={() => cycleStatus(op.id)}
-                        style={{...s.statusTag(st.bg, st.color), minWidth:140}}>
-                        {st.emoji} {st.label}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
-            {tab === "bbs" && (
-              <div style={s.section}>
-                <h2 style={s.title}>掲示板</h2>
-                <input style={s.input} placeholder="名前" value={bbsName} onChange={e => setBbsName(e.target.value)} />
-                <input style={s.input} placeholder="内容" value={bbsContent} onChange={e => setBbsContent(e.target.value)} />
-                <button style={s.primaryBtn(!bbsName.trim() || !bbsContent.trim())}
-                  onClick={postBbs} disabled={!bbsName.trim() || !bbsContent.trim()}>
-                  投稿する
-                </button>
-                <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                  {bbs.map(post => (
-                    <div key={post.id} style={s.bbsCard}>
-                      <div style={s.bbsTop}>
-                        <span style={s.bbsName}>{post.name}</span>
-                        <span style={s.bbsTime}>{post.time}</span>
-                      </div>
-                      <p style={s.bbsText}>{post.content}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </main>
+    // プロフィール更新
+    updateProfile: async (updates) => {
+      const token = _session?.access_token;
+      const uid = _session?.user?.id;
+      if (!token || !uid) return { error: "未ログイン" };
+      const r = await fetch(`${base}/profiles?id=eq.${uid}`, {
+        method: "PATCH",
+        headers: { ...authHeaders(token), "Prefer": "return=minimal" },
+        body: JSON.stringify({ ...updates, updated_at: new Date().toISOString() }),
+      });
+      return { error: r.ok ? null : "更新失敗" };
+    },
+
+
+    // トークンリフレッシュ
+    refreshSession: async () => {
+      const refresh_token = _session?.refresh_token;
+      if (!refresh_token) return null;
+      const r = await fetch(`${authBase}/token?grant_type=refresh_token`, {
+        method: "POST", headers,
+        body: JSON.stringify({ refresh_token }),
+      }).then(r => r.json()).catch(() => null);
+      if (r?.access_token) { saveSession(r); return r; }
+      saveSession(null); return null;
+    },
+  };
+})();
+
+
+
+
+// ══ STORAGE ══
+async function save(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch{}}
+async function load(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch{return null;}}
+
+
+// ══ HELPERS ══
+const AV_G=["135deg,#FF6B00,#FF3D00","135deg,#00C853,#00796B","135deg,#2979FF,#1565C0","135deg,#AA00FF,#6200EA","135deg,#FF1744,#B71C1C","135deg,#00B0FF,#0277BD","135deg,#FFD600,#F57F17","135deg,#F50057,#880E4F"];
+const avC=n=>{let s=0;for(const c of(n||"?"))s+=c.charCodeAt(0);return AV_G[s%AV_G.length];};
+const avCh=n=>(n||"?")[0].toUpperCase();
+const agoCache=new Map();
+const ago=ts=>{
+  const bucket=Math.floor((Date.now()-ts)/5000);
+  const key=`${ts}:${bucket}`;
+  if(agoCache.has(key))return agoCache.get(key);
+  const s=Math.floor((Date.now()-ts)/1000);
+  const r=s<60?`${s}秒前`:s<3600?`${Math.floor(s/60)}分前`:s<86400?`${Math.floor(s/3600)}時間前`:`${Math.floor(s/86400)}日前`;
+  if(agoCache.size>200)agoCache.clear();
+  agoCache.set(key,r);return r;
+};
+const fmtYen=n=>`¥${Number(n).toLocaleString()}`;
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+
+// ══ 料金計算エンジン ══
+const FARE_TABLE=[
+  {maxKm:2,  base:1500, perKm:400},
+  {maxKm:5,  base:2200, perKm:350},
+  {maxKm:10, base:3400, perKm:300},
+  {maxKm:20, base:5400, perKm:250},
+  {maxKm:999,base:8000, perKm:200},
+];
+const calcFare=(km,opts={})=>{
+  if(!km||km<=0)return null;
+  const tier=FARE_TABLE.find(t=>km<=t.maxKm)||FARE_TABLE[FARE_TABLE.length-1];
+  let fare=tier.base+Math.max(0,km-1)*tier.perKm;
+  const h=new Date().getHours();
+  const isLate=(h>=23||h<5);
+  if(isLate)fare=Math.round(fare*1.3);
+  if(opts.holiday)fare=Math.round(fare*1.2);
+  fare=Math.ceil(fare/100)*100; // 100円単位切り上げ
+  return{fare,isLate,km,tier,min:Math.round(fare*0.9),max:Math.round(fare*1.1)};
+};
+const fareLabel=r=>r?`${fmtYen(r.fare)}${r.isLate?" 🌙深夜料金含む":""}`:null;
+const calcKmSimple=(la1,lo1,la2,lo2)=>{
+  const R=6371,dL=(la2-la1)*Math.PI/180,dO=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dO/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+};
+
+
+// ══ COLORS ══
+const C={
+  bg:"#080808",card:"#0f0f0f",s1:"#111",s2:"#151515",s3:"#1a1a1a",
+  border:"#1e1e1e",b2:"#252525",b3:"#2e2e2e",
+  accent:"#FF6B00",aL:"rgba(255,107,0,0.08)",aM:"rgba(255,107,0,0.18)",
+  green:"#00D26A",gL:"rgba(0,210,106,0.08)",
+  red:"#FF4757",rL:"rgba(255,71,87,0.08)",
+  blue:"#4A90FF",bL:"rgba(74,144,255,0.08)",
+  gold:"#FFD700",
+  text:"#EFEFEF",t2:"#777",t3:"#3a3a3a",t4:"#555",
+};
+
+
+// ══ DATA ══
+const T=Date.now();
+const DRIVERS=[
+  {id:"u1",name:"田中 健一",shortName:"田中",rating:4.9,reviews:312,bio:"博多・天神エリア専門",eta:3,dist:0.8,price:1800,tags:["⚡ 最速","🌙 深夜OK"],active:true,lat:33.591,lon:130.401,todaySales:24800},
+  {id:"u2",name:"夜の代行 松本",shortName:"松本",rating:4.7,reviews:189,bio:"中央区・南区 深夜対応",eta:5,dist:1.4,price:1600,tags:["💰 最安","🌙 深夜OK"],active:true,lat:33.588,lon:130.398,todaySales:18200},
+  {id:"u3",name:"山田 スピード",shortName:"山田",rating:4.8,reviews:476,bio:"スピード対応が得意",eta:6,dist:1.9,price:2000,tags:["👑 実績No.1","⚡ 素早い"],active:true,lat:33.594,lon:130.404,todaySales:31500},
+  {id:"u4",name:"佐藤ドライブ",shortName:"佐藤",rating:4.6,reviews:94,bio:"丁寧で安全な運転",eta:8,dist:2.3,price:1500,tags:["💰 最安","😊 丁寧"],active:false,lat:33.586,lon:130.396,todaySales:12000},
+  {id:"u5",name:"鈴木 快速",shortName:"鈴木",rating:5.0,reviews:67,bio:"新規歓迎！全エリア対応",eta:4,dist:1.1,price:1900,tags:["⭐ 高評価","🗺 全エリア"],active:true,lat:33.592,lon:130.403,todaySales:19800},
+];
+const BEST_DRIVER=DRIVERS[0];
+const ONLINE_COUNT=rnd(5,13);
+
+
+const DEMO_POSTS=[
+  {id:"p1",userId:"u2",from:"博多駅",to:"福岡空港",price:3500,timing:"今すぐ",note:"終電逃しました😭 急いでます！",status:"募集中",time:T-180000,dist:1.2,likes:3,liked:false,replies:[{id:"r1",userId:"u4",text:"すぐ向かえます！",time:T-120000}],accepted:null,viewers:3,type:"request"},
+  {id:"p2",userId:"u3",from:"天神",to:"大橋",price:2000,timing:"今すぐ",note:"",status:"募集中",time:T-600000,dist:2.8,likes:1,liked:false,replies:[],accepted:null,viewers:2,type:"request"},
+  {id:"p3",userId:"u5",from:"中洲",to:"春日市",price:4000,timing:"今すぐ",note:"深夜2時ごろ",status:"受付終了",time:T-1800000,dist:0.8,likes:7,liked:false,replies:[{id:"r2",userId:"u1",text:"よろしくです！",time:T-1700000}],accepted:"u1",viewers:0,type:"request"},
+  {id:"p4",userId:"u1",from:"博多駅",to:"久留米駅",price:0,timing:"今すぐ",note:"帰り便！空車です🚗 乗りませんか？",status:"募集中",time:T-900000,dist:0,likes:5,liked:false,replies:[],accepted:null,viewers:4,type:"kaeri"},
+  {id:"p5",userId:"u4",from:"香椎",to:"博多駅",price:2500,timing:"今すぐ",note:"",status:"募集中",time:T-7200000,dist:4.1,likes:0,liked:false,replies:[],accepted:null,viewers:1,type:"request"},
+];
+const DEMO_TL=[
+  {id:"t1",userId:"u1",text:"今夜も博多・天神エリア空いてます！深夜OK🌙 お気軽にどうぞ",time:T-900000,likes:8,liked:false,replies:[{id:"tr1",userId:"u3",text:"いつもありがとう！",time:T-800000}],status:"active"},
+  {id:"t2",userId:"u3",text:"先日の代行さん最高でした👍 また使います！",time:T-3600000,likes:12,liked:false,replies:[],status:"active"},
+  {id:"t3",userId:"u2",text:"中洲・天神エリア 深夜2時まで対応 空いてます🚗",time:T-7200000,likes:5,liked:false,replies:[],status:"busy"},
+  {id:"t4",userId:"u5",text:"本日全エリア対応！お気軽にどうぞ ¥1,900〜",time:T-1800000,likes:9,liked:false,replies:[],status:"active"},
+];
+const RANKING=[
+  {rank:1,userId:"u3",sales:89,amount:142000,badge:"👑"},
+  {rank:2,userId:"u1",sales:67,amount:107200,badge:"🥈"},
+  {rank:3,userId:"u5",sales:54,amount:86400,badge:"🥉"},
+  {rank:4,userId:"u2",sales:41,amount:65600,badge:""},
+  {rank:5,userId:"u4",sales:28,amount:44800,badge:""},
+];
+
+
+// ══ CSS ══
+const CSS=`
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes matchPop{0%{transform:scale(.3);opacity:0}65%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes ping{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+@keyframes ping2{0%{transform:scale(.7);opacity:.5}100%{transform:scale(2.6);opacity:0}}
+@keyframes notif{0%{transform:translateY(-80px) scale(.9);opacity:0}12%{transform:translateY(0) scale(1);opacity:1}85%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(.9);opacity:0}}
+@keyframes driverIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes ctaPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,.35)}60%{box-shadow:0 4px 32px rgba(255,107,0,.6)}}
+@keyframes numberUp{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes battlePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.015)}}
+@keyframes barFill{from{width:0}to{width:var(--w)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes vsFlash{0%,100%{text-shadow:none}50%{text-shadow:0 0 12px #FF6B00,0 0 24px #FF3D00}}
+@keyframes rankSlide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+`;
+
+
+// ══ COMPONENTS ══
+const Av=memo(({name="?",size=40,ring=false,status=null})=>(
+  <div style={{position:"relative",flexShrink:0}}>
+    <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(${avC(name)})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*.4,fontWeight:900,color:"#fff",boxShadow:ring?`0 0 0 2px ${C.accent},0 0 12px rgba(255,107,0,.3)`:undefined}}>
+      {avCh(name)}
+    </div>
+    {status!==null&&<div style={{position:"absolute",bottom:1,right:1,width:Math.max(8,size*.26),height:Math.max(8,size*.26),borderRadius:"50%",background:status?C.green:C.red,border:`2px solid ${C.bg}`}}/>}
+  </div>
+));
+
+
+const Stars=memo(({rating,size=11})=>(
+  <span style={{color:C.gold,fontSize:size,letterSpacing:-1}}>
+    {"★".repeat(Math.floor(rating))}{"☆".repeat(5-Math.floor(rating))}
+  </span>
+));
+
+
+const Tag=({label})=>{
+  const col=label.includes("最速")||label.includes("素早")?C.accent:label.includes("最安")||label.includes("安")?C.green:label.includes("実績")||label.includes("高評価")||label.includes("⭐")?C.gold:C.blue;
+  return <span style={{fontSize:10,padding:"2px 7px",borderRadius:8,fontWeight:700,background:`${col}18`,color:col,border:`1px solid ${col}28`,whiteSpace:"nowrap"}}>{label}</span>;
+};
+
+
+// 通知トースト
+function NotifToast({msg,sub,onDone}){
+  useEffect(()=>{const t=setTimeout(onDone,3800);return()=>clearTimeout(t);},[]);
+  return(
+    <div style={{position:"fixed",top:0,left:"50%",transform:"translateX(-50%)",width:"calc(100% - 24px)",maxWidth:456,zIndex:9999,padding:"12px 0 0",animation:"notif 4s cubic-bezier(.34,1.56,.64,1) forwards"}}>
+      <div style={{background:"#1a1a1a",borderRadius:16,padding:"14px 16px",border:`1px solid ${C.b3}`,display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(0,0,0,.7)"}}>
+        <div style={{width:40,height:40,borderRadius:12,background:C.aL,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>🚗</div>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:700,fontSize:14,color:C.text}}>{msg}</div>
+          {sub&&<div style={{fontSize:12,color:C.t2,marginTop:2}}>{sub}</div>}
         </div>
-      );
-    }
+        <div style={{fontSize:11,color:C.accent,fontWeight:800}}>今すぐ</div>
+      </div>
+    </div>
+  );
+}
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<DaikoNau />);
-  </script>
-</body>
-</html>
+
+// メインCTAボタン
+function CallButton({driver,onPress,waitCount}){
+  const [pressed,setPressed]=useState(false);
+  const handle=()=>{setPressed(true);setTimeout(()=>setPressed(false),180);onPress();};
+  return(
+    <button onClick={handle} style={{width:"100%",padding:0,background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",transform:pressed?"scale(.96)":"scale(1)",transition:"transform .15s cubic-bezier(.34,1.56,.64,1)"}}>
+      <div style={{background:"linear-gradient(135deg,#FF6B00,#FF3D00)",borderRadius:20,overflow:"hidden",animation:"ctaPulse 2.5s ease-in-out infinite"}}>
+        <div style={{padding:"18px 20px 14px",display:"flex",alignItems:"center",gap:14}}>
+          <div style={{fontSize:30}}>🚗</div>
+          <div style={{flex:1,textAlign:"left"}}>
+            <div style={{fontSize:20,fontWeight:900,color:"#000",letterSpacing:"-.3px",lineHeight:1.1}}>今すぐ代行を呼ぶ</div>
+            <div style={{fontSize:12,color:"rgba(0,0,0,.6)",marginTop:3,fontWeight:500}}>
+              {driver.name} ★{driver.rating} · {driver.dist}km
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:28,fontWeight:900,color:"#000",lineHeight:1}}>{driver.eta}<span style={{fontSize:14,fontWeight:700}}>分</span></div>
+            <div style={{fontSize:12,color:"rgba(0,0,0,.55)",fontWeight:700}}>{fmtYen(driver.price)}〜 <span style={{fontSize:10,opacity:.7}}>({driver.dist}km)</span></div>
+          </div>
+        </div>
+        <div style={{background:"rgba(0,0,0,.16)",padding:"7px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{fontSize:11,color:"rgba(0,0,0,.65)",fontWeight:700,display:"flex",alignItems:"center",gap:5}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"rgba(0,0,0,.5)",display:"inline-block",animation:"blink .9s ease-in-out infinite"}}/>
+            {waitCount}台待機中
+          </div>
+          <div style={{fontSize:11,color:"rgba(0,0,0,.65)",fontWeight:700}}>あと{rnd(2,5)}台 ›</div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+
+// マッチングオーバーレイ
+function MatchingOverlay({driver,onCancel,onConfirm}){
+  const [phase,setPhase]=useState("searching");
+  const [countdown,setCountdown]=useState(driver.eta*60);
+  const [scanPct,setScanPct]=useState(0);
+
+
+  useEffect(()=>{
+    let p=0;
+    const scan=setInterval(()=>{p+=3.5;setScanPct(Math.min(p,100));if(p>=100)clearInterval(scan);},65);
+    const match=setTimeout(()=>setPhase("matched"),2300);
+    return()=>{clearInterval(scan);clearTimeout(match);};
+  },[]);
+
+
+  useEffect(()=>{
+    if(phase!=="matched")return;
+    const t=setInterval(()=>setCountdown(c=>Math.max(0,c-1)),1000);
+    return()=>clearInterval(t);
+  },[phase]);
+
+
+  const mm=String(Math.floor(countdown/60)).padStart(2,"0");
+  const ss=String(countdown%60).padStart(2,"0");
+
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:900,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+      {phase==="searching"?(
+        <div style={{width:"100%",maxWidth:340,textAlign:"center"}}>
+          <div style={{position:"relative",width:140,height:140,margin:"0 auto 28px"}}>
+            {[0,20,40].map(i=><div key={i} style={{position:"absolute",inset:i,borderRadius:"50%",border:`1px solid ${C.accent}${i===0?"33":i===20?"44":"55"}`}}/>)}
+            <div style={{position:"absolute",inset:0,borderRadius:"50%",border:`2px solid ${C.accent}`,opacity:.5,animation:"ping 1.5s ease-out infinite"}}/>
+            <div style={{position:"absolute",inset:0,borderRadius:"50%",border:`2px solid ${C.accent}`,opacity:.25,animation:"ping2 1.5s ease-out infinite",animationDelay:".5s"}}/>
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:42}}>🚗</div>
+          </div>
+          <div style={{fontSize:11,color:C.green,fontWeight:800,letterSpacing:2,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <span style={{width:7,height:7,borderRadius:"50%",background:C.green,display:"inline-block",animation:"blink .8s ease-in-out infinite"}}/>
+            最適なドライバーを検索中
+          </div>
+          <div style={{fontSize:22,fontWeight:900,color:C.text,marginBottom:20}}>マッチング処理中...</div>
+          <div style={{width:"100%",height:3,background:C.b2,borderRadius:2,overflow:"hidden",marginBottom:28}}>
+            <div style={{height:"100%",background:"linear-gradient(90deg,#FF6B00,#FF3D00)",width:`${scanPct}%`,transition:"width .08s linear",borderRadius:2}}/>
+          </div>
+          <button onClick={onCancel} style={{padding:"12px 32px",background:"none",border:`1px solid ${C.b3}`,borderRadius:24,color:C.t2,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>キャンセル</button>
+        </div>
+      ):(
+        <div style={{width:"100%",maxWidth:340,animation:"scaleIn .4s cubic-bezier(.34,1.56,.64,1)"}}>
+          <div style={{textAlign:"center",marginBottom:20}}>
+            <div style={{fontSize:12,color:C.green,fontWeight:800,letterSpacing:1.5,marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+              <span style={{width:7,height:7,borderRadius:"50%",background:C.green,display:"inline-block",animation:"blink 1s ease-in-out infinite"}}/>
+              マッチング完了
+            </div>
+            <div style={{fontSize:22,fontWeight:900,color:C.text}}>ドライバーが向かっています</div>
+          </div>
+          <div style={{background:C.card,borderRadius:20,padding:20,marginBottom:16,border:`1px solid ${C.b2}`}}>
+            <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:16}}>
+              <div style={{position:"relative"}}>
+                <Av name={driver.name} size={56} ring status={true}/>
+                <div style={{position:"absolute",bottom:-4,right:-4,background:C.green,borderRadius:10,padding:"2px 6px",fontSize:10,fontWeight:800,color:"#000",border:`2px solid ${C.bg}`}}>稼働中</div>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:800,fontSize:18,marginBottom:3}}>{driver.name}</div>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                  <Stars rating={driver.rating}/>
+                  <span style={{color:C.gold,fontWeight:700,fontSize:13}}>{driver.rating}</span>
+                  <span style={{color:C.t2,fontSize:12}}>({driver.reviews}件)</span>
+                </div>
+                <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                  {driver.tags.map(t=><Tag key={t} label={t}/>)}
+                </div>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <div style={{flex:1,background:C.aL,borderRadius:14,padding:"14px 0",textAlign:"center",border:`1px solid ${C.accent}22`}}>
+                <div style={{fontSize:28,fontWeight:900,color:C.accent,fontVariantNumeric:"tabular-nums"}}>{mm}:{ss}</div>
+                <div style={{fontSize:11,color:C.t2,marginTop:2}}>到着まで</div>
+              </div>
+              <div style={{flex:1,background:C.gL,borderRadius:14,padding:"14px 0",textAlign:"center",border:`1px solid ${C.green}22`}}>
+                <div style={{fontSize:24,fontWeight:900,color:C.green}}>{driver.dist}km</div>
+                <div style={{fontSize:11,color:C.t2,marginTop:2}}>現在地から</div>
+              </div>
+              <div style={{flex:1,background:"rgba(255,215,0,.06)",borderRadius:14,padding:"14px 0",textAlign:"center",border:"1px solid rgba(255,215,0,.15)"}}>
+                <div style={{fontSize:20,fontWeight:900,color:C.gold}}>{fmtYen(calcFare(driver.dist)?.fare||driver.price)}</div>
+                <div style={{fontSize:11,color:C.t2,marginTop:2}}>料金目安</div>
+              </div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={onConfirm} style={{flex:2,padding:"15px 0",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:16,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit"}}>確定する 🚗</button>
+            <button onClick={onCancel} style={{flex:1,padding:"15px 0",background:C.s2,color:C.t2,border:`1px solid ${C.b2}`,borderRadius:16,fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>キャンセル</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// チャットモーダル
+function ChatModal({post,me,users,onClose}){
+  const other=users.find(u=>u.id===(post.userId===me.id?post.accepted:post.userId))||users[0];
+  const [msgs,setMsgs]=useState([
+    {id:1,from:post.accepted||post.userId,text:"よろしくお願いします！向かっています🚗",time:T-60000},
+    {id:2,from:me.id,text:"ありがとうございます！よろしくお願いします🙏",time:T-30000},
+  ]);
+  const [txt,setTxt]=useState("");
+  const btm=useRef(null);
+  useEffect(()=>btm.current?.scrollIntoView({behavior:"smooth"}),[msgs]);
+  const send=()=>{if(!txt.trim())return;setMsgs(m=>[...m,{id:Date.now(),from:me.id,text:txt,time:Date.now()}]);setTxt("");};
+  return(
+    <div style={{position:"fixed",inset:0,background:C.bg,zIndex:200,display:"flex",flexDirection:"column"}}>
+      <div style={{background:C.s1,padding:"14px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:12}}>
+        <button onClick={onClose} style={{background:"none",border:"none",color:C.t2,fontSize:22,cursor:"pointer",padding:0,lineHeight:1}}>←</button>
+        <Av name={other?.name||"?"} size={36} status={true}/>
+        <div>
+          <div style={{fontWeight:700,fontSize:15}}>{other?.name}</div>
+          <div style={{fontSize:11,color:C.green,fontWeight:600}}>● オンライン</div>
+        </div>
+        <div style={{marginLeft:"auto",background:C.aL,border:`1px solid ${C.accent}22`,borderRadius:10,padding:"6px 12px",fontSize:11,color:C.accent,fontWeight:700}}>🚗 {post.from}→{post.to}</div>
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:16,display:"flex",flexDirection:"column",gap:10}}>
+        <div style={{textAlign:"center",fontSize:11,color:C.t3,padding:"4px 12px",background:C.s2,borderRadius:16,alignSelf:"center",marginBottom:6}}>🎉 マッチング成立</div>
+        {msgs.map(m=>{
+          const mine=m.from===me.id;const s=users.find(u=>u.id===m.from);
+          return(
+            <div key={m.id} style={{display:"flex",gap:8,alignItems:"flex-end",flexDirection:mine?"row-reverse":"row"}}>
+              {!mine&&<Av name={s?.name||"?"} size={28}/>}
+              <div style={{maxWidth:"72%"}}>
+                <div style={{background:mine?"linear-gradient(135deg,#FF6B00,#FF3D00)":C.s2,color:mine?"#000":C.text,borderRadius:mine?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px",fontSize:14,lineHeight:1.5,wordBreak:"break-word"}}>{m.text}</div>
+                <div style={{fontSize:10,color:C.t3,marginTop:3,textAlign:mine?"right":"left"}}>{ago(m.time)}</div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={btm}/>
+      </div>
+      <div style={{padding:"12px 16px",borderTop:`1px solid ${C.border}`,display:"flex",gap:8,background:C.s1}}>
+        <input value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")send();}} placeholder="メッセージを入力..." style={{flex:1,background:C.s2,border:`1px solid ${C.b2}`,borderRadius:24,padding:"10px 16px",color:C.text,fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+        <button onClick={send} style={{width:44,height:44,borderRadius:"50%",background:txt.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#222",color:txt.trim()?"#000":"#555",border:"none",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>↑</button>
+      </div>
+    </div>
+  );
+}
+
+
+// 投稿カード
+const PostCard=memo(function PostCard({post,users,me,onAccept,onLike,onReply,onChat,onFocusMap,onCallDriver}){
+  const user=users.find(u=>u.id===post.userId)||users[0];
+  const driver=DRIVERS.find(d=>d.id===post.userId);
+  const [replyOpen,setReplyOpen]=useState(false);
+  const [replyTxt,setReplyTxt]=useState("");
+  const [accepting,setAccepting]=useState(false);
+  const [justAccepted,setJustAccepted]=useState(false);
+  const [countdown,setCountdown]=useState(15);
+  const isOwn=post.userId===me.id;
+  const isClosed=post.status==="受付終了";
+  const isKaeri=post.type==="kaeri";
+
+
+  useEffect(()=>{
+    if(!accepting)return;
+    const t=setInterval(()=>setCountdown(c=>Math.max(0,c-1)),1000);
+    return()=>clearInterval(t);
+  },[accepting]);
+
+
+  const handleAccept=async()=>{
+    setAccepting(true);
+    await new Promise(r=>setTimeout(r,1200));
+    setJustAccepted(true);onAccept(post.id);setAccepting(false);
+  };
+
+
+  return(
+    <div style={{borderBottom:`1px solid ${C.border}`,padding:"14px 16px",background:justAccepted?"rgba(0,210,106,.04)":C.bg,transition:"background .4s"}}>
+      {isKaeri&&<div style={{background:"rgba(74,144,255,.07)",border:`1px solid ${C.blue}22`,borderRadius:10,padding:"5px 12px",marginBottom:10,fontSize:12,color:C.blue,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
+        🔄 帰り便募集 <span style={{color:C.t2,fontWeight:400}}>空車でお迎えできます</span>
+      </div>}
+      <div style={{display:"flex",gap:10,marginBottom:12}}>
+        <Av name={user.name} size={44} status={driver?.active}/>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+            <span style={{fontWeight:700,fontSize:15}}>{user.name}</span>
+            <Stars rating={user.rating} size={11}/>
+            <span style={{color:C.t3,fontSize:11}}>{user.rating}</span>
+            <span style={{fontSize:11,color:C.t3,marginLeft:"auto"}}>{ago(post.time)}</span>
+          </div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
+            <span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:post.status==="募集中"?C.gL:C.rL,color:post.status==="募集中"?C.green:C.red,border:`1px solid ${post.status==="募集中"?C.green+"33":C.red+"33"}`,display:"flex",alignItems:"center",gap:3}}>
+              <span style={{width:5,height:5,borderRadius:"50%",background:post.status==="募集中"?C.green:C.red,display:"inline-block",animation:post.status==="募集中"?"blink 1.4s ease-in-out infinite":undefined}}/>
+              {post.status}
+            </span>
+            <span style={{fontSize:10,padding:"2px 7px",borderRadius:8,fontWeight:700,background:C.aL,color:C.accent,border:`1px solid ${C.accent}22`}}>{post.timing==="今すぐ"?"⚡ 今すぐ":"📅 予約"}</span>
+            {post.viewers>0&&<span style={{fontSize:10,color:C.t4}}>👁 {post.viewers}人検討中</span>}
+          </div>
+        </div>
+      </div>
+      <div onClick={()=>onFocusMap&&onFocusMap(post)} style={{background:C.s2,borderRadius:14,padding:"12px 14px",marginBottom:10,border:`1px solid ${C.b2}`,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+            <div style={{width:9,height:9,borderRadius:"50%",background:C.green,boxShadow:`0 0 6px ${C.green}`}}/>
+            <div style={{width:1.5,height:18,background:`linear-gradient(${C.green},${C.red})`,margin:"2px 0"}}/>
+            <div style={{width:9,height:9,borderRadius:2,background:C.red,boxShadow:`0 0 6px ${C.red}`}}/>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:8}}>{post.from}</div>
+            <div style={{fontSize:14,fontWeight:700,color:C.t2}}>{post.to}</div>
+          </div>
+          {!isKaeri&&<div style={{textAlign:"right"}}>
+            <div style={{fontSize:22,fontWeight:900,color:C.accent,lineHeight:1}}>{fmtYen(post.price)}</div>
+            {post.km&&<div style={{fontSize:10,color:C.t2,marginTop:2}}>{post.km.toFixed(1)}km</div>}
+            {post.fareResult?.isLate&&<div style={{fontSize:9,color:"#AA00FF",fontWeight:700,marginTop:2}}>🌙 深夜料金</div>}
+          </div>}
+        </div>
+        {!isKaeri&&<div style={{display:"flex",gap:12,paddingTop:8,borderTop:`1px solid ${C.border}`,fontSize:11,color:C.t2}}>
+          <span>📍 {post.dist}km</span>
+          {driver&&<span>⏱ 約{driver.eta}分</span>}
+          <span style={{marginLeft:"auto",color:C.accent,fontSize:10}}>🗺 地図で見る</span>
+        </div>}
+      </div>
+      {post.note&&<div style={{fontSize:13,color:C.t2,lineHeight:1.6,marginBottom:10,padding:"8px 12px",background:C.s2,borderRadius:10,border:`1px solid ${C.b2}`}}>{post.note}</div>}
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        {!isOwn&&!isClosed&&(
+          <button onClick={handleAccept} disabled={accepting} style={{flex:1,padding:"12px 0",border:"none",borderRadius:14,fontWeight:900,fontSize:14,cursor:accepting?"default":"pointer",fontFamily:"inherit",background:justAccepted?C.s2:accepting?"#102210":"linear-gradient(135deg,#FF6B00,#FF3D00)",color:justAccepted?C.t3:accepting?C.green:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:8,opacity:justAccepted?.5:1}}>
+            {accepting?(<><span style={{display:"inline-block",animation:"spin .6s linear infinite"}}>⟳</span><span>受付中 {countdown}秒</span></>):justAccepted?"✓ 受付完了":"🔥 即受ける"}
+          </button>
+        )}
+        {!isOwn&&!isClosed&&<button onClick={()=>onCallDriver&&onCallDriver(user)} style={{padding:"12px 13px",background:C.aL,color:C.accent,border:`1px solid ${C.accent}33`,borderRadius:14,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>🚗 呼ぶ</button>}
+        {isClosed&&<button onClick={()=>onChat(post)} style={{flex:1,padding:"12px 0",background:C.bL,color:C.blue,border:`1px solid ${C.blue}33`,borderRadius:14,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>💬 チャットを開く</button>}
+        {isOwn&&!isClosed&&<div style={{flex:1,padding:"12px 0",background:C.aL,color:C.accent,border:`1px solid ${C.accent}22`,borderRadius:14,fontWeight:700,fontSize:13,textAlign:"center"}}>📢 あなたの依頼</div>}
+        <button onClick={()=>onLike(post.id)} style={{width:44,height:44,borderRadius:12,background:post.liked?C.rL:C.s2,color:post.liked?C.red:C.t3,border:`1px solid ${post.liked?C.red+"33":C.b2}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:3,fontSize:12,fontWeight:700,fontFamily:"inherit"}}>
+          {post.liked?"❤️":"🤍"}{post.likes>0&&<span style={{fontSize:11}}>{post.likes}</span>}
+        </button>
+        <button onClick={()=>setReplyOpen(v=>!v)} style={{width:44,height:44,borderRadius:12,background:replyOpen?C.bL:C.s2,color:replyOpen?C.blue:C.t3,border:`1px solid ${replyOpen?C.blue+"33":C.b2}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:3,fontSize:12,fontFamily:"inherit"}}>
+          💬{post.replies.length>0&&<span style={{fontSize:11}}>{post.replies.length}</span>}
+        </button>
+      </div>
+      {replyOpen&&(
+        <div style={{marginTop:10,background:C.s2,borderRadius:12,padding:"10px 12px",border:`1px solid ${C.b2}`}}>
+          {post.replies.map(r=>{const ru=users.find(u=>u.id===r.userId)||{name:"?"};return(
+            <div key={r.id} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:`1px solid ${C.border}`}}>
+              <Av name={ru.name} size={26}/>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:12,color:C.t2}}>{ru.name}<span style={{fontSize:10,marginLeft:6}}>{ago(r.time)}</span></div>
+                <div style={{fontSize:13,color:C.text,marginTop:2}}>{r.text}</div>
+              </div>
+            </div>
+          );})}
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <input value={replyTxt} onChange={e=>setReplyTxt(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&replyTxt.trim()){onReply(post.id,replyTxt);setReplyTxt("");}}} placeholder="コメントする..." style={{flex:1,background:C.bg,border:`1px solid ${C.b2}`,borderRadius:18,padding:"8px 14px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+            <button onClick={()=>{if(replyTxt.trim()){onReply(post.id,replyTxt);setReplyTxt("");}}} style={{padding:"8px 14px",background:C.accent,color:"#000",border:"none",borderRadius:18,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>送信</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+
+// TLカード
+const TLCard=memo(function TLCard({post,users,me,onLike,onReply,onCallDriver}){
+  const user=users.find(u=>u.id===post.userId)||users[0];
+  const driver=DRIVERS.find(d=>d.id===post.userId);
+  const [open,setOpen]=useState(false);
+  const [txt,setTxt]=useState("");
+  const isActive=post.status==="active";
+  return(
+    <div style={{padding:"14px 16px",borderBottom:`1px solid ${C.border}`}}>
+      <div style={{display:"flex",gap:12}}>
+        <Av name={user.name} size={44} status={isActive}/>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+            <span style={{fontWeight:700,fontSize:15}}>{user.name}</span>
+            <span style={{fontSize:10,padding:"1px 7px",borderRadius:6,background:isActive?C.gL:C.rL,color:isActive?C.green:C.red,fontWeight:700,border:`1px solid ${isActive?C.green+"33":C.red+"33"}`}}>{isActive?"🟢 稼働中":"🔴 対応中"}</span>
+            <span style={{fontSize:11,color:C.t3,marginLeft:"auto"}}>{ago(post.time)}</span>
+          </div>
+          <div style={{fontSize:14,color:"#d0d0d0",lineHeight:1.65,marginBottom:8,wordBreak:"break-word"}}>{post.text}</div>
+          {driver&&<div style={{background:C.s2,borderRadius:10,padding:"8px 12px",marginBottom:10,border:`1px solid ${C.b2}`,display:"flex",gap:12,fontSize:12,alignItems:"center"}}>
+            <span style={{color:C.accent,fontWeight:700}}>{fmtYen(driver.price)}〜</span>
+            <span style={{color:C.t2}}>📍 {driver.dist}km</span>
+            <span style={{color:C.green,fontWeight:700}}>⏱ {driver.eta}分</span>
+            <div style={{display:"flex",gap:4,marginLeft:"auto"}}>{driver.tags.slice(0,1).map(t=><Tag key={t} label={t}/>)}</div>
+          </div>}
+          <div style={{display:"flex",gap:4,alignItems:"center"}}>
+            <button onClick={()=>setOpen(v=>!v)} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:"pointer",color:open?C.blue:C.t3,fontSize:13,padding:"4px 8px 4px 0",fontFamily:"inherit"}}>
+              💬{post.replies.length>0&&<span>{post.replies.length}</span>}
+            </button>
+            <button onClick={()=>onLike(post.id)} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:"pointer",color:post.liked?C.red:C.t3,fontSize:13,padding:"4px 8px 4px 0",fontFamily:"inherit"}}>
+              {post.liked?"❤️":"🤍"}{post.likes>0&&<span>{post.likes}</span>}
+            </button>
+            {isActive&&driver&&<button onClick={()=>onCallDriver&&onCallDriver(user)} style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:5,padding:"7px 14px",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:20,fontSize:12,fontWeight:900,cursor:"pointer",fontFamily:"inherit"}}>
+              🚗 このドライバーを呼ぶ
+            </button>}
+          </div>
+          {open&&(
+            <div style={{marginTop:8,background:C.s2,borderRadius:12,padding:"10px 12px",border:`1px solid ${C.b2}`}}>
+              {post.replies.map(r=>{const ru=users.find(u=>u.id===r.userId)||{name:"?"};return(
+                <div key={r.id} style={{display:"flex",gap:8,padding:"5px 0",borderBottom:`1px solid ${C.border}`}}>
+                  <Av name={ru.name} size={26}/>
+                  <div style={{fontSize:12,color:C.t2,paddingTop:2}}><span style={{fontWeight:700,color:C.text}}>{ru.name}</span> {r.text}</div>
+                </div>
+              );})}
+              <div style={{display:"flex",gap:8,marginTop:8}}>
+                <input value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&txt.trim()){onReply(post.id,txt);setTxt("");}}} placeholder="返信する..." style={{flex:1,background:C.bg,border:`1px solid ${C.b2}`,borderRadius:18,padding:"8px 14px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+                <button onClick={()=>{if(txt.trim()){onReply(post.id,txt);setTxt("");}}} style={{padding:"8px 14px",background:C.green,color:"#000",border:"none",borderRadius:18,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>返信</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+
+// ══ 料金表コンポーネント ══
+function FareTable(){
+  const h=new Date().getHours();
+  const isLate=h>=23||h<5;
+  const rows=[
+    {label:"〜2km",fare:"¥1,500〜",ex:"博多駅→天神"},
+    {label:"〜5km",fare:"¥2,200〜",ex:"天神→大橋"},
+    {label:"〜10km",fare:"¥3,400〜",ex:"博多→春日"},
+    {label:"〜20km",fare:"¥5,400〜",ex:"博多→古賀"},
+    {label:"20km〜",fare:"¥8,000〜",ex:"博多→久留米"},
+  ];
+  return(
+    <div style={{background:C.s2,borderRadius:14,overflow:"hidden",border:`1px solid ${C.b2}`,marginBottom:14}}>
+      <div style={{padding:"10px 14px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <span style={{fontSize:12,fontWeight:800,color:C.t2}}>📋 料金表（距離別）</span>
+        {isLate&&<span style={{fontSize:10,color:"#AA00FF",fontWeight:700,background:"rgba(170,0,255,.1)",padding:"2px 8px",borderRadius:8,border:"1px solid rgba(170,0,255,.25)"}}>🌙 深夜割増 +30%中</span>}
+      </div>
+      {rows.map((r,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"center",padding:"9px 14px",borderBottom:i<rows.length-1?`1px solid ${C.border}`:undefined,background:i%2===0?"transparent":"rgba(255,255,255,.01)"}}>
+          <div style={{width:70,fontSize:12,fontWeight:700,color:C.text}}>{r.label}</div>
+          <div style={{flex:1,fontSize:13,fontWeight:900,color:C.accent}}>{isLate?r.fare.replace("¥",`¥${Math.round(parseInt(r.fare.replace(/[¥,〜]/g,""))*1.3/100)*100}〜 `):r.fare}</div>
+          <div style={{fontSize:11,color:C.t3}}>{r.ex}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+// 投稿フォーム（距離自動計算料金）
+function PostForm({me,onPost,onClose}){
+  const [type,setType]=useState("request");
+  const [from,setFrom]=useState("");
+  const [to,setTo]=useState("");
+  const [note,setNote]=useState("");
+  const [err,setErr]=useState("");
+  const [fareResult,setFareResult]=useState(null); // {fare, isLate, km, min, max}
+  const [calcStatus,setCalcStatus]=useState(""); // "" | "loading" | "done" | "error"
+  const [showTable,setShowTable]=useState(false);
+  const inp={width:"100%",background:"transparent",border:"none",padding:0,color:C.text,fontSize:15,outline:"none",fontFamily:"inherit"};
+  const calcTimer=useRef(null);
+
+
+  // 出発地・目的地が両方入ったら自動計算
+  useEffect(()=>{
+    if(!from.trim()||!to.trim()){setFareResult(null);setCalcStatus("");return;}
+    clearTimeout(calcTimer.current);
+    calcTimer.current=setTimeout(async()=>{
+      setCalcStatus("loading");setFareResult(null);
+      try{
+        const[fr,t2]=await Promise.all([
+          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(from+" 福岡")}&format=json&limit=1`).then(r=>r.json()),
+          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(to+" 福岡")}&format=json&limit=1`).then(r=>r.json()),
+        ]);
+        if(!fr.length||!t2.length){setCalcStatus("error");return;}
+        const km=calcKmSimple(parseFloat(fr[0].lat),parseFloat(fr[0].lon),parseFloat(t2[0].lat),parseFloat(t2[0].lon));
+        const result=calcFare(km);
+        setFareResult(result);setCalcStatus("done");
+      }catch{setCalcStatus("error");}
+    },800);
+    return()=>clearTimeout(calcTimer.current);
+  },[from,to]);
+
+
+  const submit=()=>{
+    if(!from.trim()||!to.trim()){setErr("出発地と目的地を入力してください");return;}
+    if(type==="request"&&!fareResult){setErr("料金を計算中です。少し待ってください");return;}
+    onPost({from,to,price:fareResult?fareResult.fare:0,km:fareResult?.km,timing:"今すぐ",note,type,fareResult});
+    onClose();
+  };
+
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:150,display:"flex",flexDirection:"column",justifyContent:"flex-end"}}>
+      <div style={{background:C.s1,borderRadius:"20px 20px 0 0",padding:"20px 16px 36px",maxHeight:"92vh",overflowY:"auto",border:`1px solid ${C.b2}`,borderBottom:"none"}}>
+        <div style={{width:36,height:3,borderRadius:2,background:C.b3,margin:"0 auto 18px"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+          <span style={{fontSize:17,fontWeight:900}}>投稿する</span>
+          <button onClick={onClose} style={{background:"none",border:"none",color:C.t2,fontSize:24,cursor:"pointer",lineHeight:1}}>×</button>
+        </div>
+
+
+        {/* タイプ切替 */}
+        <div style={{display:"flex",gap:6,marginBottom:18,background:C.s2,borderRadius:14,padding:4}}>
+          {[["request","🚗 代行依頼"],["kaeri","🔄 帰り便"]].map(([v,l])=>(
+            <button key={v} onClick={()=>setType(v)} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit",background:type===v?"linear-gradient(135deg,#FF6B00,#FF3D00)":"transparent",color:type===v?"#000":C.t2}}>{l}</button>
+          ))}
+        </div>
+
+
+        {type==="kaeri"&&<div style={{background:C.bL,border:`1px solid ${C.blue}22`,borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:12,color:C.blue}}>💡 帰り便は無料で募集できます。乗客が見つかれば料金交渉が可能です。</div>}
+
+
+        {/* ルート入力 */}
+        <div style={{background:C.s2,borderRadius:16,padding:"14px",marginBottom:type==="request"?0:14,border:`1px solid ${fareResult?C.accent+"44":C.b2}`,transition:"border-color .3s"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <div style={{width:10,height:10,borderRadius:"50%",background:C.green,flexShrink:0,boxShadow:`0 0 6px ${C.green}`}}/>
+            <input value={from} onChange={e=>setFrom(e.target.value)} placeholder={type==="kaeri"?"出発地（空車の現在地）":"出発地（例：博多駅）"} style={inp}/>
+          </div>
+          <div style={{width:1.5,height:14,background:C.b3,marginLeft:4,marginBottom:12}}/>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:10,height:10,borderRadius:2,background:C.red,flexShrink:0,boxShadow:`0 0 6px ${C.red}`}}/>
+            <input value={to} onChange={e=>setTo(e.target.value)} placeholder={type==="kaeri"?"目的地（どこまで行けるか）":"目的地（例：天神、大橋）"} style={inp}/>
+          </div>
+        </div>
+
+
+        {/* 料金自動表示エリア */}
+        {type==="request"&&(
+          <div style={{marginBottom:14}}>
+            {calcStatus==="loading"&&(
+              <div style={{padding:"12px 14px",background:C.s2,borderRadius:"0 0 14px 14px",border:`1px solid ${C.b2}`,borderTop:"none",display:"flex",alignItems:"center",gap:8,fontSize:12,color:C.t2}}>
+                <span style={{display:"inline-block",animation:"spin .7s linear infinite",fontSize:14}}>⟳</span>
+                距離を計算して料金を算出中...
+              </div>
+            )}
+            {calcStatus==="done"&&fareResult&&(
+              <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.1),rgba(255,61,0,.06))",borderRadius:"0 0 16px 16px",border:`1px solid ${C.accent}44`,borderTop:"none",overflow:"hidden"}}>
+                {/* メイン料金 */}
+                <div style={{padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:11,color:C.t2,marginBottom:3}}>距離 {fareResult.km.toFixed(1)}km · 自動計算料金</div>
+                    <div style={{fontSize:30,fontWeight:900,color:C.accent,lineHeight:1}}>{fmtYen(fareResult.fare)}</div>
+                    <div style={{fontSize:11,color:C.t2,marginTop:3}}>
+                      範囲: {fmtYen(fareResult.min)} 〜 {fmtYen(fareResult.max)}
+                      {fareResult.isLate&&<span style={{color:"#AA00FF",fontWeight:700,marginLeft:6}}>🌙 深夜+30%</span>}
+                    </div>
+                  </div>
+                  <div style={{width:48,height:48,borderRadius:14,background:C.aL,border:`1px solid ${C.accent}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>✅</div>
+                </div>
+                {/* 内訳 */}
+                <div style={{padding:"10px 16px",background:"rgba(0,0,0,.2)",borderTop:`1px solid ${C.accent}22`,fontSize:11,color:C.t2,display:"flex",gap:16}}>
+                  <span>基本料金: {fmtYen(fareResult.tier.base)}</span>
+                  <span>距離加算: {fmtYen(Math.round(Math.max(0,fareResult.km-1)*fareResult.tier.perKm))}</span>
+                  {fareResult.isLate&&<span style={{color:"#AA00FF"}}>深夜割増: ×1.3</span>}
+                </div>
+              </div>
+            )}
+            {calcStatus==="error"&&(
+              <div style={{padding:"10px 14px",background:C.rL,borderRadius:"0 0 12px 12px",border:`1px solid ${C.red}33`,borderTop:"none",fontSize:12,color:C.red}}>
+                ⚠️ 場所を確認できませんでした。正式な地名で入力してください
+              </div>
+            )}
+            {/* 料金表トグル */}
+            <button onClick={()=>setShowTable(v=>!v)} style={{width:"100%",padding:"8px 0",background:"none",border:"none",color:C.t2,fontSize:11,cursor:"pointer",fontFamily:"inherit",marginTop:8,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+              {showTable?"▲ 料金表を閉じる":"▼ 距離別の料金表を見る"}
+            </button>
+            {showTable&&<FareTable/>}
+          </div>
+        )}
+
+
+        <div style={{marginBottom:18}}>
+          <div style={{fontSize:12,color:C.t2,marginBottom:6,fontWeight:700}}>メモ（任意）</div>
+          <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder={type==="kaeri"?"乗車可能人数・メッセージなど":"駐車場所・その他の要望など"} style={{width:"100%",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:12,padding:"12px 14px",color:C.text,fontSize:14,outline:"none",fontFamily:"inherit",minHeight:64,resize:"none",lineHeight:1.6,boxSizing:"border-box"}}/>
+        </div>
+
+
+        {err&&<div style={{color:C.red,fontSize:12,marginBottom:10,textAlign:"center",fontWeight:600}}>{err}</div>}
+
+
+        <button onClick={submit}
+          style={{width:"100%",padding:"16px 0",background:type==="request"&&fareResult?"linear-gradient(135deg,#FF6B00,#FF3D00)":type==="request"&&!fareResult?"#2a2a2a":"linear-gradient(135deg,#2979FF,#1565C0)",color:type==="request"&&fareResult?"#000":type==="request"?"#555":"#fff",border:"none",borderRadius:16,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",transition:"all .3s"}}>
+          {type==="kaeri"?"🔄 帰り便を募集する":fareResult?`🚗 ${fmtYen(fareResult.fare)}で依頼を投稿`:calcStatus==="loading"?"料金計算中...":"出発地と目的地を入力してください"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// ドライバーカード
+function DriverCard({driver,onCall}){
+  return(
+    <div style={{background:C.card,borderRadius:18,padding:16,marginBottom:10,border:`1px solid ${C.b2}`}}>
+      <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:14}}>
+        <Av name={driver.name} size={52} status={driver.active}/>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:800,fontSize:16,marginBottom:3}}>{driver.name}</div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}><Stars rating={driver.rating} size={12}/><span style={{color:C.gold,fontWeight:700,fontSize:12}}>{driver.rating}</span><span style={{color:C.t2,fontSize:11}}>({driver.reviews}件)</span></div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{driver.tags.map(t=><Tag key={t} label={t}/>)}</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:24,fontWeight:900,color:driver.active?C.green:C.t3}}>{driver.active?`${driver.eta}分`:"対応中"}</div>
+          <div style={{fontSize:10,color:C.t2}}>到着予定</div>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        {[{l:"距離",v:`${driver.dist}km`,c:C.blue},{l:"料金",v:`${fmtYen(calcFare(driver.dist)?.fare||driver.price)}`,c:C.accent},{l:"本日",v:`${Math.floor(driver.todaySales/2500)}件`,c:C.green}].map(({l,v,c})=>(
+          <div key={l} style={{flex:1,background:`${c}0d`,borderRadius:10,padding:"8px 0",textAlign:"center",border:`1px solid ${c}22`}}>
+            <div style={{fontSize:14,fontWeight:800,color:c}}>{v}</div>
+            <div style={{fontSize:10,color:C.t2,marginTop:1}}>{l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{fontSize:12,color:C.t2,marginBottom:12,padding:"0 2px"}}>{driver.bio}</div>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={()=>onCall(driver)} disabled={!driver.active} style={{flex:1,padding:"12px 0",background:driver.active?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#2a2a2a",color:driver.active?"#000":C.t3,border:"none",borderRadius:14,fontWeight:900,fontSize:14,cursor:driver.active?"pointer":"default",fontFamily:"inherit"}}>
+          {driver.active?"🚗 今すぐ呼ぶ":"📵 対応中"}
+        </button>
+        <a href="tel:090-0000-0000" style={{padding:"12px 16px",background:C.s2,color:C.text,border:`1px solid ${C.b2}`,borderRadius:14,fontWeight:700,fontSize:13,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>📞</a>
+      </div>
+    </div>
+  );
+}
+
+
+// ランキング
+function RankingScreen({me}){
+  return(
+    <div style={{padding:16,paddingBottom:80}}>
+      <div style={{fontSize:18,fontWeight:900,marginBottom:4}}>📊 今月のランキング</div>
+      <div style={{fontSize:12,color:C.t2,marginBottom:20}}>{new Date().getMonth()+1}月 売上・件数ランキング</div>
+      <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.1),rgba(255,61,0,.05))",borderRadius:18,padding:16,marginBottom:20,border:`1px solid ${C.accent}22`}}>
+        <div style={{fontSize:12,color:C.accent,fontWeight:800,marginBottom:10}}>あなたの今日の成績</div>
+        <div style={{display:"flex",gap:10}}>
+          {[["本日売上",fmtYen(me.todaySales||24800),C.gold],["件数","12件",C.green],["評価",`★${me.rating}`,C.accent]].map(([l,v,c])=>(
+            <div key={l} style={{flex:1,textAlign:"center",background:`${c}10`,borderRadius:12,padding:"12px 0",border:`1px solid ${c}22`}}>
+              <div style={{fontSize:18,fontWeight:900,color:c,animation:"numberUp .4s ease"}}>{v}</div>
+              <div style={{fontSize:10,color:C.t2,marginTop:2}}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {RANKING.map((r,i)=>{
+        const u=DRIVERS.find(d=>d.id===r.userId)||{name:"?",rating:4.5,active:false};
+        const isMe=r.userId===me.id;
+        const rankColor=i===0?C.gold:i===1?"#aaa":i===2?"#CD7F32":C.t3;
+        return(
+          <div key={r.userId} style={{background:isMe?C.aL:C.card,borderRadius:14,padding:"12px 14px",marginBottom:8,border:`1px solid ${isMe?C.accent+"33":C.b2}`,display:"flex",alignItems:"center",gap:12,animation:"driverIn .3s ease",animationDelay:`${i*0.05}s`,animationFillMode:"both"}}>
+            <div style={{width:32,height:32,borderRadius:10,background:i<3?`${rankColor}20`:C.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:i<3?18:14,fontWeight:900,color:i<3?rankColor:C.t2,border:`1px solid ${i<3?rankColor+"33":C.b2}`,flexShrink:0}}>{r.badge||r.rank}</div>
+            <Av name={u.name} size={36} status={u.active}/>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6}}>{u.name}{isMe&&<span style={{fontSize:10,color:C.accent,fontWeight:700}}>(あなた)</span>}</div>
+              <div style={{fontSize:11,color:C.t2,marginTop:2}}>{r.sales}件</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:16,fontWeight:800,color:C.gold}}>{fmtYen(r.amount)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+
+
+// ══ TODAY'S BATTLE BANNER (TL固定表示) ══
+function TodayBattleBanner({onGo}){
+  const topic=BATTLE_TOPICS[0]; // 今日のバトル = 最初のトピック
+  const tc=INIT_COMMENTS[topic.id]||[];
+  const pl=tc.filter(c=>c.side==="pro").reduce((s,c)=>s+c.likes,0);
+  const cl=tc.filter(c=>c.side==="con").reduce((s,c)=>s+c.likes,0);
+  const tot=pl+cl||1;
+  const pct=Math.round(pl/tot*100);
+  // 今月1位
+  const top1=Object.entries(BATTLE_STATS).sort((a,b)=>b[1].monthLikes-a[1].monthLikes)[0];
+  const top1User=DRIVERS.find(d=>d.id===top1[0])||{name:"山田 スピード",shortName:"山田"};
+  const myStats=BATTLE_STATS["u1"]||{monthLikes:42};
+  const gap=top1[1].monthLikes-myStats.monthLikes;
+
+
+  return(
+    <div style={{margin:"12px 16px",borderRadius:18,overflow:"hidden",border:`1px solid rgba(255,107,0,.25)`,animation:"battlePulse 3s ease-in-out infinite"}}>
+      {/* グラデヘッダー */}
+      <div style={{background:"linear-gradient(135deg,#1a0800,#0d0500,#080808)",padding:"12px 14px 10px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <span style={{fontSize:16}}>⚔️</span>
+            <span style={{fontSize:12,fontWeight:900,color:C.accent,letterSpacing:.5}}>今日のバトル</span>
+            <span style={{fontSize:9,background:C.rL,color:C.red,border:`1px solid ${C.red}44`,padding:"1px 6px",borderRadius:6,fontWeight:800}}>LIVE</span>
+          </div>
+          <span style={{fontSize:10,color:C.t2}}>{tc.length}件参加中</span>
+        </div>
+        <div style={{fontWeight:900,fontSize:17,marginBottom:4,display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:18}}>{topic.icon}</span>
+          <span>{topic.theme}について、どう思う？</span>
+        </div>
+        <div style={{fontSize:11,color:C.t2,marginBottom:10,lineHeight:1.5}}>{topic.desc}</div>
+
+
+        {/* 大型スコアバー */}
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:0,marginBottom:5}}>
+            <div style={{flex:pct,textAlign:"left"}}>
+              <span style={{fontSize:11,fontWeight:800,color:C.blue}}>👍 賛成</span>
+            </div>
+            <div style={{fontSize:13,fontWeight:900,color:C.accent,padding:"0 8px",animation:"vsFlash 2s ease-in-out infinite"}}>VS</div>
+            <div style={{flex:100-pct,textAlign:"right"}}>
+              <span style={{fontSize:11,fontWeight:800,color:C.red}}>反対 👎</span>
+            </div>
+          </div>
+          <div style={{height:12,background:C.b2,borderRadius:6,overflow:"hidden",display:"flex",position:"relative"}}>
+            <div style={{width:`${pct}%`,background:"linear-gradient(90deg,#2979FF,#6ab0ff)",transition:"width .8s ease",display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4}}>
+              <span style={{fontSize:9,fontWeight:900,color:"#fff",opacity:.9}}>{pct}%</span>
+            </div>
+            <div style={{flex:1,background:"linear-gradient(90deg,#FF4757,#ff7070)",display:"flex",alignItems:"center",paddingLeft:4}}>
+              <span style={{fontSize:9,fontWeight:900,color:"#fff",opacity:.9}}>{100-pct}%</span>
+            </div>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:4,fontSize:10,color:C.t2}}>
+            <span>❤️{pl} いいね</span><span>❤️{cl} いいね</span>
+          </div>
+        </div>
+
+
+        {/* 1位バー */}
+        <div style={{background:"rgba(255,215,0,.06)",borderRadius:10,padding:"7px 10px",border:"1px solid rgba(255,215,0,.15)",display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+          <span style={{fontSize:14}}>🥇</span>
+          <div style={{flex:1,fontSize:11,color:C.t2}}>
+            今月1位: <b style={{color:C.gold}}>{top1User.name}</b> ❤️{top1[1].monthLikes}
+          </div>
+          {gap>0&&<div style={{fontSize:10,color:C.gold,fontWeight:700,textAlign:"right"}}>あと<b>{gap}</b>いいねで1位！</div>}
+          {gap<=0&&<div style={{fontSize:10,color:C.green,fontWeight:700}}>🎉 1位！</div>}
+        </div>
+
+
+        {/* CTAボタン群 */}
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={()=>onGo("pro")}
+            style={{flex:1,padding:"11px 0",background:"linear-gradient(135deg,#2979FF,#1565C0)",color:"#fff",border:"none",borderRadius:12,fontWeight:900,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+            👍 賛成で参加
+          </button>
+          <button onClick={()=>onGo("con")}
+            style={{flex:1,padding:"11px 0",background:"linear-gradient(135deg,#FF4757,#c0000f)",color:"#fff",border:"none",borderRadius:12,fontWeight:900,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+            👎 反対で参加
+          </button>
+          <button onClick={()=>onGo(null)}
+            style={{padding:"11px 12px",background:C.s2,color:C.t2,border:`1px solid ${C.b2}`,borderRadius:12,fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+            全部見る
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ══ MAP ══
+function MapView({fromPos,toPos,focusPost,visible,onMapClick,pickMode}){
+  const ref=useRef(null);const M=useRef(null);const MK=useRef([]);const LN=useRef(null);
+  const dMK=useRef([]);const mvTimer=useRef(null);const initialized=useRef(false);
+  const clickMK=useRef(null); // タップ仮ピン
+
+
+  const initMap=useCallback(()=>{
+    if(initialized.current||!ref.current||!window.L)return;
+    initialized.current=true;
+    const L=window.L;
+    const m=L.map(ref.current,{center:[33.590,130.401],zoom:14,preferCanvas:true,zoomControl:false});
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:""}).addTo(m);
+    // ズームコントロール右下
+    L.control.zoom({position:"bottomright"}).addTo(m);
+    M.current=m;
+    // ドライバーピン
+    DRIVERS.filter(d=>d.active).forEach(d=>{
+      const ic=L.divIcon({
+        html:`<div style="background:#FF6B00;color:#000;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:900;white-space:nowrap;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.5);display:flex;align-items:center;gap:4px"><span>🚗</span>${d.eta}分</div>`,
+        className:"",iconAnchor:[35,14]});
+      const mk=L.marker([d.lat,d.lon],{icon:ic}).addTo(m);
+      mk.bindPopup(`<b>${d.name}</b><br>⭐${d.rating} · ${d.dist}km · ¥${d.price}〜`);
+      dMK.current.push({mk,d:{...d}});
+    });
+    // 疑似移動
+    mvTimer.current=setInterval(()=>{
+      dMK.current.forEach(({mk,d})=>{mk.setLatLng([d.lat+(Math.random()-.5)*.002,d.lon+(Math.random()-.5)*.002]);});
+    },6000);
+    // タップイベント
+    m.on("click",e=>{
+      if(onMapClick)onMapClick(e.latlng.lat,e.latlng.lng);
+    });
+  },[onMapClick]);
+
+
+  useEffect(()=>{
+    if(!document.getElementById("lf-css")){const l=document.createElement("link");l.id="lf-css";l.rel="stylesheet";l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(l);}
+    if(window.L){initMap();return;}
+    if(!document.getElementById("lf-js")){const s=document.createElement("script");s.id="lf-js";s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=initMap;document.head.appendChild(s);}
+    else{const w=setInterval(()=>{if(window.L){clearInterval(w);initMap();}},150);return()=>clearInterval(w);}
+    return()=>{clearInterval(mvTimer.current);};
+  },[]);
+
+
+  useEffect(()=>{
+    if(!visible||!M.current||!window.L)return;
+    setTimeout(()=>{if(M.current&&window.L)M.current.invalidateSize();},80);
+    if(!initialized.current&&window.L)initMap();
+  },[visible]);
+
+
+  // onMapClick が変わったらイベント再登録
+  useEffect(()=>{
+    const m=M.current;if(!m||!window.L)return;
+    m.off("click");
+    m.on("click",e=>{if(onMapClick)onMapClick(e.latlng.lat,e.latlng.lng);});
+  },[onMapClick]);
+
+
+  // fromPos/toPos ルートマーカー
+  useEffect(()=>{
+    const L=window.L,m=M.current;if(!L||!m)return;
+    MK.current.forEach(x=>m.removeLayer(x));MK.current=[];
+    if(LN.current){m.removeLayer(LN.current);LN.current=null;}
+    const fromIc=L.divIcon({html:`<div style="width:18px;height:18px;border-radius:50%;background:#00D26A;border:3px solid #fff;box-shadow:0 0 10px #00D26A,0 3px 8px rgba(0,0,0,.4)"></div>`,iconSize:[18,18],iconAnchor:[9,9],className:""});
+    const toIc=L.divIcon({html:`<div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:18px solid #FF4757;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))"></div>`,iconSize:[20,18],iconAnchor:[10,18],className:""});
+    if(fromPos){const mk=L.marker([fromPos.lat,fromPos.lon],{icon:fromIc}).addTo(m);mk.bindPopup("🟢 出発地");MK.current.push(mk);}
+    if(toPos){const mk=L.marker([toPos.lat,toPos.lon],{icon:toIc}).addTo(m);mk.bindPopup("🔴 目的地");MK.current.push(mk);}
+    if(fromPos&&toPos){
+      LN.current=L.polyline([[fromPos.lat,fromPos.lon],[toPos.lat,toPos.lon]],{color:"#FF6B00",weight:4,dashArray:"10 6",opacity:.9}).addTo(m);
+      m.fitBounds([[fromPos.lat,fromPos.lon],[toPos.lat,toPos.lon]],{padding:[80,80]});
+    }
+  },[fromPos,toPos]);
+
+
+  // focusPost ジャンプ
+  useEffect(()=>{
+    if(!focusPost||!M.current||!window.L)return;
+    let dead=false;
+    (async()=>{
+      try{
+        const[fr,to]=await Promise.all([
+          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(focusPost.from+" 福岡")}&format=json&limit=1`).then(r=>r.json()),
+          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(focusPost.to+" 福岡")}&format=json&limit=1`).then(r=>r.json()),
+        ]);
+        if(dead||!fr.length||!to.length)return;
+        const L=window.L,m=M.current;
+        const fromIc=L.divIcon({html:`<div style="width:16px;height:16px;border-radius:50%;background:#00D26A;border:3px solid #fff;box-shadow:0 0 8px #00D26A"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:""});
+        const toIc=L.divIcon({html:`<div style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:16px solid #FF4757;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))"></div
+
+
