@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>代行なう - daiko-nau</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0f0f; font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+    input::placeholder { color: #555; }
+    input:focus { border-color: #f97316 !important; }
+    a { -webkit-tap-highlight-color: transparent; }
+    button { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const INITIAL_OPERATORS = [
+      { id: 1, name: "代行A", status: "ready", phone: "090-0000-0001" },
+      { id: 2, name: "代行B", status: "available", phone: "090-0000-0002" },
+      { id: 3, name: "代行C", status: "ready", phone: "090-0000-0003" },
+    ];
+
+    const STATUS_CONFIG = {
+      available: { label: "空き", emoji: "🟢", color: "#22c55e", bg: "#14532d" },
+      ready:     { label: "すぐ行けます", emoji: "🔥", color: "#fb923c", bg: "#431407" },
+      busy:      { label: "対応中", emoji: "🔴", color: "#f87171", bg: "#450a0a" },
+    };
+
+    const GLOBAL_STATUS = {
+      available: { label: "空き", emoji: "🟢", bg: "#16a34a" },
+      busy:      { label: "対応中", emoji: "🔴", bg: "#dc2626" },
+    };
+
+    const BBS_INITIAL = [
+      { id: 1, name: "田中様", content: "博多駅から出発予定です", time: "13:20" },
+      { id: 2, name: "鈴木様", content: "天神方面お願いします", time: "13:05" },
+    ];
+
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    async function geocode(place) {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place + " 福岡")}&format=json&limit=1`;
+      const res = await fetch(url, { headers: { "Accept-Language": "ja" } });
+      const data = await res.json();
+      if (!data.length) throw new Error(`「${place}」が見つかりませんでした`);
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), name: data[0].display_name };
+    }
+
+    function DaikoNau() {
+      const [globalStatus, setGlobalStatus] = useState("available");
+      const [operators, setOperators] = useState(INITIAL_OPERATORS);
+      const [origin, setOrigin] = useState("");
+      const [dest, setDest] = useState("");
+      const [distResult, setDistResult] = useState(null);
+      const [calcLoading, setCalcLoading] = useState(false);
+      const [calcError, setCalcError] = useState("");
+      const [bbs, setBbs] = useState(BBS_INITIAL);
+      const [bbsName, setBbsName] = useState("");
+      const [bbsContent, setBbsContent] = useState("");
+      const [newOpName, setNewOpName] = useState("");
+      const [newOpPhone, setNewOpPhone] = useState("");
+      const [showAddOp, setShowAddOp] = useState(false);
+      const [tab, setTab] = useState("home");
+
+      const calcDistance = async () => {
+        if (!origin || !dest) return;
+        setCalcLoading(true);
+        setDistResult(null);
+        setCalcError("");
+        try {
+          const [from, to] = await Promise.all([geocode(origin), geocode(dest)]);
+          const km = haversine(from.lat, from.lon, to.lat, to.lon).toFixed(1);
+          const min = Math.round(km / 0.4);
+          setDistResult({ km, min, fromName: from.name.split(",")[0], toName: to.name.split(",")[0] });
+        } catch(e) {
+          setCalcError(e.message || "距離計算に失敗しました");
+        }
+        setCalcLoading(false);
+      };
+
+      const openMap = () => {
+        const q = [origin, dest].filter(Boolean).join(" から ");
+        if (!q) return;
+        window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, "_blank");
+      };
+
+      const postBbs = () => {
+        if (!bbsName.trim() || !bbsContent.trim()) return;
+        const now = new Date();
+        const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
+        setBbs([{ id: Date.now(), name: bbsName.trim(), content: bbsContent.trim(), time }, ...bbs]);
+        setBbsName(""); setBbsContent("");
+      };
+
+      const addOperator = () => {
+        if (!newOpName.trim()) return;
+        setOperators([...operators, { id: Date.now(), name: newOpName.trim(), status: "available", phone: newOpPhone.trim() || "—" }]);
+        setNewOpName(""); setNewOpPhone(""); setShowAddOp(false);
+      };
+
+      const cycleStatus = (id) => {
+        const order = ["available","ready","busy"];
+        setOperators(ops => ops.map(op => {
+          if (op.id !== id) return op;
+          return { ...op, status: order[(order.indexOf(op.status)+1)%order.length] };
+        }));
+      };
+
+      const removeOperator = (id) => setOperators(ops => ops.filter(o => o.id !== id));
+
+      const s = {
+        root: { background:"#0f0f0f", minHeight:"100vh", color:"#fff", maxWidth:480, margin:"0 auto", paddingBottom:40 },
+        header: { background:"#1a1a1a", padding:"14px 18px 10px", borderBottom:"1px solid #2a2a2a", display:"flex", alignItems:"baseline", gap:10 },
+        logoKanji: { fontSize:26, fontWeight:900, color:"#fff" },
+        logoNau: { fontSize:26, fontWeight:900, color:"#f97316" },
+        headerSub: { fontSize:13, color:"#555", letterSpacing:1 },
+        statusRow: { display:"flex" },
+        statusBtn: (key) => ({ flex:1, padding:"18px 8px", border:"none", cursor:"pointer", fontSize:18, fontWeight:700, color:"#fff", background: GLOBAL_STATUS[key].bg, opacity: globalStatus===key?1:0.3, boxShadow: globalStatus===key?`0 0 20px ${GLOBAL_STATUS[key].bg}88`:"none", transition:"all 0.2s", letterSpacing:1 }),
+        nav: { display:"flex", background:"#1a1a1a", borderBottom:"1px solid #2a2a2a" },
+        navBtn: (id) => ({ flex:1, padding:"12px 4px", background: tab===id?"#1a0f00":"none", border:"none", borderBottom: tab===id?"2px solid #f97316":"2px solid transparent", color: tab===id?"#f97316":"#555", fontSize:12, cursor:"pointer" }),
+        main: { padding:"16px 14px" },
+        section: { display:"flex", flexDirection:"column", gap:12 },
+        title: { fontSize:15, fontWeight:700, color:"#f97316", letterSpacing:1 },
+        hint: { fontSize:12, color:"#555" },
+        opGrid: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 },
+        opCard: (color) => ({ background:"#1c1c1c", borderRadius:10, padding:12, display:"flex", flexDirection:"column", gap:8, border:`1px solid ${color}44` }),
+        opCardTop: { display:"flex", justifyContent:"space-between", alignItems:"center" },
+        opName: { fontSize:14, fontWeight:700, color:"#fff" },
+        removeBtn: { background:"none", border:"none", color:"#444", cursor:"pointer", fontSize:14, padding:2, lineHeight:1 },
+        statusTag: (bg, color) => ({ borderRadius:20, padding:"7px 10px", fontSize:12, fontWeight:700, border:"none", cursor:"pointer", textAlign:"center", background:bg, color }),
+        phoneLink: { color:"#60a5fa", fontSize:11, textDecoration:"none" },
+        phoneEmpty: { fontSize:11, color:"#444" },
+        addForm: { display:"flex", flexDirection:"column", gap:8, background:"#1c1c1c", padding:14, borderRadius:10, border:"1px solid #2a2a2a" },
+        addBtn: { background:"none", border:"1px dashed #f97316", color:"#f97316", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", width:"100%", fontWeight:700 },
+        input: { background:"#1c1c1c", border:"1px solid #2e2e2e", borderRadius:8, padding:"11px 12px", color:"#fff", fontSize:14, width:"100%", outline:"none" },
+        primaryBtn: (disabled) => ({ background:"#f97316", color:"#fff", border:"none", borderRadius:8, padding:"13px", fontSize:14, fontWeight:700, cursor: disabled?"not-allowed":"pointer", width:"100%", opacity: disabled?0.5:1 }),
+        ghostBtn: { background:"none", color:"#777", border:"1px solid #333", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", flex:1 },
+        btnRow: { display:"flex", gap:8 },
+        mapBtn: { background:"#1c1c1c", color:"#60a5fa", border:"1px solid #2a2a2a", borderRadius:8, padding:"13px", fontSize:14, cursor:"pointer", width:"100%", fontWeight:600 },
+        errorBox: { background:"#2a0a0a", border:"1px solid #7f1d1d", borderRadius:8, padding:"12px", color:"#fca5a5", fontSize:13 },
+        distBox: { background:"#1c1c1c", borderRadius:10, padding:16, textAlign:"center", border:"1px solid #f9731644" },
+        distKm: { fontSize:32, fontWeight:900, color:"#f97316" },
+        distMin: { fontSize:18, color:"#aaa", marginTop:4 },
+        distNames: { fontSize:11, color:"#555", marginTop:8 },
+        opRow: { background:"#1c1c1c", borderRadius:10, padding:"13px 14px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, border:"1px solid #2a2a2a" },
+        opPhone: { fontSize:11, color:"#555", marginTop:2 },
+        bbsCard: { background:"#1c1c1c", borderRadius:10, padding:12, border:"1px solid #2a2a2a" },
+        bbsTop: { display:"flex", justifyContent:"space-between", marginBottom:6 },
+        bbsName: { fontSize:13, fontWeight:700, color:"#f97316" },
+        bbsTime: { fontSize:11, color:"#555" },
+        bbsText: { fontSize:13, color:"#ccc" },
+      };
+
+      return (
+        <div style={s.root}>
+          <header style={s.header}>
+            <span style={s.logoKanji}>代行</span>
+            <span style={s.logoNau}>なう</span>
+            <span style={s.headerSub}>daiko-nau</span>
+          </header>
+
+          <div style={s.statusRow}>
+            {Object.entries(GLOBAL_STATUS).map(([key, cfg]) => (
+              <button key={key} onClick={() => setGlobalStatus(key)} style={s.statusBtn(key)}>
+                {cfg.emoji} {cfg.label}
+              </button>
+            ))}
+          </div>
+
+          <nav style={s.nav}>
+            {[["home","ホーム"],["map","地図・距離"],["ops","業者管理"],["bbs","掲示板"]].map(([id,label]) => (
+              <button key={id} onClick={() => setTab(id)} style={s.navBtn(id)}>{label}</button>
+            ))}
+          </nav>
+
+          <main style={s.main}>
+
+            {tab === "home" && (
+              <div style={s.section}>
+                <h2 style={s.title}>業者一覧</h2>
+                <div style={s.opGrid}>
+                  {operators.map(op => {
+                    const st = STATUS_CONFIG[op.status];
+                    return (
+                      <div key={op.id} style={s.opCard(st.color)}>
+                        <div style={s.opCardTop}>
+                          <span style={s.opName}>{op.name}</span>
+                          <button onClick={() => removeOperator(op.id)} style={s.removeBtn}>✕</button>
+                        </div>
+                        <button onClick={() => cycleStatus(op.id)} style={s.statusTag(st.bg, st.color)}>
+                          {st.emoji} {st.label}
+                        </button>
+                        {op.phone !== "—"
+                          ? <a href={`tel:${op.phone.replace(/-/g,"")}`} style={s.phoneLink}>📞 {op.phone}</a>
+                          : <span style={s.phoneEmpty}>電話番号なし</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+                {showAddOp ? (
+                  <div style={s.addForm}>
+                    <input style={s.input} placeholder="業者名（例：代行D）" value={newOpName} onChange={e => setNewOpName(e.target.value)} />
+                    <input style={s.input} placeholder="電話番号（任意）" value={newOpPhone} onChange={e => setNewOpPhone(e.target.value)} type="tel" />
+                    <div style={s.btnRow}>
+                      <button style={s.primaryBtn(false)} onClick={addOperator}>追加する</button>
+                      <button style={s.ghostBtn} onClick={() => setShowAddOp(false)}>キャンセル</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button style={s.addBtn} onClick={() => setShowAddOp(true)}>＋ 業者を追加</button>
+                )}
+              </div>
+            )}
+
+            {tab === "map" && (
+              <div style={s.section}>
+                <h2 style={s.title}>距離計算</h2>
+                <input style={s.input} placeholder="出発地（例：博多駅）" value={origin}
+                  onChange={e => { setOrigin(e.target.value); setDistResult(null); setCalcError(""); }} />
+                <input style={s.input} placeholder="目的地（例：宇美町）" value={dest}
+                  onChange={e => { setDest(e.target.value); setDistResult(null); setCalcError(""); }} />
+                <button style={s.primaryBtn(!origin || !dest || calcLoading)}
+                  onClick={calcDistance} disabled={!origin || !dest || calcLoading}>
+                  {calcLoading ? "🔍 計算中…" : "距離計算"}
+                </button>
+                {calcError && <div style={s.errorBox}>⚠️ {calcError}</div>}
+                {distResult && (
+                  <div style={s.distBox}>
+                    <div style={s.distKm}>📍 {distResult.km} km</div>
+                    <div style={s.distMin}>約 {distResult.min} 分</div>
+                    <div style={s.distNames}>{distResult.fromName} → {distResult.toName}</div>
+                  </div>
+                )}
+                <button style={s.mapBtn} onClick={openMap}>🗺 Googleマップで開く</button>
+              </div>
+            )}
+
+            {tab === "ops" && (
+              <div style={s.section}>
+                <h2 style={s.title}>業者ステータス管理</h2>
+                <p style={s.hint}>ボタンをタップするとステータスが切り替わります</p>
+                {operators.length === 0 && <p style={{fontSize:13,color:"#555",textAlign:"center",padding:"20px 0"}}>業者が登録されていません</p>}
+                {operators.map(op => {
+                  const st = STATUS_CONFIG[op.status];
+                  return (
+                    <div key={op.id} style={s.opRow}>
+                      <div>
+                        <div style={s.opName}>{op.name}</div>
+                        <div style={s.opPhone}>{op.phone}</div>
+                      </div>
+                      <button onClick={() => cycleStatus(op.id)}
+                        style={{...s.statusTag(st.bg, st.color), minWidth:140}}>
+                        {st.emoji} {st.label}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {tab === "bbs" && (
+              <div style={s.section}>
+                <h2 style={s.title}>掲示板</h2>
+                <input style={s.input} placeholder="名前" value={bbsName} onChange={e => setBbsName(e.target.value)} />
+                <input style={s.input} placeholder="内容" value={bbsContent} onChange={e => setBbsContent(e.target.value)} />
+                <button style={s.primaryBtn(!bbsName.trim() || !bbsContent.trim())}
+                  onClick={postBbs} disabled={!bbsName.trim() || !bbsContent.trim()}>
+                  投稿する
+                </button>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {bbs.map(post => (
+                    <div key={post.id} style={s.bbsCard}>
+                      <div style={s.bbsTop}>
+                        <span style={s.bbsName}>{post.name}</span>
+                        <span style={s.bbsTime}>{post.time}</span>
+                      </div>
+                      <p style={s.bbsText}>{post.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<DaikoNau />);
+  </script>
+</body>
+</html>
