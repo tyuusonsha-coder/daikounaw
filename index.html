@@ -1080,7 +1080,6 @@ function MapView({fromPos,toPos,focusPost,visible,onMapClick,pickMode}){
     MK.current.forEach(x=>m.removeLayer(x));MK.current=[];
     if(LN.current){m.removeLayer(LN.current);LN.current=null;}
     const fromIc=L.divIcon({html:`<div style="width:18px;height:18px;border-radius:50%;background:#00D26A;border:3px solid #fff;box-shadow:0 0 10px #00D26A,0 3px 8px rgba(0,0,0,.4)"></div>`,iconSize:[18,18],iconAnchor:[9,9],className:""});
-    const toIc=L.divIcon({html:`<div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:18px solid #FF4757;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))"></div>`,iconSize:[20,18],iconAnchor:[10,18],className:""});
     if(fromPos){const mk=L.marker([fromPos.lat,fromPos.lon],{icon:fromIc}).addTo(m);mk.bindPopup("🟢 出発地");MK.current.push(mk);}
 const toIc=L.divIcon({html:`<div style="..."></div>`,iconSize:[20,18],iconAnchor:[10,18],className:""});
     if(fromPos&&toPos){
