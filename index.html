@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>代行なう — 運転代行マッチング</title>
-  <meta name="description" content="福岡エリアの運転代行マッチングアプリ。料金計算・即時予約・ドライバー検索。中尊社運転代行が運営。"/>
+  <meta name="description" content="福岡エリアの運転代行マッチングアプリ。料金計算・即時予約。中尊社運転代行が運営。"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
@@ -22,37 +22,34 @@
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes scaleIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-    @keyframes ping{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.4);opacity:0}}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
     @keyframes ctaPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,.35)}60%{box-shadow:0 4px 32px rgba(255,107,0,.6)}}
     @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes notif{0%{transform:translateY(-80px);opacity:0}12%{transform:translateY(0);opacity:1}85%{transform:translateY(0);opacity:1}100%{transform:translateY(-80px);opacity:0}}
-    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
     @keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,210,106,.4)}70%{box-shadow:0 0 0 10px rgba(0,210,106,0)}}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback, useMemo, memo } = React;
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 /* ══════════════════════════════════════
-   定数・設定
+   事業者情報
    ══════════════════════════════════════ */
-
-// ── 事業者情報（実際の情報に差し替え） ──
 const BIZ = {
   name: "中尊社運転代行",
-  phone: "050-1724-3179",       // ← 実際の電話番号
-  lineUrl: "https://lin.ee/kuikkusutaa", // ← 実際のLINE URL
+  phone: "050-1724-3179",
+  lineUrl: "https://lin.ee/kuikkusutaa",
   lineId: "kuikkusutaa",
   area: "那珂川市・福岡市南区・春日市・大野城市・太宰府市",
   hours: "20:00〜翌5:00（年中無休）",
   web: "https://tyuusonshauntendaikou.com",
 };
 
-// ── カラーパレット ──
+/* ══════════════════════════════════════
+   カラーパレット
+   ══════════════════════════════════════ */
 const C = {
   bg:"#080808", card:"#0f0f0f", s1:"#111", s2:"#151515",
   border:"#1e1e1e", b2:"#252525", b3:"#2e2e2e",
@@ -63,19 +60,13 @@ const C = {
   gold:"#FFD700", text:"#EFEFEF", t2:"#777", t3:"#3a3a3a", t4:"#555",
 };
 
-// ── ユーティリティ ──
+/* ══════════════════════════════════════
+   ユーティリティ
+   ══════════════════════════════════════ */
 const fmtYen = n => `¥${Number(n).toLocaleString()}`;
-const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
-const ago = ts => {
-  const s = Math.floor((Date.now()-ts)/1000);
-  return s<60?`${s}秒前`:s<3600?`${Math.floor(s/60)}分前`:s<86400?`${Math.floor(s/3600)}時間前`:`${Math.floor(s/86400)}日前`;
-};
-const AV_G = ["135deg,#FF6B00,#FF3D00","135deg,#00C853,#00796B","135deg,#2979FF,#1565C0","135deg,#AA00FF,#6200EA","135deg,#FF1744,#B71C1C","135deg,#00B0FF,#0277BD","135deg,#FFD600,#F57F17"];
-const avC = n => { let s=0; for(const c of (n||"?")) s += c.charCodeAt(0); return AV_G[s % AV_G.length]; };
-const avCh = n => (n||"?")[0].toUpperCase();
 
 /* ══════════════════════════════════════
-   料金計算（実際の料金表に合わせて調整）
+   料金計算
    ══════════════════════════════════════ */
 const FARE_TABLE = [
   {maxKm:2,  base:1500, perKm:400},
@@ -90,11 +81,6 @@ const calcFare = km => {
   const tier = FARE_TABLE.find(t => km<=t.maxKm) || FARE_TABLE[4];
   const fare = Math.ceil((tier.base + Math.max(0,km-1)*tier.perKm) * (isLate?1.3:1) / 100)*100;
   return { fare, isLate, km, min:Math.round(fare*.9), max:Math.round(fare*1.1) };
-};
-const calcFee = fare => {
-  if(!fare) return null;
-  const fee = Math.ceil(fare*.1/10)*10;
-  return { fare, fee, net:fare-fee };
 };
 
 // ── 距離計算（Haversine） ──
@@ -114,199 +100,16 @@ const getKm = (from,to) => {
   if(!f||!t) return null;
   const R=6371, dL=(t[1].lat-f[1].lat)*Math.PI/180, dO=(t[1].lon-f[1].lon)*Math.PI/180;
   const a = Math.sin(dL/2)**2 + Math.cos(f[1].lat*Math.PI/180)*Math.cos(t[1].lat*Math.PI/180)*Math.sin(dO/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)) * 1.25; // 道路距離は直線の約1.25倍
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)) * 1.25;
 };
 
 /* ══════════════════════════════════════
-   ダミードライバー（本番はDB/API接続）
+   エリアマップ（Canvas）
    ══════════════════════════════════════ */
-const T = Date.now();
-const DRIVERS = [
-  {id:"u1",name:"田中 健一",short:"田中",rating:4.9,reviews:312,bio:"博多・天神エリア専門",eta:3,dist:0.8,price:1800,tags:["⚡ 最速","🌙 深夜OK"],active:true},
-  {id:"u2",name:"松本 大輔",short:"松本",rating:4.7,reviews:189,bio:"中央区・南区 深夜対応",eta:5,dist:1.4,price:1600,tags:["💰 お手頃","🌙 深夜OK"],active:true},
-  {id:"u3",name:"山田 翔太",short:"山田",rating:4.8,reviews:476,bio:"スピード対応が得意",eta:6,dist:1.9,price:2000,tags:["👑 実績No.1","⚡ 素早い"],active:true},
-  {id:"u4",name:"佐藤 誠",short:"佐藤",rating:4.6,reviews:94,bio:"丁寧で安全な運転",eta:8,dist:2.3,price:1500,tags:["💰 お手頃","😊 丁寧"],active:false},
-  {id:"u5",name:"鈴木 快",short:"鈴木",rating:5.0,reviews:67,bio:"新規歓迎！全エリア対応",eta:4,dist:1.1,price:1900,tags:["⭐ 高評価","🗺 全エリア"],active:true},
-];
-
-const INIT_POSTS = [
-  {id:"p1",userId:"u2",from:"博多駅",to:"福岡空港",price:3500,note:"終電逃しました😭 急いでます！",status:"募集中",time:T-180000,dist:1.2,likes:3,liked:false,replies:[{id:"r1",userId:"u4",text:"すぐ向かえます！",time:T-120000}],accepted:null,viewers:3,type:"request"},
-  {id:"p2",userId:"u3",from:"天神",to:"大橋",price:2000,note:"",status:"募集中",time:T-600000,dist:2.8,likes:1,liked:false,replies:[],accepted:null,viewers:2,type:"request"},
-  {id:"p3",userId:"u5",from:"中洲",to:"春日市",price:4000,note:"深夜2時ごろ",status:"受付終了",time:T-1800000,dist:0.8,likes:7,liked:false,replies:[],accepted:"u1",viewers:0,type:"request"},
-  {id:"p4",userId:"u1",from:"博多駅",to:"久留米駅",price:0,note:"帰り便！空車です🚗",status:"募集中",time:T-900000,dist:0,likes:5,liked:false,replies:[],accepted:null,viewers:4,type:"kaeri"},
-];
-
-const INIT_TL = [
-  {id:"t1",userId:"u1",text:"今夜も博多・天神エリア空いてます！深夜OK🌙",time:T-900000,likes:8,liked:false,status:"active"},
-  {id:"t2",userId:"u3",text:"先日の代行さん最高でした👍 また使います！",time:T-3600000,likes:12,liked:false,status:"active"},
-  {id:"t3",userId:"u2",text:"中洲・天神エリア 深夜2時まで対応🚗",time:T-7200000,likes:5,liked:false,status:"busy"},
-];
-
-/* ══════════════════════════════════════
-   小コンポーネント
-   ══════════════════════════════════════ */
-const Av = memo(({name="?", size=40, ring=false, status=null}) => (
-  <div style={{position:"relative", flexShrink:0}}>
-    <div style={{width:size, height:size, borderRadius:"50%", background:`linear-gradient(${avC(name)})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:size*.4, fontWeight:900, color:"#fff", boxShadow:ring?`0 0 0 2px ${C.accent}, 0 0 12px rgba(255,107,0,.3)`:undefined}}>
-      {avCh(name)}
-    </div>
-    {status !== null && <div style={{position:"absolute", bottom:1, right:1, width:Math.max(8,size*.26), height:Math.max(8,size*.26), borderRadius:"50%", background:status?C.green:C.red, border:`2px solid ${C.bg}`}}/>}
-  </div>
-));
-
-const Stars = ({rating, size=11}) => (
-  <span style={{color:C.gold, fontSize:size, letterSpacing:-1}}>
-    {"★".repeat(Math.floor(rating))}{"☆".repeat(5-Math.floor(rating))}
-  </span>
-);
-
-const Tag = ({label}) => {
-  const col = label.includes("最速")||label.includes("素早")?C.accent:label.includes("お手頃")?C.green:label.includes("実績")||label.includes("高評価")||label.includes("⭐")?C.gold:C.blue;
-  return <span style={{fontSize:10, padding:"2px 7px", borderRadius:8, fontWeight:700, background:`${col}18`, color:col, border:`1px solid ${col}28`, whiteSpace:"nowrap"}}>{label}</span>;
-};
-
-const SubHdr = ({title, onBack, right=null}) => (
-  <div style={{flexShrink:0, padding:"13px 16px", borderBottom:`1px solid ${C.border}`, display:"flex", alignItems:"center", gap:10, background:C.bg, position:"sticky", top:0, zIndex:10}}>
-    <button onClick={onBack} style={{background:"none", border:"none", color:C.t2, fontSize:20, cursor:"pointer", padding:0, lineHeight:1}}>←</button>
-    <span style={{fontWeight:900, fontSize:17, flex:1}}>{title}</span>
-    {right}
-  </div>
-);
-
-/* ══════════════════════════════════════
-   📞 電話・LINE 発信バー（常時表示CTA）
-   ══════════════════════════════════════ */
-function CallBar() {
-  return (
-    <div style={{padding:"10px 16px", background:"linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,61,0,.06))", borderBottom:`1px solid ${C.accent}33`}}>
-      <div style={{display:"flex", gap:8}}>
-        <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:8, padding:"13px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none", animation:"ringPulse 2s ease infinite"}}>
-          📞 電話で予約
-        </a>
-        <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:8, padding:"13px 0", background:"#06C755", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>
-          💬 LINEで予約
-        </a>
-      </div>
-      <div style={{textAlign:"center", fontSize:10, color:C.t2, marginTop:6}}>
-        {BIZ.name} · {BIZ.hours}
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════
-   🗺️ ネオンCanvasマップ
-   ══════════════════════════════════════ */
-function NeonMap({fromSpot, toSpot}) {
-  const cvRef = useRef(null);
-  const [tick, setTick] = useState(0);
-  const dPos = useRef(DRIVERS.filter(d=>d.active).map((d,i)=>({...d, px:0.15+i*0.18, py:0.2+i*0.14})));
-  const pulse = useRef(0);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      pulse.current = (pulse.current + 1) % 30;
-      dPos.current = dPos.current.map(d => ({...d, px:Math.max(0.06,Math.min(0.90,d.px+(Math.random()-.5)*.018)), py:Math.max(0.06,Math.min(0.88,d.py+(Math.random()-.5)*.018))}));
-      setTick(v=>v+1);
-    }, 1800);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const cv = cvRef.current; if(!cv) return;
-    const ctx = cv.getContext("2d");
-    const W = cv.width, H = cv.height;
-    ctx.fillStyle = "#050508"; ctx.fillRect(0,0,W,H);
-
-    // ネオングリッド
-    ctx.strokeStyle = "rgba(255,107,0,.06)"; ctx.lineWidth = 0.5;
-    for(let x=0;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-    // 主要道路
-    const roads = [[0,H*.5,W,H*.5],[W*.5,0,W*.5,H],[W*.18,0,W*.18,H],[W*.82,0,W*.82,H],[0,H*.28,W,H*.28],[0,H*.72,W,H*.72]];
-    roads.forEach(([x1,y1,x2,y2],i) => {
-      ctx.shadowColor = "rgba(255,107,0,.4)"; ctx.shadowBlur = 6;
-      ctx.strokeStyle = i<2?"rgba(255,107,0,.35)":"rgba(255,107,0,.18)";
-      ctx.lineWidth = i<2?3:1.5;
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-      ctx.shadowBlur = 0;
-    });
-
-    // 地名ラベル
-    const areas = [["博多駅",W*.18,H*.5],["天神",W*.5,H*.28],["中洲",W*.5,H*.5],["大橋",W*.5,H*.72],["福岡空港",W*.82,H*.28],["那珂川",W*.82,H*.72]];
-    ctx.shadowBlur = 0;
-    areas.forEach(([name,x,y]) => {
-      ctx.fillStyle = "rgba(255,255,255,.22)";
-      ctx.font = "9px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(name, x, y+16);
-    });
-
-    // 出発地・目的地
-    if(fromSpot && toSpot) {
-      const fx = fromSpot.px*W, fy = fromSpot.py*H;
-      const tx = toSpot.px*W, ty = toSpot.py*H;
-      ctx.shadowColor = C.green; ctx.shadowBlur = 10;
-      ctx.strokeStyle = C.green; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-      ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke();
-      ctx.setLineDash([]); ctx.shadowBlur = 0;
-      ctx.fillStyle = C.green; ctx.shadowColor = C.green; ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(fx,fy,7,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = C.red; ctx.shadowColor = C.red;
-      ctx.beginPath(); ctx.arc(tx,ty,7,0,Math.PI*2); ctx.fill();
-      ctx.shadowBlur = 0;
-    }
-
-    // 現在地
-    const p = pulse.current / 30;
-    ctx.strokeStyle = `rgba(74,144,255,${0.6-p*.5})`; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(W/2,H/2,6+p*8,0,Math.PI*2); ctx.stroke();
-    ctx.fillStyle = C.blue; ctx.shadowColor = C.blue; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.arc(W/2,H/2,7,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
-    ctx.font = "bold 9px sans-serif"; ctx.textAlign = "center"; ctx.fillText("現在地", W/2, H/2+16);
-
-    // ドライバー
-    dPos.current.forEach(d => {
-      const x = d.px * W, y = d.py * H;
-      ctx.strokeStyle = "rgba(255,107,0,.3)"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle = C.accent; ctx.shadowColor = C.accent; ctx.shadowBlur = 10;
-      ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = "#000"; ctx.shadowBlur = 0;
-      ctx.font = "bold 8px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(d.short[0], x, y);
-      const lw = 50, lh = 17;
-      ctx.fillStyle = "rgba(20,20,20,.92)"; ctx.strokeStyle = C.accent; ctx.lineWidth = 1;
-      ctx.shadowColor = C.accent; ctx.shadowBlur = 4;
-      ctx.beginPath();
-      if(ctx.roundRect) ctx.roundRect(x-lw/2, y-32, lw, lh, 4);
-      else { ctx.rect(x-lw/2, y-32, lw, lh); }
-      ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
-      ctx.fillStyle = C.accent; ctx.font = "bold 8px sans-serif";
-      ctx.fillText(`${d.eta}分`, x-7, y-23);
-      ctx.fillStyle = C.gold; ctx.fillText(`${fmtYen(d.price)}`, x+8, y-23);
-    });
-  }, [tick, fromSpot, toSpot]);
-
-  return (
-    <div style={{width:"100%", borderRadius:16, overflow:"hidden", border:`1px solid rgba(255,107,0,.25)`, background:"#050508", position:"relative"}}>
-      <canvas ref={cvRef} width={360} height={240} style={{width:"100%", height:240, display:"block"}}/>
-      <div style={{position:"absolute", bottom:0, left:0, right:0, padding:"6px 10px", background:"rgba(5,5,8,.85)", display:"flex", gap:10, fontSize:10}}>
-        <span style={{color:C.blue}}>● 現在地</span>
-        <span style={{color:C.accent}}>● ドライバー</span>
-        {fromSpot && <span style={{color:C.green}}>● 出発</span>}
-        {toSpot && <span style={{color:C.red}}>● 目的地</span>}
-        <span style={{marginLeft:"auto", color:C.green}}>{DRIVERS.filter(d=>d.active).length}台稼働中</span>
-      </div>
-    </div>
-  );
-}
-
 const MAP_SPOTS = {
   "博多駅":{px:0.18,py:0.50},"天神":{px:0.50,py:0.28},"中洲":{px:0.50,py:0.50},
   "大橋":{px:0.50,py:0.72},"福岡空港":{px:0.82,py:0.28},"春日市":{px:0.82,py:0.72},
-  "香椎":{px:0.82,py:0.28},"久留米駅":{px:0.15,py:0.82},"姪浜":{px:0.15,py:0.28},
+  "久留米駅":{px:0.15,py:0.82},"姪浜":{px:0.15,py:0.28},
   "太宰府":{px:0.68,py:0.82},"那珂川":{px:0.82,py:0.72},"大野城":{px:0.68,py:0.65},
   "薬院":{px:0.42,py:0.38},"西新":{px:0.30,py:0.28},"六本松":{px:0.38,py:0.42},
 };
@@ -316,14 +119,103 @@ const findSpot = q => {
   return key ? MAP_SPOTS[key] : null;
 };
 
+function AreaMap({fromSpot, toSpot}) {
+  const cvRef = useRef(null);
+
+  useEffect(() => {
+    const cv = cvRef.current; if(!cv) return;
+    const ctx = cv.getContext("2d");
+    const W = cv.width, H = cv.height;
+    ctx.fillStyle = "#050508"; ctx.fillRect(0,0,W,H);
+
+    // グリッド
+    ctx.strokeStyle = "rgba(255,107,0,.05)"; ctx.lineWidth = 0.5;
+    for(let x=0;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // 主要道路
+    const roads = [[0,H*.5,W,H*.5],[W*.5,0,W*.5,H],[W*.18,0,W*.18,H],[W*.82,0,W*.82,H],[0,H*.28,W,H*.28],[0,H*.72,W,H*.72]];
+    roads.forEach(([x1,y1,x2,y2],i) => {
+      ctx.shadowColor = "rgba(255,107,0,.4)"; ctx.shadowBlur = 6;
+      ctx.strokeStyle = i<2?"rgba(255,107,0,.3)":"rgba(255,107,0,.15)";
+      ctx.lineWidth = i<2?2.5:1.5;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    });
+
+    // 地名ラベル
+    const areas = [["博多駅",W*.18,H*.5],["天神",W*.5,H*.28],["中洲",W*.5,H*.5],["大橋",W*.5,H*.72],["福岡空港",W*.82,H*.28],["那珂川",W*.82,H*.72]];
+    areas.forEach(([name,x,y]) => {
+      ctx.fillStyle = "rgba(255,255,255,.18)";
+      ctx.font = "9px 'Noto Sans JP',sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(name, x, y+14);
+      // 地点ドット
+      ctx.fillStyle = "rgba(255,107,0,.25)";
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    });
+
+    // 出発地・目的地の経路
+    if(fromSpot && toSpot) {
+      const fx = fromSpot.px*W, fy = fromSpot.py*H;
+      const tx = toSpot.px*W, ty = toSpot.py*H;
+      ctx.shadowColor = C.green; ctx.shadowBlur = 8;
+      ctx.strokeStyle = C.green; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke();
+      ctx.setLineDash([]); ctx.shadowBlur = 0;
+      // 出発マーカー
+      ctx.fillStyle = C.green; ctx.shadowColor = C.green; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(fx,fy,7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
+      ctx.font = "bold 8px sans-serif"; ctx.fillText("出発",fx,fy+18);
+      // 目的地マーカー
+      ctx.fillStyle = C.red; ctx.shadowColor = C.red; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(tx,ty,7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
+      ctx.fillText("到着",tx,ty+18);
+    }
+  }, [fromSpot, toSpot]);
+
+  return (
+    <div style={{width:"100%", borderRadius:16, overflow:"hidden", border:`1px solid rgba(255,107,0,.2)`, background:"#050508", position:"relative"}}>
+      <canvas ref={cvRef} width={360} height={220} style={{width:"100%", height:220, display:"block"}}/>
+      <div style={{position:"absolute", bottom:0, left:0, right:0, padding:"6px 10px", background:"rgba(5,5,8,.85)", display:"flex", gap:10, fontSize:10}}>
+        <span style={{color:"rgba(255,107,0,.5)"}}>● エリア</span>
+        {fromSpot && <span style={{color:C.green}}>● 出発</span>}
+        {toSpot && <span style={{color:C.red}}>● 目的地</span>}
+        <span style={{marginLeft:"auto", color:C.t2}}>福岡エリア</span>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════
-   🗺️ 料金計算＆マップ画面
+   営業時間判定
+   ══════════════════════════════════════ */
+function useBusinessStatus() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+  const h = now.getHours();
+  const isOpen = h >= 20 || h < 5;
+  const isLate = h >= 23 || h < 5;
+  let nextOpen = "";
+  if(!isOpen) {
+    nextOpen = "本日 20:00 から営業開始";
+  }
+  return { isOpen, isLate, nextOpen, now };
+}
+
+/* ══════════════════════════════════════
+   📏 料金計算画面
    ══════════════════════════════════════ */
 function FareScreen() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [result, setResult] = useState(null);
   const [searching, setSearching] = useState(false);
+  const { isOpen, isLate } = useBusinessStatus();
   const fromSpot = findSpot(from);
   const toSpot = findSpot(to);
 
@@ -331,12 +223,15 @@ function FareScreen() {
     if(!from.trim()||!to.trim()) return;
     setSearching(true);
     setTimeout(() => {
-      const km = getKm(from, to) || (Math.random()*8+1);
-      const fare = calcFare(km);
-      const fee = calcFee(fare?.fare||0);
-      setResult({km, fare, fee, minutes: Math.round(km/30*60+rnd(2,8))});
+      const km = getKm(from, to);
+      if(km) {
+        const fare = calcFare(km);
+        setResult({km, fare, minutes: Math.round(km/30*60+5), found:true});
+      } else {
+        setResult({found:false});
+      }
       setSearching(false);
-    }, 500);
+    }, 400);
   };
 
   const openGoogleMaps = () => {
@@ -348,11 +243,11 @@ function FareScreen() {
 
   return (
     <div style={{paddingBottom:80}}>
-      {/* 料金計算入力 */}
       <div style={{padding:"14px 16px 0"}}>
         <div style={{fontSize:18, fontWeight:900, marginBottom:2}}>📏 料金計算</div>
-        <div style={{fontSize:12, color:C.t2, marginBottom:12}}>出発地と目的地を入力して料金を調べましょう</div>
+        <div style={{fontSize:12, color:C.t2, marginBottom:12}}>出発地と目的地を入力して料金の目安を確認</div>
 
+        {/* 入力フォーム */}
         <div style={{background:"linear-gradient(135deg,#1a0800,#0d0400)", borderRadius:20, padding:4, border:`1px solid rgba(255,107,0,.35)`, boxShadow:"0 0 20px rgba(255,107,0,.08)", marginBottom:12}}>
           <div style={{background:C.s2, borderRadius:16, padding:"13px 16px", marginBottom:2, display:"flex", alignItems:"center", gap:12}}>
             <div style={{width:12, height:12, borderRadius:"50%", background:C.green, flexShrink:0, boxShadow:`0 0 8px ${C.green}`}}/>
@@ -402,15 +297,15 @@ function FareScreen() {
 
       {/* マップ */}
       <div style={{padding:"0 16px 14px"}}>
-        <NeonMap fromSpot={fromSpot} toSpot={toSpot}/>
+        <AreaMap fromSpot={fromSpot} toSpot={toSpot}/>
       </div>
 
       {/* 計算結果 */}
-      {result && (
+      {result && result.found && (
         <div style={{padding:"0 16px 14px", animation:"fadeIn .3s ease"}}>
           <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.1),rgba(255,61,0,.05))", borderRadius:18, padding:16, border:`1px solid rgba(255,107,0,.3)`, marginBottom:14}}>
             <div style={{fontSize:12, color:C.accent, fontWeight:800, marginBottom:12, display:"flex", alignItems:"center", gap:6}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:C.accent,display:"inline-block",animation:"blink .8s ease-in-out infinite"}}/>
+              <span style={{width:6,height:6,borderRadius:"50%",background:C.accent,display:"inline-block"}}/>
               ルート情報 · {from} → {to}
             </div>
             <div style={{textAlign:"center", marginBottom:14, padding:"14px 0", borderBottom:`1px solid rgba(255,107,0,.2)`}}>
@@ -430,12 +325,35 @@ function FareScreen() {
                 </div>
               ))}
             </div>
+            <div style={{marginTop:12, fontSize:11, color:C.t3, textAlign:"center", lineHeight:1.7}}>
+              ※ 料金は目安です。実際の料金は経路・交通状況により変動します<br/>
+              ※ 正確な料金はお電話・LINEでお問い合わせください
+            </div>
           </div>
 
-          {/* 計算結果後の予約CTA */}
-          <div style={{display:"flex", gap:8, marginBottom:14}}>
+          {/* 予約CTA */}
+          <div style={{display:"flex", gap:8}}>
             <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"14px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>📞 電話で予約</a>
             <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"14px 0", background:"#06C755", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>💬 LINE予約</a>
+          </div>
+        </div>
+      )}
+
+      {/* 地名が見つからない場合 */}
+      {result && !result.found && (
+        <div style={{padding:"0 16px 14px", animation:"fadeIn .3s ease"}}>
+          <div style={{background:C.rL, borderRadius:14, padding:16, border:`1px solid ${C.red}33`, marginBottom:14}}>
+            <div style={{fontSize:14, fontWeight:700, color:C.red, marginBottom:6}}>📍 地名が見つかりませんでした</div>
+            <div style={{fontSize:12, color:C.t2, lineHeight:1.7, marginBottom:12}}>
+              対応地名：博多駅、天神、中洲、大橋、那珂川、春日市、太宰府、福岡空港、薬院、西新、六本松、姪浜、香椎、久留米駅、大野城、二日市
+            </div>
+            <div style={{fontSize:12, color:C.t2, lineHeight:1.7}}>
+              上記以外の地名は、Googleマップで距離を確認するか、お電話・LINEで直接お問い合わせください。
+            </div>
+          </div>
+          <div style={{display:"flex", gap:8}}>
+            <button onClick={openGoogleMaps} style={{flex:1, padding:"13px 0", background:"rgba(26,115,232,.15)", color:"#4A90FF", border:`1px solid rgba(74,144,255,.4)`, borderRadius:14, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit"}}>🗺️ Googleマップで確認</button>
+            <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"13px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:14, textDecoration:"none"}}>📞 電話</a>
           </div>
         </div>
       )}
@@ -458,7 +376,7 @@ function FareScreen() {
             <div style={{marginTop:10, fontSize:11, color:C.t3, textAlign:"center"}}>タップで自動入力 · 深夜23時〜5時は+30%</div>
           </div>
 
-          {/* 料金体系説明 */}
+          {/* 料金体系 */}
           <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`}}>
             <div style={{color:C.gold, fontWeight:800, fontSize:13, marginBottom:12}}>💰 料金体系</div>
             <table style={{width:"100%", borderCollapse:"collapse", fontSize:12}}>
@@ -491,177 +409,99 @@ function FareScreen() {
 }
 
 /* ══════════════════════════════════════
-   🚗 依頼画面（ドライバー一覧 + ワンタップ呼び出し）
+   🚗 予約画面
    ══════════════════════════════════════ */
-function OrderScreen({showToast}) {
-  const [calling, setCalling] = useState(null);
-  const activeDrivers = DRIVERS.filter(d=>d.active);
-  const onlineCount = activeDrivers.length;
+function BookingScreen() {
+  const { isOpen, isLate, nextOpen } = useBusinessStatus();
 
   return (
     <div style={{paddingBottom:80}}>
-      <CallBar/>
+      {/* 営業ステータス */}
+      <div style={{padding:"12px 16px", background:isOpen?"rgba(0,210,106,.06)":"rgba(255,71,87,.06)", borderBottom:`1px solid ${isOpen?C.green+"33":C.red+"33"}`}}>
+        <div style={{display:"flex", alignItems:"center", gap:8}}>
+          <span style={{width:8, height:8, borderRadius:"50%", background:isOpen?C.green:C.red, display:"inline-block", animation:isOpen?"blink 1.4s ease-in-out infinite":undefined}}/>
+          <span style={{fontSize:14, fontWeight:700, color:isOpen?C.green:C.red}}>{isOpen?"営業中":"営業時間外"}</span>
+          {isLate && <span style={{fontSize:11, padding:"2px 8px", borderRadius:8, background:"rgba(170,0,255,.12)", color:"#AA00FF", fontWeight:700}}>🌙 深夜割増</span>}
+        </div>
+        {!isOpen && <div style={{fontSize:12, color:C.t2, marginTop:4}}>{nextOpen}</div>}
+        <div style={{fontSize:11, color:C.t2, marginTop:2}}>{BIZ.hours}</div>
+      </div>
 
       <div style={{padding:16}}>
-        <div style={{fontSize:18, fontWeight:900, marginBottom:4}}>🚗 代行を呼ぶ</div>
-        <div style={{fontSize:12, color:C.t2, marginBottom:16}}>
-          現在 <span style={{color:C.green, fontWeight:700}}>{onlineCount}台</span> が稼働中 · {BIZ.area}
-        </div>
-
-        {/* メインCTA */}
-        <a href={`tel:${BIZ.phone}`} style={{display:"block", textDecoration:"none", marginBottom:20}}>
+        {/* メインCTA：電話 */}
+        <a href={`tel:${BIZ.phone}`} style={{display:"block", textDecoration:"none", marginBottom:14}}>
           <div style={{background:"linear-gradient(135deg,#FF6B00,#FF3D00)", borderRadius:20, overflow:"hidden", animation:"ctaPulse 2.5s ease-in-out infinite"}}>
-            <div style={{padding:"18px 20px 14px", display:"flex", alignItems:"center", gap:14}}>
-              <div style={{fontSize:30}}>📞</div>
+            <div style={{padding:"20px 20px 16px", display:"flex", alignItems:"center", gap:14}}>
+              <div style={{fontSize:34}}>📞</div>
               <div style={{flex:1, textAlign:"left"}}>
-                <div style={{fontSize:20, fontWeight:900, color:"#000", lineHeight:1.1}}>今すぐ電話で予約</div>
-                <div style={{fontSize:12, color:"rgba(0,0,0,.6)", marginTop:3}}>{BIZ.name} · {BIZ.hours}</div>
+                <div style={{fontSize:20, fontWeight:900, color:"#000", lineHeight:1.1}}>電話で予約する</div>
+                <div style={{fontSize:12, color:"rgba(0,0,0,.6)", marginTop:4}}>{BIZ.name}</div>
               </div>
               <div style={{textAlign:"right"}}>
-                <div style={{fontSize:14, fontWeight:900, color:"#000"}}>{BIZ.phone}</div>
+                <div style={{fontSize:14, fontWeight:900, color:"#000", letterSpacing:".5px"}}>{BIZ.phone}</div>
               </div>
             </div>
-            <div style={{background:"rgba(0,0,0,.16)", padding:"7px 20px", display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-              <div style={{fontSize:11, color:"rgba(0,0,0,.65)", fontWeight:700, display:"flex", alignItems:"center", gap:5}}>
-                <span style={{width:6, height:6, borderRadius:"50%", background:"rgba(0,0,0,.5)", display:"inline-block", animation:"blink .9s ease-in-out infinite"}}/>{onlineCount}台待機中
-              </div>
-              <div style={{fontSize:11, color:"rgba(0,0,0,.65)", fontWeight:700}}>タップして発信 ›</div>
+            <div style={{background:"rgba(0,0,0,.16)", padding:"8px 20px", textAlign:"center"}}>
+              <div style={{fontSize:12, color:"rgba(0,0,0,.65)", fontWeight:700}}>タップして発信 ›</div>
             </div>
           </div>
         </a>
 
-        {/* ドライバー一覧 */}
-        <div style={{fontSize:14, fontWeight:800, color:C.t2, marginBottom:12}}>稼働中のドライバー</div>
-        {DRIVERS.map((d, i) => (
-          <div key={d.id} style={{background:d.active?C.card:"#0a0a0a", borderRadius:14, padding:"12px 14px", marginBottom:8, border:`1px solid ${d.active?C.b2:C.border}`, display:"flex", alignItems:"center", gap:12, opacity:d.active?1:.5, animation:`slideUp .25s ease ${i*.05}s both`}}>
-            <Av name={d.name} size={44} status={d.active}/>
+        {/* LINE予約 */}
+        <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{display:"block", textDecoration:"none", marginBottom:20}}>
+          <div style={{background:"#06C755", borderRadius:20, padding:"18px 20px", display:"flex", alignItems:"center", gap:14}}>
+            <div style={{fontSize:34}}>💬</div>
             <div style={{flex:1}}>
-              <div style={{fontWeight:700, fontSize:14, marginBottom:3}}>{d.name}</div>
-              <div style={{display:"flex", alignItems:"center", gap:5, marginBottom:3}}>
-                <Stars rating={d.rating} size={10}/>
-                <span style={{color:C.gold, fontSize:11, fontWeight:700}}>{d.rating}</span>
-                <span style={{color:C.t2, fontSize:10}}>({d.reviews}件)</span>
+              <div style={{fontSize:18, fontWeight:900, color:"#fff", lineHeight:1.1}}>LINEで予約する</div>
+              <div style={{fontSize:12, color:"rgba(255,255,255,.7)", marginTop:4}}>LINE ID: {BIZ.lineId}</div>
+            </div>
+            <div style={{fontSize:18, color:"#fff", fontWeight:700}}>›</div>
+          </div>
+        </a>
+
+        {/* 予約の流れ */}
+        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
+          <div style={{fontSize:14, fontWeight:800, color:C.accent, marginBottom:14}}>📋 ご予約の流れ</div>
+          {[
+            {step:"1", title:"お電話・LINEでご連絡", desc:"出発地と目的地をお伝えください。料金の見積もりもこの時点でお伝えします。", icon:"📞"},
+            {step:"2", title:"ドライバー手配", desc:"最寄りのドライバーを手配いたします。到着予定時刻をお知らせします。", icon:"🚗"},
+            {step:"3", title:"ドライバー到着", desc:"ドライバーがお客様の元へ到着。お車にお乗りいただきます。", icon:"📍"},
+            {step:"4", title:"目的地へ安全運転", desc:"お客様のお車を安全に目的地まで運転いたします。", icon:"🛡"},
+            {step:"5", title:"到着・お支払い", desc:"目的地到着後、料金をお支払いいただきます。現金・電子決済対応。", icon:"💰"},
+          ].map(({step, title, desc, icon}, i) => (
+            <div key={step} style={{display:"flex", gap:14, marginBottom:i<4?16:0, animation:`slideUp .3s ease ${i*.06}s both`}}>
+              <div style={{display:"flex", flexDirection:"column", alignItems:"center", flexShrink:0}}>
+                <div style={{width:36, height:36, borderRadius:"50%", background:C.aL, border:`1px solid ${C.accent}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16}}>{icon}</div>
+                {i<4 && <div style={{width:1.5, height:16, background:C.b2, marginTop:4}}/>}
               </div>
-              <div style={{display:"flex", gap:4, flexWrap:"wrap"}}>{d.tags.map(t => <Tag key={t} label={t}/>)}</div>
+              <div style={{paddingTop:4}}>
+                <div style={{fontSize:13, fontWeight:700, marginBottom:3, color:C.text}}>
+                  <span style={{color:C.accent, marginRight:6}}>STEP {step}</span>{title}
+                </div>
+                <div style={{fontSize:12, color:C.t2, lineHeight:1.6}}>{desc}</div>
+              </div>
             </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontSize:18, fontWeight:900, color:d.active?C.accent:C.t3}}>{d.active?`${d.eta}分`:"対応中"}</div>
-              <div style={{fontSize:11, color:C.t2}}>{fmtYen(d.price)}〜</div>
-            </div>
-          </div>
-        ))}
-
-        <div style={{marginTop:10, fontSize:11, color:C.t3, textAlign:"center", lineHeight:1.8}}>
-          ドライバーの到着時間・料金は目安です<br/>
-          正確な見積もりは電話・LINEでお問い合わせください
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════
-   📢 掲示板（タイムライン）
-   ══════════════════════════════════════ */
-const PostCard = memo(function PostCard({post, onLike}) {
-  const user = DRIVERS.find(u => u.id === post.userId) || DRIVERS[0];
-  const isClosed = post.status === "受付終了";
-  const isKaeri = post.type === "kaeri";
-
-  return (
-    <div style={{borderBottom:`1px solid ${C.border}`, padding:"14px 16px", background:C.bg}}>
-      {isKaeri && <div style={{background:C.bL, border:`1px solid ${C.blue}22`, borderRadius:10, padding:"5px 12px", marginBottom:10, fontSize:12, color:C.blue, fontWeight:700}}>🔄 帰り便募集</div>}
-      <div style={{display:"flex", gap:10, marginBottom:12}}>
-        <Av name={user.name} size={42} status={user.active}/>
-        <div style={{flex:1, minWidth:0}}>
-          <div style={{display:"flex", alignItems:"center", gap:6, marginBottom:4}}>
-            <span style={{fontWeight:700, fontSize:14}}>{user.name}</span>
-            <Stars rating={user.rating} size={10}/>
-            <span style={{fontSize:11, color:C.t3, marginLeft:"auto"}}>{ago(post.time)}</span>
-          </div>
-          <span style={{fontSize:11, padding:"2px 8px", borderRadius:8, fontWeight:700, background:post.status==="募集中"?C.gL:C.rL, color:post.status==="募集中"?C.green:C.red, border:`1px solid ${post.status==="募集中"?C.green+"33":C.red+"33"}`, display:"inline-flex", alignItems:"center", gap:3}}>
-            <span style={{width:5, height:5, borderRadius:"50%", background:post.status==="募集中"?C.green:C.red, display:"inline-block", animation:post.status==="募集中"?"blink 1.4s ease-in-out infinite":undefined}}/>{post.status}
-          </span>
-        </div>
-      </div>
-      <div style={{background:C.s2, borderRadius:14, padding:"12px 14px", marginBottom:10, border:`1px solid ${C.b2}`}}>
-        <div style={{display:"flex", alignItems:"center", gap:10}}>
-          <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
-            <div style={{width:9, height:9, borderRadius:"50%", background:C.green, boxShadow:`0 0 6px ${C.green}`}}/>
-            <div style={{width:1.5, height:18, background:`linear-gradient(${C.green},${C.red})`, margin:"2px 0"}}/>
-            <div style={{width:9, height:9, borderRadius:2, background:C.red, boxShadow:`0 0 6px ${C.red}`}}/>
-          </div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:14, fontWeight:700, marginBottom:8}}>{post.from}</div>
-            <div style={{fontSize:14, fontWeight:700, color:C.t2}}>{post.to}</div>
-          </div>
-          {!isKaeri && post.price > 0 && <div style={{textAlign:"right"}}>
-            <div style={{fontSize:22, fontWeight:900, color:C.accent, lineHeight:1}}>{fmtYen(post.price)}</div>
-          </div>}
-        </div>
-      </div>
-      {post.note && <div style={{fontSize:13, color:C.t2, lineHeight:1.6, marginBottom:10, padding:"8px 12px", background:C.s2, borderRadius:10, border:`1px solid ${C.b2}`}}>{post.note}</div>}
-      <div style={{display:"flex", gap:8, alignItems:"center"}}>
-        {!isClosed && (
-          <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"11px 0", background:"linear-gradient(135deg,#FF6B00,#FF3D00)", color:"#000", borderRadius:14, fontWeight:900, fontSize:14, textDecoration:"none"}}>
-            📞 この依頼に対応
-          </a>
-        )}
-        {isClosed && <div style={{flex:1, padding:"11px 0", background:C.s2, color:C.t3, borderRadius:14, fontWeight:700, fontSize:13, textAlign:"center", border:`1px solid ${C.b2}`}}>✅ マッチ成立</div>}
-        <button onClick={() => onLike(post.id)} style={{width:42, height:42, borderRadius:12, background:post.liked?C.rL:C.s2, color:post.liked?C.red:C.t3, border:`1px solid ${post.liked?C.red+"33":C.b2}`, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:3, fontSize:12, fontWeight:700, fontFamily:"inherit"}}>
-          {post.liked?"❤️":"🤍"}{post.likes > 0 && <span style={{fontSize:11}}>{post.likes}</span>}
-        </button>
-      </div>
-    </div>
-  );
-});
-
-function BoardScreen({posts, tlPosts, onLike, onTlLike}) {
-  const [filterStatus, setFilterStatus] = useState("すべて");
-  const filtered = useMemo(() =>
-    posts.filter(p => filterStatus==="募集中のみ" ? p.status==="募集中" : true).sort((a,b) => b.time-a.time),
-  [posts, filterStatus]);
-
-  return (
-    <div style={{paddingBottom:80}}>
-      {/* フィルター */}
-      <div style={{background:C.s1, borderBottom:`1px solid ${C.border}`, padding:"10px 16px", position:"sticky", top:56, zIndex:40}}>
-        <div style={{display:"flex", gap:6}}>
-          {["すべて","募集中のみ"].map(s => (
-            <button key={s} onClick={() => setFilterStatus(s)} style={{padding:"6px 14px", borderRadius:14, border:`1px solid ${filterStatus===s?C.accent:C.b2}`, background:filterStatus===s?C.aL:"transparent", color:filterStatus===s?C.accent:C.t2, fontSize:12, fontWeight:filterStatus===s?700:400, cursor:"pointer", fontFamily:"inherit"}}>
-              {s==="募集中のみ"?"🟢 "+s:s}
-            </button>
           ))}
         </div>
-      </div>
 
-      {/* 依頼カード */}
-      {filtered.length === 0 && <div style={{textAlign:"center", color:C.t3, padding:"50px 20px", fontSize:14}}>依頼がありません</div>}
-      {filtered.map(p => <PostCard key={p.id} post={p} onLike={onLike}/>)}
+        {/* 対応エリア */}
+        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
+          <div style={{fontSize:14, fontWeight:800, color:C.blue, marginBottom:10}}>📍 対応エリア</div>
+          <div style={{fontSize:13, color:C.t2, lineHeight:1.8}}>{BIZ.area}</div>
+          <div style={{fontSize:11, color:C.t3, marginTop:8}}>上記以外のエリアもご相談ください</div>
+        </div>
 
-      {/* つぶやき */}
-      <div style={{padding:"8px 16px", fontSize:10, color:C.t3, borderBottom:`1px solid ${C.border}`, letterSpacing:1.5, fontWeight:600}}>── つぶやき</div>
-      {tlPosts.map(t => {
-        const u = DRIVERS.find(d => d.id===t.userId) || DRIVERS[0];
-        return (
-          <div key={t.id} style={{padding:"14px 16px", borderBottom:`1px solid ${C.border}`}}>
-            <div style={{display:"flex", gap:12}}>
-              <Av name={u.name} size={42} status={t.status==="active"}/>
-              <div style={{flex:1, minWidth:0}}>
-                <div style={{display:"flex", alignItems:"center", gap:6, marginBottom:4}}>
-                  <span style={{fontWeight:700, fontSize:14}}>{u.name}</span>
-                  <span style={{fontSize:10, padding:"1px 7px", borderRadius:6, background:t.status==="active"?C.gL:C.rL, color:t.status==="active"?C.green:C.red, fontWeight:700}}>{t.status==="active"?"🟢 稼働中":"🔴 対応中"}</span>
-                  <span style={{fontSize:11, color:C.t3, marginLeft:"auto"}}>{ago(t.time)}</span>
-                </div>
-                <div style={{fontSize:14, color:"#d0d0d0", lineHeight:1.65, marginBottom:8}}>{t.text}</div>
-                <button onClick={() => onTlLike(t.id)} style={{display:"flex", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", color:t.liked?C.red:C.t3, fontSize:13, padding:"4px 0", fontFamily:"inherit"}}>
-                  {t.liked?"❤️":"🤍"}{t.likes > 0 && <span>{t.likes}</span>}
-                </button>
-              </div>
-            </div>
+        {/* お支払い方法 */}
+        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`}}>
+          <div style={{fontSize:14, fontWeight:800, color:C.gold, marginBottom:10}}>💳 お支払い方法</div>
+          <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
+            {["💴 現金","📱 PayPay","📱 電子決済"].map(m => (
+              <span key={m} style={{fontSize:12, padding:"6px 12px", borderRadius:10, background:C.s2, border:`1px solid ${C.b2}`, color:C.t2}}>{m}</span>
+            ))}
           </div>
-        );
-      })}
+          <div style={{fontSize:11, color:C.t3, marginTop:8}}>詳しくはお電話でお問い合わせください</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -672,24 +512,26 @@ function BoardScreen({posts, tlPosts, onLike, onTlLike}) {
 function InfoScreen() {
   const faqs = [
     {q:"予約はどうすればいいですか？", a:"お電話またはLINEでご予約ください。出発地と目的地をお伝えいただければ、すぐにドライバーを手配いたします。"},
-    {q:"料金はいつ決まりますか？", a:"出発地と目的地の距離に基づいて自動計算されます。料金計算タブで事前に目安を確認できます。深夜（23:00〜5:00）は30%増しとなります。"},
+    {q:"料金はいつ決まりますか？", a:"出発地と目的地の距離に基づいて計算されます。料金計算タブで事前に目安を確認できます。深夜（23:00〜5:00）は30%増しとなります。"},
     {q:"キャンセルはできますか？", a:"ドライバー出発前であれば無料でキャンセル可能です。出発後のキャンセルは所定のキャンセル料が発生する場合があります。"},
     {q:"対応エリアはどこですか？", a:`${BIZ.area}を中心に対応しています。その他のエリアもご相談ください。`},
     {q:"支払い方法は？", a:"現金払い・各種電子決済に対応しています。詳しくはお問い合わせください。"},
     {q:"何人まで乗れますか？", a:"お客様の車に乗車する形ですので、お車の定員に準じます。ドライバー1名が随行車で追従します。"},
+    {q:"運転代行とは何ですか？", a:"お酒を飲んだ後などにお客様に代わってお車を運転するサービスです。お客様はご自身のお車の助手席や後部座席にお乗りいただけます。"},
+    {q:"どのくらいで来てくれますか？", a:"エリアや混雑状況によりますが、通常お電話から15〜30分程度でお迎えに上がります。"},
   ];
   const [openFaq, setOpenFaq] = useState(null);
 
   return (
     <div style={{paddingBottom:80}}>
       {/* ヘッダー */}
-      <div style={{background:"linear-gradient(160deg,#1a0800,#0d0400,#080808)", padding:"20px 16px", borderBottom:`1px solid ${C.border}`}}>
+      <div style={{background:"linear-gradient(160deg,#1a0800,#0d0400,#080808)", padding:"24px 16px", borderBottom:`1px solid ${C.border}`}}>
         <div style={{fontSize:40, marginBottom:8, animation:"float 2s ease-in-out infinite", textAlign:"center"}}>🚗</div>
         <div style={{textAlign:"center", marginBottom:6}}>
           <span style={{fontWeight:900, fontSize:24, color:C.text}}>代行</span>
           <span style={{fontWeight:900, fontSize:24, color:C.accent}}>なう</span>
         </div>
-        <div style={{textAlign:"center", fontSize:12, color:C.t2, marginBottom:14}}>{BIZ.name} が運営する運転代行マッチング</div>
+        <div style={{textAlign:"center", fontSize:12, color:C.t2, marginBottom:16}}>{BIZ.name} が運営する運転代行サービス</div>
         <div style={{display:"flex", gap:8}}>
           <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"13px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>📞 電話する</a>
           <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"13px 0", background:"#06C755", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>💬 LINE</a>
@@ -706,12 +548,13 @@ function InfoScreen() {
             {l:"対応エリア", v:BIZ.area, i:"📍"},
             {l:"電話番号", v:BIZ.phone, i:"📞"},
             {l:"LINE ID", v:BIZ.lineId, i:"💬"},
+            {l:"公式サイト", v:BIZ.web, i:"🌐"},
           ].map(({l,v,i}) => (
             <div key={l} style={{display:"flex", gap:10, alignItems:"flex-start", padding:"8px 0", borderBottom:`1px solid ${C.border}`}}>
               <span style={{fontSize:16, flexShrink:0, marginTop:1}}>{i}</span>
               <div>
                 <div style={{fontSize:11, color:C.t2, marginBottom:2}}>{l}</div>
-                <div style={{fontSize:13, fontWeight:600}}>{v}</div>
+                <div style={{fontSize:13, fontWeight:600}}>{l==="公式サイト"?<a href={v} target="_blank" rel="noopener" style={{color:C.accent}}>{v}</a>:v}</div>
               </div>
             </div>
           ))}
@@ -722,7 +565,7 @@ function InfoScreen() {
           <div style={{fontSize:14, fontWeight:800, color:C.gold, marginBottom:12}}>⭐ サービスの特徴</div>
           {[
             {i:"🛡", t:"安心・安全", d:"全ドライバー身元確認済み。損害保険加入済みで万が一の時も安心。"},
-            {i:"⚡", t:"スピード配車", d:"お電話から最短5分で到着。深夜でも迅速に対応します。"},
+            {i:"⚡", t:"スピード配車", d:"お電話から最短15分で到着。深夜でも迅速に対応します。"},
             {i:"💰", t:"明朗会計", d:"料金は距離に基づく明朗会計。深夜割増も事前にご確認いただけます。"},
             {i:"🌙", t:"深夜対応", d:"深夜・早朝も年中無休で対応。飲み会帰りも安心してご利用ください。"},
           ].map(({i,t,d}) => (
@@ -754,8 +597,8 @@ function InfoScreen() {
         {/* フッター */}
         <div style={{textAlign:"center", fontSize:10, color:C.t3, lineHeight:1.9, marginTop:8}}>
           <a href={BIZ.web} target="_blank" rel="noopener" style={{color:C.accent}}>{BIZ.web}</a><br/>
-          代行なう v2.0 · {BIZ.name}<br/>
-          <span style={{color:C.t2}}>利用規約</span> · <span style={{color:C.t2}}>プライバシーポリシー</span>
+          代行なう · {BIZ.name}<br/>
+          © {new Date().getFullYear()} {BIZ.name}
         </div>
       </div>
     </div>
@@ -766,10 +609,9 @@ function InfoScreen() {
    ナビゲーション
    ══════════════════════════════════════ */
 const NAV = [
-  {id:"fare",  icon:"📏", label:"料金計算"},
-  {id:"order", icon:"🚗", label:"代行予約"},
-  {id:"board", icon:"📢", label:"掲示板"},
-  {id:"info",  icon:"ℹ️", label:"案内"},
+  {id:"fare",    icon:"📏", label:"料金計算"},
+  {id:"booking", icon:"🚗", label:"予約"},
+  {id:"info",    icon:"ℹ️", label:"案内"},
 ];
 
 /* ══════════════════════════════════════
@@ -777,29 +619,13 @@ const NAV = [
    ══════════════════════════════════════ */
 function App() {
   const [screen, setScreen] = useState("fare");
-  const [posts, setPosts] = useState(INIT_POSTS);
-  const [tlPosts, setTlPosts] = useState(INIT_TL);
-  const [toastMsg, setToastMsg] = useState(null);
-  const toastTimer = useRef(null);
   const scrollRef = useRef(null);
-
-  const onlineCount = DRIVERS.filter(d=>d.active).length;
+  const { isOpen } = useBusinessStatus();
 
   useEffect(() => { if(scrollRef.current) scrollRef.current.scrollTop = 0; }, [screen]);
 
-  const showToast = useCallback(msg => {
-    setToastMsg(msg); clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToastMsg(null), 2800);
-  }, []);
-
-  const handleLike = useCallback(id => setPosts(p => p.map(x => x.id===id ? {...x, liked:!x.liked, likes:x.liked?x.likes-1:x.likes+1} : x)), []);
-  const handleTlLike = useCallback(id => setTlPosts(p => p.map(x => x.id===id ? {...x, liked:!x.liked, likes:x.liked?x.likes-1:x.likes+1} : x)), []);
-
   return (
     <div style={{fontFamily:"'Noto Sans JP',sans-serif", background:C.bg, minHeight:"100vh", color:C.text, maxWidth:480, margin:"0 auto", display:"flex", flexDirection:"column"}}>
-
-      {/* Toast */}
-      {toastMsg && <div style={{position:"fixed", bottom:88, left:"50%", transform:"translateX(-50%)", background:"#1e1e1e", color:C.text, padding:"10px 20px", borderRadius:20, fontSize:13, fontWeight:700, zIndex:8000, border:`1px solid ${C.b3}`, whiteSpace:"nowrap", animation:"fadeIn .25s ease"}}>{toastMsg}</div>}
 
       {/* トップバー */}
       <div style={{background:C.s1, padding:"12px 16px 10px", borderBottom:`1px solid ${C.border}`, position:"sticky", top:0, zIndex:50}}>
@@ -807,8 +633,8 @@ function App() {
           <div style={{display:"flex", alignItems:"center", gap:8}}>
             <span style={{fontWeight:900, fontSize:20, color:C.text, letterSpacing:"-.5px"}}>代行</span>
             <span style={{fontWeight:900, fontSize:20, color:C.accent, letterSpacing:"-.5px"}}>なう</span>
-            <span style={{fontSize:10, color:C.green, fontWeight:700, display:"flex", alignItems:"center", gap:4, background:C.gL, padding:"3px 8px", borderRadius:10, border:`1px solid ${C.green}22`}}>
-              <span style={{width:5, height:5, borderRadius:"50%", background:C.green, display:"inline-block", animation:"blink 1.4s ease-in-out infinite"}}/>{onlineCount}台稼働
+            <span style={{fontSize:10, color:isOpen?C.green:C.red, fontWeight:700, display:"flex", alignItems:"center", gap:4, background:isOpen?C.gL:C.rL, padding:"3px 8px", borderRadius:10, border:`1px solid ${isOpen?C.green:C.red}22`}}>
+              <span style={{width:5, height:5, borderRadius:"50%", background:isOpen?C.green:C.red, display:"inline-block", animation:isOpen?"blink 1.4s ease-in-out infinite":undefined}}/>{isOpen?"営業中":"時間外"}
             </span>
           </div>
           <a href={`tel:${BIZ.phone}`} style={{display:"flex", alignItems:"center", gap:5, padding:"7px 14px", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:12, fontWeight:800, fontSize:12, textDecoration:"none"}}>
@@ -818,10 +644,9 @@ function App() {
       </div>
 
       {/* コンテンツ */}
-      <div ref={scrollRef} style={{flex:1, overflowY:"auto", paddingBottom:0}}>
+      <div ref={scrollRef} style={{flex:1, overflowY:"auto"}}>
         {screen === "fare" && <FareScreen/>}
-        {screen === "order" && <OrderScreen showToast={showToast}/>}
-        {screen === "board" && <BoardScreen posts={posts} tlPosts={tlPosts} onLike={handleLike} onTlLike={handleTlLike}/>}
+        {screen === "booking" && <BookingScreen/>}
         {screen === "info" && <InfoScreen/>}
       </div>
 
