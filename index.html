@@ -4,666 +4,368 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <meta name="theme-color" content="#080808"/>
+  <meta name="theme-color" content="#060609"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <title>代行なう — 運転代行マッチング</title>
-  <meta name="description" content="福岡エリアの運転代行マッチングアプリ。料金計算・即時予約。中尊社運転代行が運営。"/>
+  <title>代行なう — 全国運転代行プラットフォーム</title>
+  <meta name="description" content="全国の運転代行プラットフォーム。どの代行業者でも無料で掲載OK。料金比較・匿名掲示板。"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-    html,body,#root{height:100%;margin:0;padding:0;}
-    body{background:#080808;font-family:'Noto Sans JP',sans-serif;color:#efefef;overscroll-behavior:none;-webkit-font-smoothing:antialiased;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+    html,body,#root{height:100%;}
+    body{background:#060609;font-family:'Noto Sans JP',sans-serif;color:#efefef;overscroll-behavior:none;-webkit-font-smoothing:antialiased;}
     input,textarea,button,select{font-family:'Noto Sans JP',sans-serif;}
     a{color:inherit;text-decoration:none;}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-    @keyframes ctaPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,.35)}60%{box-shadow:0 4px 32px rgba(255,107,0,.6)}}
+    ::-webkit-scrollbar{width:0;height:0;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
     @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,210,106,.4)}70%{box-shadow:0 0 0 10px rgba(0,210,106,0)}}
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,.3)}60%{box-shadow:0 4px 32px rgba(255,107,0,.55)}}
+    @keyframes vs{0%,100%{transform:scale(1)}50%{transform:scale(1.2) rotate(-5deg)}}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const{useState,useEffect,useRef,useCallback,useMemo}=React;
+const C={bg:"#060609",card:"#0c0c10",s1:"#0e0e13",s2:"#131318",border:"#1c1c24",b2:"#24242e",b3:"#2e2e3a",accent:"#FF6B00",aL:"rgba(255,107,0,.08)",green:"#00D26A",gL:"rgba(0,210,106,.08)",red:"#FF4757",rL:"rgba(255,71,87,.08)",blue:"#4A90FF",bL:"rgba(74,144,255,.08)",purple:"#AA55FF",gold:"#FFD700",text:"#EFEFEF",t2:"#888",t3:"#444"};
+const fmtYen=n=>`¥${Number(n).toLocaleString()}`;
+const LS={get(k,d){try{const v=localStorage.getItem("daikounaw_"+k);return v?JSON.parse(v):d;}catch{return d;}},set(k,v){try{localStorage.setItem("daikounaw_"+k,JSON.stringify(v));}catch{}}};
+function getAnonId(){let id=LS.get("anonId",null);if(!id){id="anon_"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS.set("anonId",id);}return id;}
+const ago=ts=>{const s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?`${Math.floor(s/60)}分前`:s<86400?`${Math.floor(s/3600)}時間前`:`${Math.floor(s/86400)}日前`;};
+const ROLE_CFG={customer:{emoji:"🍺",label:"お客",color:C.blue,bg:C.bL,bd:C.blue+"33"},driver:{emoji:"🚗",label:"運転手",color:C.accent,bg:C.aL,bd:C.accent+"33"}};
 
-/* ══════════════════════════════════════
-   事業者情報
-   ══════════════════════════════════════ */
-const BIZ = {
-  name: "中尊社運転代行",
-  phone: "050-1724-3179",
-  lineUrl: "https://lin.ee/kuikkusutaa",
-  lineId: "kuikkusutaa",
-  area: "那珂川市・福岡市南区・春日市・大野城市・太宰府市",
-  hours: "20:00〜翌5:00（年中無休）",
-  web: "https://tyuusonshauntendaikou.com",
-};
+/* 都道府県 */
+const PREFS=["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
 
-/* ══════════════════════════════════════
-   カラーパレット
-   ══════════════════════════════════════ */
-const C = {
-  bg:"#080808", card:"#0f0f0f", s1:"#111", s2:"#151515",
-  border:"#1e1e1e", b2:"#252525", b3:"#2e2e2e",
-  accent:"#FF6B00", aL:"rgba(255,107,0,.08)",
-  green:"#00D26A", gL:"rgba(0,210,106,.08)",
-  red:"#FF4757", rL:"rgba(255,71,87,.08)",
-  blue:"#4A90FF", bL:"rgba(74,144,255,.08)",
-  gold:"#FFD700", text:"#EFEFEF", t2:"#777", t3:"#3a3a3a", t4:"#555",
-};
+const DEFAULT_COMPANIES=[{id:"daikounaw",name:"代行なう運転代行",phone:"050-1724-3179",line:"https://lin.ee/kuikkusutaa",lineId:"kuikkusutaa",pref:"福岡県",area:"那珂川市・福岡市南区・春日市・大野城市・太宰府市 他",hours:"21:00〜翌6:00",baseFare:2000,perKm:500,campaign:"初乗り無料（4km以上）＋LINE登録で¥500引き",web:"https://daikounaw.com",featured:true,addedAt:0}];
 
-/* ══════════════════════════════════════
-   ユーティリティ
-   ══════════════════════════════════════ */
-const fmtYen = n => `¥${Number(n).toLocaleString()}`;
+/* ═══════ 🏠 ホーム ═══════ */
+function HomeScreen({companies,goTo}){
+  const[km,setKm]=useState("");
+  const[from,setFrom]=useState("");
+  const[to,setTo]=useState("");
+  const[showResult,setShowResult]=useState(false);
+  const[prefFilter,setPrefFilter]=useState("すべて");
+  const[searchText,setSearchText]=useState("");
+  const kmNum=parseFloat(km);
 
-/* ══════════════════════════════════════
-   料金計算
-   ══════════════════════════════════════ */
-const FARE_TABLE = [
-  {maxKm:2,  base:1500, perKm:400},
-  {maxKm:5,  base:2200, perKm:350},
-  {maxKm:10, base:3400, perKm:300},
-  {maxKm:20, base:5400, perKm:250},
-  {maxKm:999,base:8000, perKm:200},
-];
-const calcFare = km => {
-  if(!km || km<=0) return null;
-  const h = new Date().getHours(), isLate = h>=23 || h<5;
-  const tier = FARE_TABLE.find(t => km<=t.maxKm) || FARE_TABLE[4];
-  const fare = Math.ceil((tier.base + Math.max(0,km-1)*tier.perKm) * (isLate?1.3:1) / 100)*100;
-  return { fare, isLate, km, min:Math.round(fare*.9), max:Math.round(fare*1.1) };
-};
+  const openGMap=()=>{if(from&&to)window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`,"_blank");};
 
-// ── 距離計算（Haversine） ──
-const SPOTS = {
-  "博多駅":{lat:33.5904,lon:130.4207},"天神":{lat:33.5902,lon:130.3976},
-  "福岡空港":{lat:33.5839,lon:130.4511},"中洲":{lat:33.5920,lon:130.4065},
-  "大橋":{lat:33.5620,lon:130.4213},"春日市":{lat:33.5317,lon:130.4747},
-  "香椎":{lat:33.6275,lon:130.4373},"久留米駅":{lat:33.3196,lon:130.5083},
-  "太宰府":{lat:33.5126,lon:130.5302},"姪浜":{lat:33.5815,lon:130.3444},
-  "那珂川":{lat:33.5025,lon:130.4180},"大野城":{lat:33.5367,lon:130.4778},
-  "二日市":{lat:33.5087,lon:130.5133},"薬院":{lat:33.5813,lon:130.3998},
-  "西新":{lat:33.5815,lon:130.3650},"六本松":{lat:33.5760,lon:130.3870},
-};
-const getKm = (from,to) => {
-  const f = Object.entries(SPOTS).find(([k])=>from.includes(k));
-  const t = Object.entries(SPOTS).find(([k])=>to.includes(k));
-  if(!f||!t) return null;
-  const R=6371, dL=(t[1].lat-f[1].lat)*Math.PI/180, dO=(t[1].lon-f[1].lon)*Math.PI/180;
-  const a = Math.sin(dL/2)**2 + Math.cos(f[1].lat*Math.PI/180)*Math.cos(t[1].lat*Math.PI/180)*Math.sin(dO/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)) * 1.25;
-};
+  const filteredCompanies=useMemo(()=>{
+    let list=companies;
+    if(prefFilter!=="すべて") list=list.filter(c=>c.pref===prefFilter);
+    if(searchText.trim()) list=list.filter(c=>c.name.includes(searchText)||c.area.includes(searchText)||c.pref===searchText);
+    return list;
+  },[companies,prefFilter,searchText]);
 
-/* ══════════════════════════════════════
-   エリアマップ（Canvas）
-   ══════════════════════════════════════ */
-const MAP_SPOTS = {
-  "博多駅":{px:0.18,py:0.50},"天神":{px:0.50,py:0.28},"中洲":{px:0.50,py:0.50},
-  "大橋":{px:0.50,py:0.72},"福岡空港":{px:0.82,py:0.28},"春日市":{px:0.82,py:0.72},
-  "久留米駅":{px:0.15,py:0.82},"姪浜":{px:0.15,py:0.28},
-  "太宰府":{px:0.68,py:0.82},"那珂川":{px:0.82,py:0.72},"大野城":{px:0.68,py:0.65},
-  "薬院":{px:0.42,py:0.38},"西新":{px:0.30,py:0.28},"六本松":{px:0.38,py:0.42},
-};
-const findSpot = q => {
-  if(!q) return null;
-  const key = Object.keys(MAP_SPOTS).find(k => q.includes(k));
-  return key ? MAP_SPOTS[key] : null;
-};
+  const usedPrefs=useMemo(()=>[...new Set(companies.map(c=>c.pref))].sort(),[companies]);
 
-function AreaMap({fromSpot, toSpot}) {
-  const cvRef = useRef(null);
+  return(
+<div style={{paddingBottom:80}}>
+{/* ヘッダー */}
+<div style={{padding:"16px",background:"linear-gradient(160deg,#1a0800,#0d0400,#060609)",borderBottom:`1px solid ${C.accent}33`}}>
+  <div style={{textAlign:"center",marginBottom:8}}>
+    <span style={{fontWeight:900,fontSize:22}}>代行</span><span style={{fontWeight:900,fontSize:22,color:C.accent}}>なう</span>
+  </div>
+  <div style={{textAlign:"center",fontSize:13,color:C.t2,lineHeight:1.7,marginBottom:12}}>全国の運転代行プラットフォーム<br/><span style={{color:C.green,fontWeight:700}}>どの代行業者でも無料で掲載OK</span></div>
+  <div style={{display:"flex",gap:8}}>
+    <button onClick={()=>goTo("register")} style={{flex:1,padding:"12px 0",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:14,fontWeight:900,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>＋ 無料で業者掲載</button>
+  </div>
+</div>
 
-  useEffect(() => {
-    const cv = cvRef.current; if(!cv) return;
-    const ctx = cv.getContext("2d");
-    const W = cv.width, H = cv.height;
-    ctx.fillStyle = "#050508"; ctx.fillRect(0,0,W,H);
+{/* 料金比較 */}
+<div style={{padding:"14px 16px 0"}}>
+  <div style={{fontSize:18,fontWeight:900,marginBottom:2}}>📏 料金比較</div>
+  <div style={{fontSize:12,color:C.t2,marginBottom:12}}>距離を入力して各業者の料金を比較</div>
 
-    // グリッド
-    ctx.strokeStyle = "rgba(255,107,0,.05)"; ctx.lineWidth = 0.5;
-    for(let x=0;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-    // 主要道路
-    const roads = [[0,H*.5,W,H*.5],[W*.5,0,W*.5,H],[W*.18,0,W*.18,H],[W*.82,0,W*.82,H],[0,H*.28,W,H*.28],[0,H*.72,W,H*.72]];
-    roads.forEach(([x1,y1,x2,y2],i) => {
-      ctx.shadowColor = "rgba(255,107,0,.4)"; ctx.shadowBlur = 6;
-      ctx.strokeStyle = i<2?"rgba(255,107,0,.3)":"rgba(255,107,0,.15)";
-      ctx.lineWidth = i<2?2.5:1.5;
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-      ctx.shadowBlur = 0;
-    });
-
-    // 地名ラベル
-    const areas = [["博多駅",W*.18,H*.5],["天神",W*.5,H*.28],["中洲",W*.5,H*.5],["大橋",W*.5,H*.72],["福岡空港",W*.82,H*.28],["那珂川",W*.82,H*.72]];
-    areas.forEach(([name,x,y]) => {
-      ctx.fillStyle = "rgba(255,255,255,.18)";
-      ctx.font = "9px 'Noto Sans JP',sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(name, x, y+14);
-      // 地点ドット
-      ctx.fillStyle = "rgba(255,107,0,.25)";
-      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
-    });
-
-    // 出発地・目的地の経路
-    if(fromSpot && toSpot) {
-      const fx = fromSpot.px*W, fy = fromSpot.py*H;
-      const tx = toSpot.px*W, ty = toSpot.py*H;
-      ctx.shadowColor = C.green; ctx.shadowBlur = 8;
-      ctx.strokeStyle = C.green; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-      ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke();
-      ctx.setLineDash([]); ctx.shadowBlur = 0;
-      // 出発マーカー
-      ctx.fillStyle = C.green; ctx.shadowColor = C.green; ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(fx,fy,7,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
-      ctx.font = "bold 8px sans-serif"; ctx.fillText("出発",fx,fy+18);
-      // 目的地マーカー
-      ctx.fillStyle = C.red; ctx.shadowColor = C.red; ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(tx,ty,7,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
-      ctx.fillText("到着",tx,ty+18);
-    }
-  }, [fromSpot, toSpot]);
-
-  return (
-    <div style={{width:"100%", borderRadius:16, overflow:"hidden", border:`1px solid rgba(255,107,0,.2)`, background:"#050508", position:"relative"}}>
-      <canvas ref={cvRef} width={360} height={220} style={{width:"100%", height:220, display:"block"}}/>
-      <div style={{position:"absolute", bottom:0, left:0, right:0, padding:"6px 10px", background:"rgba(5,5,8,.85)", display:"flex", gap:10, fontSize:10}}>
-        <span style={{color:"rgba(255,107,0,.5)"}}>● エリア</span>
-        {fromSpot && <span style={{color:C.green}}>● 出発</span>}
-        {toSpot && <span style={{color:C.red}}>● 目的地</span>}
-        <span style={{marginLeft:"auto", color:C.t2}}>福岡エリア</span>
-      </div>
+  {/* 距離入力 */}
+  <div style={{background:C.s2,borderRadius:16,padding:"14px",border:`1px solid ${C.b2}`,marginBottom:10}}>
+    <div style={{fontSize:11,color:C.accent,fontWeight:700,marginBottom:6}}>距離（km）を入力</div>
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+      <input value={km} onChange={e=>{setKm(e.target.value);setShowResult(false);}} type="number" inputMode="decimal" placeholder="例：5" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:12,padding:"12px 14px",color:C.text,fontSize:20,fontWeight:700,outline:"none",fontFamily:"inherit",textAlign:"center"}}/>
+      <span style={{fontSize:16,color:C.t2,fontWeight:700}}>km</span>
     </div>
-  );
+    <div style={{fontSize:11,color:C.t3,marginTop:6,textAlign:"center"}}>Googleマップで距離を調べて入力してください</div>
+  </div>
+
+  {/* Googleマップで調べる */}
+  <div style={{background:C.s2,borderRadius:16,padding:"12px 14px",border:`1px solid ${C.b2}`,marginBottom:10}}>
+    <div style={{fontSize:11,color:C.blue,fontWeight:700,marginBottom:6}}>🗺️ Googleマップで距離を調べる</div>
+    <div style={{display:"flex",gap:6,marginBottom:6}}>
+      <input value={from} onChange={e=>setFrom(e.target.value)} placeholder="出発地" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 10px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+      <span style={{color:C.t3,alignSelf:"center"}}>→</span>
+      <input value={to} onChange={e=>setTo(e.target.value)} placeholder="目的地" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 10px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+    </div>
+    <button onClick={openGMap} disabled={!from||!to} style={{width:"100%",padding:"10px 0",background:from&&to?"rgba(26,115,232,.15)":"#1a1a1a",color:from&&to?"#4A90FF":"#555",border:from&&to?`1px solid rgba(74,144,255,.4)`:`1px solid ${C.b2}`,borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>🗺️ Googleマップを開く</button>
+  </div>
+
+  <button onClick={()=>setShowResult(true)} disabled={!kmNum||kmNum<=0} style={{width:"100%",padding:"14px 0",background:kmNum>0?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#222",color:kmNum>0?"#000":"#555",border:"none",borderRadius:14,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",marginBottom:14}}>📏 料金を比較する</button>
+</div>
+
+{/* 比較結果 */}
+{showResult&&kmNum>0&&(
+<div style={{padding:"0 16px 14px",animation:"fadeIn .3s ease"}}>
+  <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.08),rgba(255,61,0,.03))",borderRadius:18,padding:14,border:`1px solid rgba(255,107,0,.25)`,marginBottom:10}}>
+    <div style={{fontSize:14,color:C.accent,fontWeight:800,marginBottom:10}}>📊 {kmNum}km の料金比較 ({filteredCompanies.length}社)</div>
+    {filteredCompanies.length===0&&<div style={{textAlign:"center",padding:"20px 0",color:C.t3,fontSize:13}}>該当する業者がありません</div>}
+    {[...filteredCompanies].sort((a,b)=>(a.baseFare+Math.ceil(kmNum)*a.perKm)-(b.baseFare+Math.ceil(kmNum)*b.perKm)).map((co,i)=>{
+      const fare=co.baseFare+Math.ceil(kmNum)*co.perKm;
+      return(
+        <div key={co.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:`1px solid ${C.border}`,animation:`slideUp .2s ease ${i*.03}s both`}}>
+          <div style={{width:26,textAlign:"center",fontSize:i===0?16:13,fontWeight:900,color:i===0?C.gold:i===1?"#C0C0C0":i===2?"#CD7F32":C.t3,flexShrink:0}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}`}</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:14,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{co.name}</div>
+            <div style={{fontSize:10,color:C.t2}}>{co.pref} · {co.area}</div>
+            {co.campaign&&<div style={{fontSize:10,color:C.green,marginTop:1}}>🎉 {co.campaign}</div>}
+          </div>
+          <div style={{textAlign:"right",flexShrink:0}}>
+            <div style={{fontSize:20,fontWeight:900,color:C.accent}}>{fmtYen(fare)}</div>
+            <a href={`tel:${co.phone}`} style={{fontSize:10,color:C.green,fontWeight:700,textDecoration:"none"}}>📞 電話</a>
+          </div>
+        </div>
+      );
+    })}
+    <div style={{marginTop:8,fontSize:11,color:C.t3,textAlign:"center"}}>※ 料金は目安です。正確な金額は各業者にお問い合わせください</div>
+  </div>
+</div>)}
+
+{/* 業者一覧 */}
+{!showResult&&(<>
+<div style={{padding:"6px 16px 8px"}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+    <div style={{fontSize:16,fontWeight:900}}>📋 掲載業者 ({filteredCompanies.length}社)</div>
+  </div>
+
+  {/* 検索 */}
+  <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="🔍 業者名・エリアで検索" style={{width:"100%",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 14px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",marginBottom:8}}/>
+
+  {/* 都道府県フィルター */}
+  <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:6}}>
+    <button onClick={()=>setPrefFilter("すべて")} style={{flexShrink:0,background:prefFilter==="すべて"?C.accent:"transparent",color:prefFilter==="すべて"?"#000":C.t2,border:`1px solid ${prefFilter==="すべて"?C.accent:C.b2}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>すべて</button>
+    {usedPrefs.map(p=>(<button key={p} onClick={()=>setPrefFilter(p)} style={{flexShrink:0,background:prefFilter===p?C.accent:"transparent",color:prefFilter===p?"#000":C.t2,border:`1px solid ${prefFilter===p?C.accent:C.b2}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:prefFilter===p?700:400,cursor:"pointer",fontFamily:"inherit"}}>{p}</button>))}
+  </div>
+</div>
+
+{filteredCompanies.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:C.t3}}><div style={{fontSize:30,marginBottom:8}}>📋</div><div style={{fontSize:14}}>この地域にはまだ業者がありません</div><div style={{fontSize:12,marginTop:4}}>最初の掲載者になりましょう！</div></div>}
+
+{filteredCompanies.map((co,i)=>(
+<div key={co.id} style={{margin:"0 16px 10px",background:co.featured?`linear-gradient(135deg,${C.aL},${C.card})`:C.card,borderRadius:16,padding:14,border:`1px solid ${co.featured?C.accent+"44":C.b2}`,animation:`slideUp .2s ease ${i*.03}s both`}}>
+  {co.featured&&<div style={{fontSize:10,color:C.accent,fontWeight:700,marginBottom:6}}>⭐ 公式</div>}
+  <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
+    <div style={{width:44,height:44,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#FF3D00)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>🚗</div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontWeight:900,fontSize:15,marginBottom:3}}>{co.name}</div>
+      <div style={{fontSize:12,color:C.t2,marginBottom:1}}>📍 {co.pref} · {co.area}</div>
+      <div style={{fontSize:12,color:C.t2,marginBottom:1}}>🕐 {co.hours}</div>
+      <div style={{fontSize:13,fontWeight:700,color:C.accent}}>初乗り{fmtYen(co.baseFare)} · 1km {fmtYen(co.perKm)}</div>
+      {co.campaign&&<div style={{fontSize:11,color:C.green,fontWeight:700,marginTop:2}}>🎉 {co.campaign}</div>}
+    </div>
+  </div>
+  <div style={{display:"flex",gap:8,marginTop:10}}>
+    <a href={`tel:${co.phone}`} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"11px 0",background:"linear-gradient(135deg,#00D26A,#00a050)",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>📞 電話</a>
+    {co.line&&<a href={co.line} target="_blank" rel="noopener" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"11px 0",background:"#06C755",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>💬 LINE</a>}
+  </div>
+</div>))}
+</>)}
+</div>);
 }
 
-/* ══════════════════════════════════════
-   営業時間判定
-   ══════════════════════════════════════ */
-function useBusinessStatus() {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(t);
-  }, []);
-  const h = now.getHours();
-  const isOpen = h >= 20 || h < 5;
-  const isLate = h >= 23 || h < 5;
-  let nextOpen = "";
-  if(!isOpen) {
-    nextOpen = "本日 20:00 から営業開始";
-  }
-  return { isOpen, isLate, nextOpen, now };
-}
-
-/* ══════════════════════════════════════
-   📏 料金計算画面
-   ══════════════════════════════════════ */
-function FareScreen() {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [result, setResult] = useState(null);
-  const [searching, setSearching] = useState(false);
-  const { isOpen, isLate } = useBusinessStatus();
-  const fromSpot = findSpot(from);
-  const toSpot = findSpot(to);
-
-  const doSearch = () => {
-    if(!from.trim()||!to.trim()) return;
-    setSearching(true);
-    setTimeout(() => {
-      const km = getKm(from, to);
-      if(km) {
-        const fare = calcFare(km);
-        setResult({km, fare, minutes: Math.round(km/30*60+5), found:true});
-      } else {
-        setResult({found:false});
-      }
-      setSearching(false);
-    }, 400);
+/* ═══════ 📋 業者登録 ═══════ */
+function RegisterScreen({companies,setCompanies,goBack}){
+  const[name,setName]=useState("");const[phone,setPhone]=useState("");const[line,setLine]=useState("");
+  const[pref,setPref]=useState("福岡県");const[area,setArea]=useState("");const[hours,setHours]=useState("");
+  const[baseFare,setBaseFare]=useState("2000");const[perKm,setPerKm]=useState("500");
+  const[campaign,setCampaign]=useState("");const[web,setWeb]=useState("");const[done,setDone]=useState(false);
+  const anonId=getAnonId();
+  const submit=()=>{
+    if(!name.trim()||!phone.trim())return;
+    const newCo={id:"co_"+Date.now(),name:name.trim(),phone:phone.trim(),line:line.trim()||null,pref,area:area.trim()||pref,hours:hours.trim()||"未設定",baseFare:parseInt(baseFare)||2000,perKm:parseInt(perKm)||500,campaign:campaign.trim()||null,web:web.trim()||null,featured:false,addedAt:Date.now(),ownerId:anonId};
+    setCompanies(prev=>{const n=[...prev,newCo];LS.set("companies",n);return n;});
+    setDone(true);
   };
+  const deleteCompany=(id)=>{if(!confirm("削除しますか？"))return;setCompanies(prev=>{const n=prev.filter(c=>c.id!==id);LS.set("companies",n);return n;});};
+  const myCompanies=companies.filter(c=>c.ownerId===anonId);
+  const iS={width:"100%",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 14px",color:C.text,fontSize:14,outline:"none",fontFamily:"inherit",marginBottom:8};
+  const selS={...iS,appearance:"none",WebkitAppearance:"none"};
 
-  const openGoogleMaps = () => {
-    if(!from.trim()||!to.trim()) return;
-    window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from+" 福岡")}&destination=${encodeURIComponent(to+" 福岡")}&travelmode=driving`, "_blank");
-  };
+  if(done)return(
+<div style={{paddingBottom:80}}>
+  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}><button onClick={goBack} style={{background:"none",border:"none",color:C.t2,fontSize:18,cursor:"pointer",padding:0}}>←</button><span style={{fontWeight:900,fontSize:16}}>掲載完了</span></div>
+  <div style={{padding:"50px 20px",textAlign:"center",animation:"fadeIn .3s ease"}}>
+    <div style={{fontSize:50,marginBottom:12}}>🎉</div>
+    <div style={{fontSize:20,fontWeight:900,marginBottom:6}}>掲載完了！</div>
+    <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:20}}>「{name}」が代行なうに掲載されました。</div>
+    <button onClick={goBack} style={{padding:"14px 32px",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:14,fontWeight:900,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>🏠 ホームに戻る</button>
+  </div>
+</div>);
 
-  const inpS = {width:"100%", background:"transparent", border:"none", color:C.text, fontSize:16, outline:"none", fontFamily:"inherit", padding:0};
+  return(
+<div style={{paddingBottom:80}}>
+  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}><button onClick={goBack} style={{background:"none",border:"none",color:C.t2,fontSize:18,cursor:"pointer",padding:0}}>←</button><span style={{fontWeight:900,fontSize:16}}>＋ 無料で業者掲載</span></div>
 
-  return (
-    <div style={{paddingBottom:80}}>
-      <div style={{padding:"14px 16px 0"}}>
-        <div style={{fontSize:18, fontWeight:900, marginBottom:2}}>📏 料金計算</div>
-        <div style={{fontSize:12, color:C.t2, marginBottom:12}}>出発地と目的地を入力して料金の目安を確認</div>
+  {myCompanies.length>0&&(
+  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
+    <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:8}}>あなたの掲載中の業者</div>
+    {myCompanies.map(co=>(<div key={co.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:`1px solid ${C.border}`}}><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{co.name}</div><div style={{fontSize:11,color:C.t2}}>{co.pref} · {co.phone}</div></div><button onClick={()=>deleteCompany(co.id)} style={{background:C.rL,border:`1px solid ${C.red}33`,borderRadius:8,padding:"4px 10px",color:C.red,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>削除</button></div>))}
+  </div>)}
 
-        {/* 入力フォーム */}
-        <div style={{background:"linear-gradient(135deg,#1a0800,#0d0400)", borderRadius:20, padding:4, border:`1px solid rgba(255,107,0,.35)`, boxShadow:"0 0 20px rgba(255,107,0,.08)", marginBottom:12}}>
-          <div style={{background:C.s2, borderRadius:16, padding:"13px 16px", marginBottom:2, display:"flex", alignItems:"center", gap:12}}>
-            <div style={{width:12, height:12, borderRadius:"50%", background:C.green, flexShrink:0, boxShadow:`0 0 8px ${C.green}`}}/>
-            <div style={{flex:1}}>
-              <div style={{fontSize:10, color:C.green, fontWeight:700, marginBottom:4, letterSpacing:.5}}>出発地</div>
-              <input value={from} onChange={e=>{setFrom(e.target.value);setResult(null);}} onKeyDown={e=>{if(e.key==="Enter")doSearch();}}
-                placeholder="例：博多駅、天神、中洲" style={{...inpS, fontSize:17, fontWeight:500}}/>
-            </div>
-            {from && <button onClick={()=>{setFrom("");setResult(null);}} style={{background:"none",border:"none",color:C.t3,fontSize:18,cursor:"pointer",padding:0}}>×</button>}
-          </div>
-          <div style={{display:"flex", justifyContent:"center", alignItems:"center", padding:"2px 0", position:"relative"}}>
-            <div style={{flex:1, height:1, background:`linear-gradient(90deg,transparent,rgba(255,107,0,.3))`}}/>
-            <div style={{width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#FF6B00,#FF3D00)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, flexShrink:0, margin:"0 8px", boxShadow:"0 0 10px rgba(255,107,0,.4)"}}>↓</div>
-            <div style={{flex:1, height:1, background:`linear-gradient(90deg,rgba(255,107,0,.3),transparent)`}}/>
-          </div>
-          <div style={{background:C.s2, borderRadius:16, padding:"13px 16px", marginTop:2, display:"flex", alignItems:"center", gap:12}}>
-            <div style={{width:12, height:12, borderRadius:3, background:C.red, flexShrink:0, boxShadow:`0 0 8px ${C.red}`}}/>
-            <div style={{flex:1}}>
-              <div style={{fontSize:10, color:C.red, fontWeight:700, marginBottom:4, letterSpacing:.5}}>目的地</div>
-              <input value={to} onChange={e=>{setTo(e.target.value);setResult(null);}} onKeyDown={e=>{if(e.key==="Enter")doSearch();}}
-                placeholder="例：大橋、春日市、那珂川" style={{...inpS, fontSize:17, fontWeight:500}}/>
-            </div>
-            {to && <button onClick={()=>{setTo("");setResult(null);}} style={{background:"none",border:"none",color:C.t3,fontSize:18,cursor:"pointer",padding:0}}>×</button>}
-          </div>
-        </div>
+  <div style={{padding:16}}>
+    <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:16}}>代行なうに<span style={{color:C.green,fontWeight:700}}>完全無料</span>で掲載。<br/>全国のお客様が料金比較して直接電話します。</div>
 
-        {/* クイック入力 */}
-        <div style={{display:"flex", gap:6, overflowX:"auto", paddingBottom:6, marginBottom:12}}>
-          {["博多駅","天神","中洲","大橋","那珂川","春日市","太宰府","薬院"].map(s=>(
-            <button key={s} onClick={()=>{if(!from)setFrom(s);else if(!to)setTo(s);}}
-              style={{flexShrink:0, background:C.s2, border:`1px solid ${C.b2}`, borderRadius:20, padding:"6px 12px", fontSize:12, color:C.t2, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap"}}>{s}</button>
-          ))}
-        </div>
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>業者名 <span style={{color:C.red}}>*</span></div>
+    <input value={name} onChange={e=>setName(e.target.value)} placeholder="例：○○運転代行" style={iS}/>
 
-        {/* ボタン */}
-        <div style={{display:"flex", gap:10, marginBottom:14}}>
-          <button onClick={doSearch} disabled={!from||!to||searching}
-            style={{flex:2, padding:"14px 0", background:from&&to&&!searching?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#2a2a2a", color:from&&to&&!searching?"#000":"#555", border:"none", borderRadius:14, fontWeight:900, fontSize:15, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8}}>
-            {searching?<><span style={{display:"inline-block",animation:"spin .6s linear infinite"}}>⟳</span> 計算中...</>:"📏 料金を計算する"}
-          </button>
-          <button onClick={openGoogleMaps} disabled={!from||!to}
-            style={{flex:1, padding:"14px 0", background:from&&to?"rgba(26,115,232,.15)":"#2a2a2a", color:from&&to?"#4A90FF":"#555", border:from&&to?`1px solid rgba(74,144,255,.4)`:`1px solid ${C.b2}`, borderRadius:14, fontWeight:700, fontSize:13, cursor:"pointer", fontFamily:"inherit"}}>
-            🗺️ Gマップ
-          </button>
-        </div>
-      </div>
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>電話番号 <span style={{color:C.red}}>*</span></div>
+    <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="例：090-1234-5678" type="tel" style={iS}/>
 
-      {/* マップ */}
-      <div style={{padding:"0 16px 14px"}}>
-        <AreaMap fromSpot={fromSpot} toSpot={toSpot}/>
-      </div>
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>LINE URL（任意）</div>
+    <input value={line} onChange={e=>setLine(e.target.value)} placeholder="例：https://lin.ee/xxxxx" style={iS}/>
 
-      {/* 計算結果 */}
-      {result && result.found && (
-        <div style={{padding:"0 16px 14px", animation:"fadeIn .3s ease"}}>
-          <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.1),rgba(255,61,0,.05))", borderRadius:18, padding:16, border:`1px solid rgba(255,107,0,.3)`, marginBottom:14}}>
-            <div style={{fontSize:12, color:C.accent, fontWeight:800, marginBottom:12, display:"flex", alignItems:"center", gap:6}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:C.accent,display:"inline-block"}}/>
-              ルート情報 · {from} → {to}
-            </div>
-            <div style={{textAlign:"center", marginBottom:14, padding:"14px 0", borderBottom:`1px solid rgba(255,107,0,.2)`}}>
-              <div style={{fontSize:11, color:C.t2, marginBottom:4}}>推定代行料金</div>
-              <div style={{fontSize:42, fontWeight:900, color:C.accent, lineHeight:1}}>{result.fare?fmtYen(result.fare.fare):"—"}</div>
-              {result.fare && <div style={{fontSize:12, color:C.t2, marginTop:6}}>{fmtYen(result.fare.min)} 〜 {fmtYen(result.fare.max)}{result.fare.isLate&&<span style={{color:"#AA00FF",marginLeft:6}}>🌙 深夜割増+30%</span>}</div>}
-            </div>
-            <div style={{display:"flex", gap:8}}>
-              {[
-                {icon:"📍", label:"距離", val:`${result.km.toFixed(1)}km`, col:C.blue},
-                {icon:"⏱", label:"所要時間", val:`約${result.minutes}分`, col:C.green},
-              ].map(({icon,label,val,col})=>(
-                <div key={label} style={{flex:1, background:`${col}0d`, borderRadius:10, padding:"10px 4px", textAlign:"center", border:`1px solid ${col}22`}}>
-                  <div style={{fontSize:14, marginBottom:2}}>{icon}</div>
-                  <div style={{fontSize:14, fontWeight:800, color:col}}>{val}</div>
-                  <div style={{fontSize:9, color:C.t2, marginTop:2}}>{label}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{marginTop:12, fontSize:11, color:C.t3, textAlign:"center", lineHeight:1.7}}>
-              ※ 料金は目安です。実際の料金は経路・交通状況により変動します<br/>
-              ※ 正確な料金はお電話・LINEでお問い合わせください
-            </div>
-          </div>
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>都道府県 <span style={{color:C.red}}>*</span></div>
+    <select value={pref} onChange={e=>setPref(e.target.value)} style={selS}>
+      {PREFS.map(p=><option key={p} value={p}>{p}</option>)}
+    </select>
 
-          {/* 予約CTA */}
-          <div style={{display:"flex", gap:8}}>
-            <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"14px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>📞 電話で予約</a>
-            <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"14px 0", background:"#06C755", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>💬 LINE予約</a>
-          </div>
-        </div>
-      )}
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>対応エリア（詳細）</div>
+    <input value={area} onChange={e=>setArea(e.target.value)} placeholder="例：博多・天神・中洲" style={iS}/>
 
-      {/* 地名が見つからない場合 */}
-      {result && !result.found && (
-        <div style={{padding:"0 16px 14px", animation:"fadeIn .3s ease"}}>
-          <div style={{background:C.rL, borderRadius:14, padding:16, border:`1px solid ${C.red}33`, marginBottom:14}}>
-            <div style={{fontSize:14, fontWeight:700, color:C.red, marginBottom:6}}>📍 地名が見つかりませんでした</div>
-            <div style={{fontSize:12, color:C.t2, lineHeight:1.7, marginBottom:12}}>
-              対応地名：博多駅、天神、中洲、大橋、那珂川、春日市、太宰府、福岡空港、薬院、西新、六本松、姪浜、香椎、久留米駅、大野城、二日市
-            </div>
-            <div style={{fontSize:12, color:C.t2, lineHeight:1.7}}>
-              上記以外の地名は、Googleマップで距離を確認するか、お電話・LINEで直接お問い合わせください。
-            </div>
-          </div>
-          <div style={{display:"flex", gap:8}}>
-            <button onClick={openGoogleMaps} style={{flex:1, padding:"13px 0", background:"rgba(26,115,232,.15)", color:"#4A90FF", border:`1px solid rgba(74,144,255,.4)`, borderRadius:14, fontWeight:700, fontSize:14, cursor:"pointer", fontFamily:"inherit"}}>🗺️ Googleマップで確認</button>
-            <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"13px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:14, textDecoration:"none"}}>📞 電話</a>
-          </div>
-        </div>
-      )}
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>営業時間</div>
+    <input value={hours} onChange={e=>setHours(e.target.value)} placeholder="例：21:00〜翌5:00" style={iS}/>
 
-      {/* 料金表 */}
-      {!result && (
-        <div style={{padding:"0 16px"}}>
-          <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-            <div style={{color:C.accent, fontWeight:800, fontSize:13, marginBottom:12}}>📋 料金目安（主要区間）</div>
-            {[["博多駅","天神"],["博多駅","福岡空港"],["天神","大橋"],["中洲","春日市"],["天神","那珂川"],["博多駅","太宰府"]].map(([f,t])=>{
-              const km = getKm(f,t); const r = km?calcFare(km):null;
-              return (
-                <div key={f+t} style={{display:"flex", alignItems:"center", padding:"9px 0", borderBottom:`1px solid ${C.border}`, cursor:"pointer"}} onClick={()=>{setFrom(f);setTo(t);}}>
-                  <div style={{flex:1}}><div style={{fontSize:13, fontWeight:600}}>{f} → {t}</div></div>
-                  <div style={{fontSize:11, color:C.t2, marginRight:10}}>{km?km.toFixed(1)+"km":"—"}</div>
-                  <div style={{fontSize:15, fontWeight:800, color:C.accent}}>{r?fmtYen(r.fare):"—"}</div>
-                </div>
-              );
-            })}
-            <div style={{marginTop:10, fontSize:11, color:C.t3, textAlign:"center"}}>タップで自動入力 · 深夜23時〜5時は+30%</div>
-          </div>
-
-          {/* 料金体系 */}
-          <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`}}>
-            <div style={{color:C.gold, fontWeight:800, fontSize:13, marginBottom:12}}>💰 料金体系</div>
-            <table style={{width:"100%", borderCollapse:"collapse", fontSize:12}}>
-              <thead>
-                <tr style={{borderBottom:`1px solid ${C.b2}`}}>
-                  <th style={{textAlign:"left", padding:"6px 0", color:C.t2, fontWeight:600}}>距離</th>
-                  <th style={{textAlign:"right", padding:"6px 0", color:C.t2, fontWeight:600}}>基本料金</th>
-                  <th style={{textAlign:"right", padding:"6px 0", color:C.t2, fontWeight:600}}>加算/km</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FARE_TABLE.slice(0,4).map((t,i) => (
-                  <tr key={i} style={{borderBottom:`1px solid ${C.border}`}}>
-                    <td style={{padding:"7px 0", color:C.text}}>{i===0?"〜2km":i===1?"〜5km":i===2?"〜10km":"〜20km"}</td>
-                    <td style={{padding:"7px 0", textAlign:"right", color:C.accent, fontWeight:700}}>{fmtYen(t.base)}</td>
-                    <td style={{padding:"7px 0", textAlign:"right", color:C.t2}}>{fmtYen(t.perKm)}/km</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div style={{marginTop:10, fontSize:11, color:C.t2, lineHeight:1.7}}>
-              ※ 深夜（23:00〜5:00）は30%増し<br/>
-              ※ 上記は目安です。実際の料金は経路により変動します
-            </div>
-          </div>
-        </div>
-      )}
+    <div style={{display:"flex",gap:8}}>
+      <div style={{flex:1}}><div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>初乗り（円）</div><input value={baseFare} onChange={e=>setBaseFare(e.target.value)} type="number" style={iS}/></div>
+      <div style={{flex:1}}><div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>1kmあたり（円）</div><input value={perKm} onChange={e=>setPerKm(e.target.value)} type="number" style={iS}/></div>
     </div>
-  );
+
+    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>キャンペーン（任意）</div>
+    <input value={campaign} onChange={e=>setCampaign(e.target.value)} placeholder="例：初乗り無料！LINE登録で割引" style={iS}/>
+
+    <button onClick={submit} disabled={!name.trim()||!phone.trim()} style={{width:"100%",padding:"16px 0",background:name&&phone?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:name&&phone?"#000":"#666",border:"none",borderRadius:14,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",marginTop:8}}>✅ 無料で掲載する</button>
+    <div style={{fontSize:11,color:C.t3,textAlign:"center",marginTop:12,lineHeight:1.7}}>※ 掲載は完全無料・手数料なし<br/>※ お客様から直接電話が来ます</div>
+  </div>
+</div>);
 }
 
-/* ══════════════════════════════════════
-   🚗 予約画面
-   ══════════════════════════════════════ */
-function BookingScreen() {
-  const { isOpen, isLate, nextOpen } = useBusinessStatus();
+/* ═══════ ⚔️ バトル ═══════ */
+function BattleScreen(){
+  const[posts,setPosts]=useState(()=>LS.get("battlePosts",[]));
+  const[myRole,setMyRole]=useState(()=>LS.get("myRole",null));
+  const[composeOpen,setComposeOpen]=useState(false);const[composeText,setComposeText]=useState("");
+  const[filter,setFilter]=useState("all");const[replyTo,setReplyTo]=useState(null);const[replyText,setReplyText]=useState("");
+  const anonId=getAnonId();
+  useEffect(()=>{LS.set("battlePosts",posts);},[posts]);
+  const submitPost=()=>{if(!composeText.trim()||!myRole)return;setPosts(prev=>[{id:"bp_"+Date.now(),role:myRole,text:composeText.trim(),time:Date.now(),likes:0,likedBy:[],replies:[],authorId:anonId},...prev]);setComposeText("");setComposeOpen(false);};
+  const submitReply=(pid)=>{if(!replyText.trim()||!myRole)return;setPosts(prev=>prev.map(p=>p.id===pid?{...p,replies:[...p.replies,{id:"re_"+Date.now(),role:myRole,text:replyText.trim(),time:Date.now(),authorId:anonId}]}:p));setReplyText("");setReplyTo(null);};
+  const toggleLike=(pid)=>{setPosts(prev=>prev.map(p=>{if(p.id!==pid)return p;const liked=p.likedBy.includes(anonId);return{...p,likes:liked?p.likes-1:p.likes+1,likedBy:liked?p.likedBy.filter(x=>x!==anonId):[...p.likedBy,anonId]};}));};
+  const deletePost=(pid)=>{setPosts(prev=>prev.filter(p=>p.id!==pid));};
+  const selectRole=(r)=>{setMyRole(r);LS.set("myRole",r);};
+  const filtered=useMemo(()=>filter==="all"?posts:posts.filter(p=>p.role===filter),[posts,filter]);
+  const stats=useMemo(()=>({cN:posts.filter(p=>p.role==="customer").length,dN:posts.filter(p=>p.role==="driver").length,cL:posts.filter(p=>p.role==="customer").reduce((a,p)=>a+p.likes,0),dL:posts.filter(p=>p.role==="driver").reduce((a,p)=>a+p.likes,0)}),[posts]);
 
-  return (
-    <div style={{paddingBottom:80}}>
-      {/* 営業ステータス */}
-      <div style={{padding:"12px 16px", background:isOpen?"rgba(0,210,106,.06)":"rgba(255,71,87,.06)", borderBottom:`1px solid ${isOpen?C.green+"33":C.red+"33"}`}}>
-        <div style={{display:"flex", alignItems:"center", gap:8}}>
-          <span style={{width:8, height:8, borderRadius:"50%", background:isOpen?C.green:C.red, display:"inline-block", animation:isOpen?"blink 1.4s ease-in-out infinite":undefined}}/>
-          <span style={{fontSize:14, fontWeight:700, color:isOpen?C.green:C.red}}>{isOpen?"営業中":"営業時間外"}</span>
-          {isLate && <span style={{fontSize:11, padding:"2px 8px", borderRadius:8, background:"rgba(170,0,255,.12)", color:"#AA00FF", fontWeight:700}}>🌙 深夜割増</span>}
-        </div>
-        {!isOpen && <div style={{fontSize:12, color:C.t2, marginTop:4}}>{nextOpen}</div>}
-        <div style={{fontSize:11, color:C.t2, marginTop:2}}>{BIZ.hours}</div>
-      </div>
+  if(!myRole)return(
+<div style={{paddingBottom:80}}><div style={{padding:"40px 20px",textAlign:"center"}}>
+  <div style={{fontSize:50,marginBottom:12}}>⚔️</div>
+  <div style={{fontSize:22,fontWeight:900,marginBottom:6}}>バトル掲示板</div>
+  <div style={{fontSize:13,color:C.t2,lineHeight:1.7,marginBottom:28}}>お客 vs 運転手<br/>全国の利用者が匿名で投稿！</div>
+  <div style={{display:"flex",gap:12}}>
+    <button onClick={()=>selectRole("customer")} style={{flex:1,padding:"24px 0",background:"linear-gradient(135deg,rgba(74,144,255,.15),rgba(74,144,255,.05))",border:`2px solid ${C.blue}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}><div style={{fontSize:40,marginBottom:8}}>🍺</div><div style={{fontSize:18,fontWeight:900,color:C.blue}}>お客</div></button>
+    <button onClick={()=>selectRole("driver")} style={{flex:1,padding:"24px 0",background:"linear-gradient(135deg,rgba(255,107,0,.15),rgba(255,107,0,.05))",border:`2px solid ${C.accent}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}><div style={{fontSize:40,marginBottom:8}}>🚗</div><div style={{fontSize:18,fontWeight:900,color:C.accent}}>運転手</div></button>
+  </div>
+  <div style={{fontSize:11,color:C.t3,marginTop:16}}>※ 完全匿名・あとから変更可</div>
+</div></div>);
 
-      <div style={{padding:16}}>
-        {/* メインCTA：電話 */}
-        <a href={`tel:${BIZ.phone}`} style={{display:"block", textDecoration:"none", marginBottom:14}}>
-          <div style={{background:"linear-gradient(135deg,#FF6B00,#FF3D00)", borderRadius:20, overflow:"hidden", animation:"ctaPulse 2.5s ease-in-out infinite"}}>
-            <div style={{padding:"20px 20px 16px", display:"flex", alignItems:"center", gap:14}}>
-              <div style={{fontSize:34}}>📞</div>
-              <div style={{flex:1, textAlign:"left"}}>
-                <div style={{fontSize:20, fontWeight:900, color:"#000", lineHeight:1.1}}>電話で予約する</div>
-                <div style={{fontSize:12, color:"rgba(0,0,0,.6)", marginTop:4}}>{BIZ.name}</div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontSize:14, fontWeight:900, color:"#000", letterSpacing:".5px"}}>{BIZ.phone}</div>
-              </div>
-            </div>
-            <div style={{background:"rgba(0,0,0,.16)", padding:"8px 20px", textAlign:"center"}}>
-              <div style={{fontSize:12, color:"rgba(0,0,0,.65)", fontWeight:700}}>タップして発信 ›</div>
-            </div>
-          </div>
-        </a>
-
-        {/* LINE予約 */}
-        <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{display:"block", textDecoration:"none", marginBottom:20}}>
-          <div style={{background:"#06C755", borderRadius:20, padding:"18px 20px", display:"flex", alignItems:"center", gap:14}}>
-            <div style={{fontSize:34}}>💬</div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:18, fontWeight:900, color:"#fff", lineHeight:1.1}}>LINEで予約する</div>
-              <div style={{fontSize:12, color:"rgba(255,255,255,.7)", marginTop:4}}>LINE ID: {BIZ.lineId}</div>
-            </div>
-            <div style={{fontSize:18, color:"#fff", fontWeight:700}}>›</div>
-          </div>
-        </a>
-
-        {/* 予約の流れ */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.accent, marginBottom:14}}>📋 ご予約の流れ</div>
-          {[
-            {step:"1", title:"お電話・LINEでご連絡", desc:"出発地と目的地をお伝えください。料金の見積もりもこの時点でお伝えします。", icon:"📞"},
-            {step:"2", title:"ドライバー手配", desc:"最寄りのドライバーを手配いたします。到着予定時刻をお知らせします。", icon:"🚗"},
-            {step:"3", title:"ドライバー到着", desc:"ドライバーがお客様の元へ到着。お車にお乗りいただきます。", icon:"📍"},
-            {step:"4", title:"目的地へ安全運転", desc:"お客様のお車を安全に目的地まで運転いたします。", icon:"🛡"},
-            {step:"5", title:"到着・お支払い", desc:"目的地到着後、料金をお支払いいただきます。現金・電子決済対応。", icon:"💰"},
-          ].map(({step, title, desc, icon}, i) => (
-            <div key={step} style={{display:"flex", gap:14, marginBottom:i<4?16:0, animation:`slideUp .3s ease ${i*.06}s both`}}>
-              <div style={{display:"flex", flexDirection:"column", alignItems:"center", flexShrink:0}}>
-                <div style={{width:36, height:36, borderRadius:"50%", background:C.aL, border:`1px solid ${C.accent}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16}}>{icon}</div>
-                {i<4 && <div style={{width:1.5, height:16, background:C.b2, marginTop:4}}/>}
-              </div>
-              <div style={{paddingTop:4}}>
-                <div style={{fontSize:13, fontWeight:700, marginBottom:3, color:C.text}}>
-                  <span style={{color:C.accent, marginRight:6}}>STEP {step}</span>{title}
-                </div>
-                <div style={{fontSize:12, color:C.t2, lineHeight:1.6}}>{desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 対応エリア */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.blue, marginBottom:10}}>📍 対応エリア</div>
-          <div style={{fontSize:13, color:C.t2, lineHeight:1.8}}>{BIZ.area}</div>
-          <div style={{fontSize:11, color:C.t3, marginTop:8}}>上記以外のエリアもご相談ください</div>
-        </div>
-
-        {/* お支払い方法 */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.gold, marginBottom:10}}>💳 お支払い方法</div>
-          <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
-            {["💴 現金","📱 PayPay","📱 電子決済"].map(m => (
-              <span key={m} style={{fontSize:12, padding:"6px 12px", borderRadius:10, background:C.s2, border:`1px solid ${C.b2}`, color:C.t2}}>{m}</span>
-            ))}
-          </div>
-          <div style={{fontSize:11, color:C.t3, marginTop:8}}>詳しくはお電話でお問い合わせください</div>
-        </div>
-      </div>
+  const rc=ROLE_CFG[myRole];
+  return(
+<div style={{paddingBottom:80}}>
+<div style={{padding:"12px 16px",background:"linear-gradient(135deg,rgba(170,85,255,.08),rgba(255,107,0,.05))",borderBottom:`1px solid ${C.purple}33`}}>
+  <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:8}}>
+    <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:11,color:C.blue,fontWeight:700}}>🍺 お客</div><div style={{fontSize:24,fontWeight:900,color:C.blue}}>{stats.cN}</div><div style={{fontSize:10,color:C.t2}}>❤️{stats.cL}</div></div>
+    <div style={{fontSize:22,fontWeight:900,color:C.purple,animation:"vs 2s ease infinite"}}>VS</div>
+    <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:11,color:C.accent,fontWeight:700}}>🚗 運転手</div><div style={{fontSize:24,fontWeight:900,color:C.accent}}>{stats.dN}</div><div style={{fontSize:10,color:C.t2}}>❤️{stats.dL}</div></div>
+  </div>
+  <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:rc.bg,color:rc.color,border:`1px solid ${rc.bd}`}}>{rc.emoji} {rc.label}</span><button onClick={()=>{setMyRole(null);LS.set("myRole",null);}} style={{marginLeft:"auto",background:"none",border:`1px solid ${C.b2}`,borderRadius:8,padding:"2px 8px",color:C.t3,fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>変更</button></div>
+</div>
+<div style={{display:"flex",borderBottom:`1px solid ${C.border}`,position:"sticky",top:56,zIndex:40,background:C.s1}}>
+  {[{id:"all",l:"すべて"},{id:"customer",l:"🍺 お客"},{id:"driver",l:"🚗 運転手"}].map(f=>(<button key={f.id} onClick={()=>setFilter(f.id)} style={{flex:1,padding:"9px 0",border:"none",borderBottom:filter===f.id?`2px solid ${C.accent}`:"2px solid transparent",background:"transparent",color:filter===f.id?C.accent:C.t2,fontSize:12,fontWeight:filter===f.id?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f.l}</button>))}
+</div>
+{composeOpen&&(<div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .2s ease"}}><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(${myRole==="customer"?"135deg,#2979FF,#1565C0":"135deg,#FF6B00,#FF3D00"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{rc.emoji}</div><div style={{flex:1}}><textarea value={composeText} onChange={e=>setComposeText(e.target.value)} placeholder="匿名で投稿..." rows={3} style={{width:"100%",background:C.card,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 12px",color:C.text,fontSize:14,outline:"none",resize:"none",fontFamily:"inherit"}}/><div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:6}}><button onClick={()=>{setComposeOpen(false);setComposeText("");}} style={{padding:"8px 16px",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:10,color:C.t2,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>取消</button><button onClick={submitPost} disabled={!composeText.trim()} style={{padding:"8px 20px",background:composeText.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:composeText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>投稿</button></div></div></div></div>)}
+{filtered.length===0&&(<div style={{textAlign:"center",padding:"50px 20px",color:C.t3}}><div style={{fontSize:40,marginBottom:10}}>💬</div><div style={{fontSize:14,fontWeight:700}}>まだ投稿がありません</div></div>)}
+{filtered.map(p=>{const prc=ROLE_CFG[p.role];const isMe=p.authorId===anonId;const isLiked=p.likedBy.includes(anonId);return(
+<div key={p.id} style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
+  <div style={{display:"flex",gap:10}}>
+    <div style={{width:40,height:40,borderRadius:"50%",background:`linear-gradient(${p.role==="customer"?"135deg,#2979FF,#1565C0":"135deg,#FF6B00,#FF3D00"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{prc.emoji}</div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:prc.bg,color:prc.color,border:`1px solid ${prc.bd}`}}>{prc.emoji} {prc.label}</span>{isMe&&<span style={{fontSize:10,color:C.t3}}>（あなた）</span>}<span style={{fontSize:10,color:C.t3,marginLeft:"auto"}}>{ago(p.time)}</span></div>
+      <div style={{fontSize:14,color:"#d0d0d0",lineHeight:1.7,marginBottom:8,wordBreak:"break-word"}}>{p.text}</div>
+      {p.replies.length>0&&(<div style={{marginBottom:8,marginLeft:8,borderLeft:`2px solid ${C.b2}`,paddingLeft:10}}>{p.replies.map(r=>{const rrc=ROLE_CFG[r.role];return(<div key={r.id} style={{marginBottom:6}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}><span style={{fontSize:10,padding:"1px 6px",borderRadius:6,fontWeight:700,background:rrc.bg,color:rrc.color}}>{rrc.emoji} {rrc.label}</span><span style={{fontSize:9,color:C.t3}}>{ago(r.time)}</span></div><div style={{fontSize:13,color:C.t2,lineHeight:1.6}}>{r.text}</div></div>);})}</div>)}
+      <div style={{display:"flex",gap:14,alignItems:"center"}}><button onClick={()=>toggleLike(p.id)} style={{display:"flex",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",color:isLiked?C.red:C.t3,fontSize:13,padding:0,fontFamily:"inherit"}}>{isLiked?"❤️":"🤍"}{p.likes>0&&<span>{p.likes}</span>}</button><button onClick={()=>setReplyTo(replyTo===p.id?null:p.id)} style={{display:"flex",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",color:replyTo===p.id?C.blue:C.t3,fontSize:13,padding:0,fontFamily:"inherit"}}>💬{p.replies.length>0&&<span> {p.replies.length}</span>}</button>{isMe&&<button onClick={()=>deletePost(p.id)} style={{background:"none",border:"none",cursor:"pointer",color:C.t3,fontSize:12,padding:0,fontFamily:"inherit",marginLeft:"auto"}}>🗑</button>}</div>
+      {replyTo===p.id&&(<div style={{marginTop:8,display:"flex",gap:6,animation:"fadeIn .2s ease"}}><input value={replyText} onChange={e=>setReplyText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")submitReply(p.id);}} placeholder="返信..." style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/><button onClick={()=>submitReply(p.id)} disabled={!replyText.trim()} style={{padding:"8px 14px",background:replyText.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:replyText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>送信</button></div>)}
     </div>
-  );
+  </div>
+</div>);})}
+<button onClick={()=>setComposeOpen(!composeOpen)} style={{position:"fixed",bottom:72,right:Math.max(16,(window.innerWidth-480)/2+16),width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",border:"none",color:"#000",fontSize:24,cursor:"pointer",boxShadow:"0 4px 20px rgba(255,107,0,.4)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}}>✏️</button>
+</div>);
 }
 
-/* ══════════════════════════════════════
-   ℹ️ サービス案内
-   ══════════════════════════════════════ */
-function InfoScreen() {
-  const faqs = [
-    {q:"予約はどうすればいいですか？", a:"お電話またはLINEでご予約ください。出発地と目的地をお伝えいただければ、すぐにドライバーを手配いたします。"},
-    {q:"料金はいつ決まりますか？", a:"出発地と目的地の距離に基づいて計算されます。料金計算タブで事前に目安を確認できます。深夜（23:00〜5:00）は30%増しとなります。"},
-    {q:"キャンセルはできますか？", a:"ドライバー出発前であれば無料でキャンセル可能です。出発後のキャンセルは所定のキャンセル料が発生する場合があります。"},
-    {q:"対応エリアはどこですか？", a:`${BIZ.area}を中心に対応しています。その他のエリアもご相談ください。`},
-    {q:"支払い方法は？", a:"現金払い・各種電子決済に対応しています。詳しくはお問い合わせください。"},
-    {q:"何人まで乗れますか？", a:"お客様の車に乗車する形ですので、お車の定員に準じます。ドライバー1名が随行車で追従します。"},
-    {q:"運転代行とは何ですか？", a:"お酒を飲んだ後などにお客様に代わってお車を運転するサービスです。お客様はご自身のお車の助手席や後部座席にお乗りいただけます。"},
-    {q:"どのくらいで来てくれますか？", a:"エリアや混雑状況によりますが、通常お電話から15〜30分程度でお迎えに上がります。"},
-  ];
-  const [openFaq, setOpenFaq] = useState(null);
-
-  return (
-    <div style={{paddingBottom:80}}>
-      {/* ヘッダー */}
-      <div style={{background:"linear-gradient(160deg,#1a0800,#0d0400,#080808)", padding:"24px 16px", borderBottom:`1px solid ${C.border}`}}>
-        <div style={{fontSize:40, marginBottom:8, animation:"float 2s ease-in-out infinite", textAlign:"center"}}>🚗</div>
-        <div style={{textAlign:"center", marginBottom:6}}>
-          <span style={{fontWeight:900, fontSize:24, color:C.text}}>代行</span>
-          <span style={{fontWeight:900, fontSize:24, color:C.accent}}>なう</span>
-        </div>
-        <div style={{textAlign:"center", fontSize:12, color:C.t2, marginBottom:16}}>{BIZ.name} が運営する運転代行サービス</div>
-        <div style={{display:"flex", gap:8}}>
-          <a href={`tel:${BIZ.phone}`} style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"13px 0", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>📞 電話する</a>
-          <a href={BIZ.lineUrl} target="_blank" rel="noopener" style={{flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, padding:"13px 0", background:"#06C755", color:"#fff", borderRadius:14, fontWeight:900, fontSize:15, textDecoration:"none"}}>💬 LINE</a>
-        </div>
-      </div>
-
-      <div style={{padding:16}}>
-        {/* 営業情報 */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.accent, marginBottom:12}}>📋 営業情報</div>
-          {[
-            {l:"事業者名", v:BIZ.name, i:"🏢"},
-            {l:"営業時間", v:BIZ.hours, i:"🕐"},
-            {l:"対応エリア", v:BIZ.area, i:"📍"},
-            {l:"電話番号", v:BIZ.phone, i:"📞"},
-            {l:"LINE ID", v:BIZ.lineId, i:"💬"},
-            {l:"公式サイト", v:BIZ.web, i:"🌐"},
-          ].map(({l,v,i}) => (
-            <div key={l} style={{display:"flex", gap:10, alignItems:"flex-start", padding:"8px 0", borderBottom:`1px solid ${C.border}`}}>
-              <span style={{fontSize:16, flexShrink:0, marginTop:1}}>{i}</span>
-              <div>
-                <div style={{fontSize:11, color:C.t2, marginBottom:2}}>{l}</div>
-                <div style={{fontSize:13, fontWeight:600}}>{l==="公式サイト"?<a href={v} target="_blank" rel="noopener" style={{color:C.accent}}>{v}</a>:v}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* サービスの特徴 */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.gold, marginBottom:12}}>⭐ サービスの特徴</div>
-          {[
-            {i:"🛡", t:"安心・安全", d:"全ドライバー身元確認済み。損害保険加入済みで万が一の時も安心。"},
-            {i:"⚡", t:"スピード配車", d:"お電話から最短15分で到着。深夜でも迅速に対応します。"},
-            {i:"💰", t:"明朗会計", d:"料金は距離に基づく明朗会計。深夜割増も事前にご確認いただけます。"},
-            {i:"🌙", t:"深夜対応", d:"深夜・早朝も年中無休で対応。飲み会帰りも安心してご利用ください。"},
-          ].map(({i,t,d}) => (
-            <div key={t} style={{display:"flex", gap:12, alignItems:"flex-start", marginBottom:14}}>
-              <div style={{width:40, height:40, borderRadius:12, background:C.aL, border:`1px solid ${C.accent}22`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0}}>{i}</div>
-              <div><div style={{fontWeight:700, fontSize:14, marginBottom:3}}>{t}</div><div style={{fontSize:12, color:C.t2, lineHeight:1.6}}>{d}</div></div>
-            </div>
-          ))}
-        </div>
-
-        {/* FAQ */}
-        <div style={{background:C.card, borderRadius:16, padding:16, border:`1px solid ${C.b2}`, marginBottom:14}}>
-          <div style={{fontSize:14, fontWeight:800, color:C.blue, marginBottom:12}}>❓ よくある質問</div>
-          {faqs.map((f, i) => (
-            <div key={i} style={{marginBottom:8}}>
-              <button onClick={() => setOpenFaq(openFaq===i?null:i)} style={{width:"100%", textAlign:"left", background:openFaq===i?C.bL:C.s2, border:`1px solid ${openFaq===i?C.blue+"33":C.b2}`, borderRadius:12, padding:"12px 14px", color:C.text, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:8}}>
-                <span style={{color:C.blue, fontSize:14, flexShrink:0}}>{openFaq===i?"▼":"▶"}</span>
-                <span>{f.q}</span>
-              </button>
-              {openFaq===i && (
-                <div style={{padding:"10px 14px 10px 36px", fontSize:13, color:C.t2, lineHeight:1.7, animation:"fadeIn .2s ease"}}>
-                  {f.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* フッター */}
-        <div style={{textAlign:"center", fontSize:10, color:C.t3, lineHeight:1.9, marginTop:8}}>
-          <a href={BIZ.web} target="_blank" rel="noopener" style={{color:C.accent}}>{BIZ.web}</a><br/>
-          代行なう · {BIZ.name}<br/>
-          © {new Date().getFullYear()} {BIZ.name}
-        </div>
-      </div>
-    </div>
-  );
+/* ═══════ ℹ️ 案内 ═══════ */
+function InfoScreen(){
+  const[openFaq,setOpenFaq]=useState(null);
+  const faqs=[{q:"代行なうとは？",a:"全国の運転代行プラットフォームです。複数の業者を比較して直接電話・LINEで予約できます。"},{q:"掲載料はかかりますか？",a:"完全無料です。全国どの代行業者でも掲載できます。手数料も一切なし。"},{q:"料金はどう計算されますか？",a:"各業者の初乗り料金＋距離×km単価で計算。正確な料金は各業者にお問い合わせください。"},{q:"バトル掲示板とは？",a:"お客と運転手が匿名で投稿できる掲示板。感想・要望・情報交換に。"},{q:"運転代行とは？",a:"お客様に代わってお車を運転するサービス。飲酒後などに利用します。"}];
+  return(
+<div style={{paddingBottom:80}}>
+<div style={{background:"linear-gradient(160deg,#1a0800,#0d0400,#060609)",padding:"22px 16px",borderBottom:`1px solid ${C.border}`}}>
+  <div style={{fontSize:40,textAlign:"center",animation:"float 2s ease infinite"}}>🚗</div>
+  <div style={{textAlign:"center",marginTop:4}}><span style={{fontWeight:900,fontSize:24}}>代行</span><span style={{fontWeight:900,fontSize:24,color:C.accent}}>なう</span></div>
+  <div style={{textAlign:"center",fontSize:12,color:C.t2,margin:"4px 0 4px"}}>全国の運転代行プラットフォーム</div>
+  <div style={{textAlign:"center",fontSize:11,color:C.green,fontWeight:700,marginBottom:14}}>どの代行業者でも完全無料で掲載OK</div>
+</div>
+<div style={{padding:16}}>
+  <div style={{background:C.card,borderRadius:16,padding:14,border:`1px solid ${C.b2}`,marginBottom:14}}>
+    <div style={{fontSize:14,fontWeight:800,color:C.gold,marginBottom:10}}>⭐ 特徴</div>
+    {[{i:"🌏",t:"全国対応",d:"47都道府県すべての代行業者が掲載可能。"},{i:"💰",t:"完全無料",d:"掲載料・手数料は永久無料。"},{i:"📊",t:"料金比較",d:"距離を入力するだけで複数業者の料金を即時比較。"},{i:"📞",t:"直接予約",d:"お客様から業者に直接電話・LINE。中間マージンなし。"},{i:"⚔️",t:"バトル掲示板",d:"お客と運転手が匿名で自由に投稿。"}].map(({i,t,d})=>(<div key={t} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12}}><div style={{width:36,height:36,borderRadius:10,background:C.aL,border:`1px solid ${C.accent}22`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{i}</div><div><div style={{fontWeight:700,fontSize:13,marginBottom:2}}>{t}</div><div style={{fontSize:12,color:C.t2,lineHeight:1.5}}>{d}</div></div></div>))}
+  </div>
+  <div style={{background:C.card,borderRadius:16,padding:14,border:`1px solid ${C.b2}`,marginBottom:14}}>
+    <div style={{fontSize:14,fontWeight:800,color:C.blue,marginBottom:10}}>❓ よくある質問</div>
+    {faqs.map((f,i)=>(<div key={i} style={{marginBottom:6}}><button onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{width:"100%",textAlign:"left",background:openFaq===i?C.bL:C.s2,border:`1px solid ${openFaq===i?C.blue+"33":C.b2}`,borderRadius:10,padding:"10px 12px",color:C.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}><span style={{color:C.blue,fontSize:12}}>{openFaq===i?"▼":"▶"}</span>{f.q}</button>{openFaq===i&&<div style={{padding:"6px 12px 6px 28px",fontSize:12,color:C.t2,lineHeight:1.7,animation:"fadeIn .2s ease"}}>{f.a}</div>}</div>))}
+  </div>
+  <div style={{textAlign:"center",fontSize:10,color:C.t3,lineHeight:1.9}}>代行なう — 全国運転代行プラットフォーム<br/>© {new Date().getFullYear()} 代行なう</div>
+</div>
+</div>);
 }
 
-/* ══════════════════════════════════════
-   ナビゲーション
-   ══════════════════════════════════════ */
-const NAV = [
-  {id:"fare",    icon:"📏", label:"料金計算"},
-  {id:"booking", icon:"🚗", label:"予約"},
-  {id:"info",    icon:"ℹ️", label:"案内"},
-];
-
-/* ══════════════════════════════════════
-   メインApp
-   ══════════════════════════════════════ */
-function App() {
-  const [screen, setScreen] = useState("fare");
-  const scrollRef = useRef(null);
-  const { isOpen } = useBusinessStatus();
-
-  useEffect(() => { if(scrollRef.current) scrollRef.current.scrollTop = 0; }, [screen]);
-
-  return (
-    <div style={{fontFamily:"'Noto Sans JP',sans-serif", background:C.bg, minHeight:"100vh", color:C.text, maxWidth:480, margin:"0 auto", display:"flex", flexDirection:"column"}}>
-
-      {/* トップバー */}
-      <div style={{background:C.s1, padding:"12px 16px 10px", borderBottom:`1px solid ${C.border}`, position:"sticky", top:0, zIndex:50}}>
-        <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-          <div style={{display:"flex", alignItems:"center", gap:8}}>
-            <span style={{fontWeight:900, fontSize:20, color:C.text, letterSpacing:"-.5px"}}>代行</span>
-            <span style={{fontWeight:900, fontSize:20, color:C.accent, letterSpacing:"-.5px"}}>なう</span>
-            <span style={{fontSize:10, color:isOpen?C.green:C.red, fontWeight:700, display:"flex", alignItems:"center", gap:4, background:isOpen?C.gL:C.rL, padding:"3px 8px", borderRadius:10, border:`1px solid ${isOpen?C.green:C.red}22`}}>
-              <span style={{width:5, height:5, borderRadius:"50%", background:isOpen?C.green:C.red, display:"inline-block", animation:isOpen?"blink 1.4s ease-in-out infinite":undefined}}/>{isOpen?"営業中":"時間外"}
-            </span>
-          </div>
-          <a href={`tel:${BIZ.phone}`} style={{display:"flex", alignItems:"center", gap:5, padding:"7px 14px", background:"linear-gradient(135deg,#00D26A,#00a050)", color:"#fff", borderRadius:12, fontWeight:800, fontSize:12, textDecoration:"none"}}>
-            📞 電話
-          </a>
-        </div>
+/* ═══════ App ═══════ */
+const NAV=[{id:"home",icon:"🏠",label:"ホーム"},{id:"battle",icon:"⚔️",label:"バトル"},{id:"info",icon:"ℹ️",label:"案内"}];
+function App(){
+  const[screen,setScreen]=useState("home");
+  const[companies,setCompanies]=useState(()=>{const s=LS.get("companies",null);return s||DEFAULT_COMPANIES;});
+  const scrollRef=useRef(null);
+  useEffect(()=>{if(scrollRef.current)scrollRef.current.scrollTop=0;},[screen]);
+  return(
+<div style={{fontFamily:"'Noto Sans JP',sans-serif",background:C.bg,minHeight:"100vh",color:C.text,maxWidth:480,margin:"0 auto",display:"flex",flexDirection:"column"}}>
+  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,zIndex:50}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}} onClick={()=>setScreen("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
+        <span style={{fontWeight:900,fontSize:20}}>代行</span><span style={{fontWeight:900,fontSize:20,color:C.accent}}>なう</span>
+        <span style={{fontSize:10,color:C.green,fontWeight:700,background:C.gL,padding:"3px 8px",borderRadius:10,border:`1px solid ${C.green}22`}}>{companies.length}社掲載</span>
       </div>
-
-      {/* コンテンツ */}
-      <div ref={scrollRef} style={{flex:1, overflowY:"auto"}}>
-        {screen === "fare" && <FareScreen/>}
-        {screen === "booking" && <BookingScreen/>}
-        {screen === "info" && <InfoScreen/>}
-      </div>
-
-      {/* ボトムナビ */}
-      <div style={{position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:480, background:"rgba(8,8,8,.97)", borderTop:`1px solid ${C.border}`, display:"flex", backdropFilter:"blur(16px)", zIndex:100, paddingBottom:"env(safe-area-inset-bottom)"}}>
-        {NAV.map(n => (
-          <button key={n.id} onClick={() => setScreen(n.id)} style={{flex:1, padding:"10px 0 12px", background:"none", border:"none", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:3, fontFamily:"inherit", color:screen===n.id?C.accent:C.t3, transition:"color .15s"}}>
-            <span style={{fontSize:18, lineHeight:1}}>{n.icon}</span>
-            <span style={{fontSize:9, fontWeight:screen===n.id?700:400, letterSpacing:.3}}>{n.label}</span>
-            {screen===n.id && <div style={{width:18, height:2, borderRadius:1, background:C.accent, marginTop:1}}/>}
-          </button>
-        ))}
-      </div>
+      <button onClick={()=>setScreen("register")} style={{padding:"7px 14px",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:12,fontWeight:800,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>＋ 無料掲載</button>
     </div>
-  );
+  </div>
+  <div ref={scrollRef} style={{flex:1,overflowY:"auto"}}>
+    {(screen==="home"||screen==="companies")&&<HomeScreen companies={companies} goTo={setScreen}/>}
+    {screen==="register"&&<RegisterScreen companies={companies} setCompanies={setCompanies} goBack={()=>setScreen("home")}/>}
+    {screen==="battle"&&<BattleScreen/>}
+    {screen==="info"&&<InfoScreen/>}
+  </div>
+  <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"rgba(6,6,9,.97)",borderTop:`1px solid ${C.border}`,display:"flex",backdropFilter:"blur(16px)",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>
+    {NAV.map(n=>(<button key={n.id} onClick={()=>setScreen(n.id)} style={{flex:1,padding:"10px 0 12px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"inherit",color:screen===n.id||(n.id==="home"&&screen==="register")?C.accent:C.t3}}><span style={{fontSize:18,lineHeight:1}}>{n.icon}</span><span style={{fontSize:9,fontWeight:screen===n.id?700:400}}>{n.label}</span>{(screen===n.id||(n.id==="home"&&screen==="register"))&&<div style={{width:18,height:2,borderRadius:1,background:C.accent,marginTop:1}}/>}</button>))}
+  </div>
+</div>);
 }
-
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
