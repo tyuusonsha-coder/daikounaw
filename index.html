@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
   <meta name="theme-color" content="#060609"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <title>代行なう — 全国運転代行プラットフォーム</title>
-  <meta name="description" content="全国の運転代行プラットフォーム。どの代行業者でも無料で掲載OK。料金比較・匿名掲示板。"/>
+  <title>代行なう — お客 vs 運転手 バトル掲示板</title>
+  <meta name="description" content="お客 vs 運転手！匿名バトル掲示板。全国の運転代行プラットフォーム。"/>
+  <meta property="og:title" content="代行なう — お客 vs 運転手 バトル掲示板"/>
+  <meta property="og:description" content="お客と運転手がガチで本音をぶつけ合う匿名掲示板🔥 #代行なう"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
@@ -19,350 +21,336 @@
     input,textarea,button,select{font-family:'Noto Sans JP',sans-serif;}
     a{color:inherit;text-decoration:none;}
     ::-webkit-scrollbar{width:0;height:0;}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-    @keyframes ctaPulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,.3)}60%{box-shadow:0 4px 32px rgba(255,107,0,.55)}}
-    @keyframes vs{0%,100%{transform:scale(1)}50%{transform:scale(1.2) rotate(-5deg)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes vs{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.3) rotate(-8deg)}}
+    @keyframes fire{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 4px 16px rgba(255,107,0,.3)}60%{box-shadow:0 4px 28px rgba(255,107,0,.5)}}
+    @keyframes countUp{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const{useState,useEffect,useRef,useCallback,useMemo}=React;
-const C={bg:"#060609",card:"#0c0c10",s1:"#0e0e13",s2:"#131318",border:"#1c1c24",b2:"#24242e",b3:"#2e2e3a",accent:"#FF6B00",aL:"rgba(255,107,0,.08)",green:"#00D26A",gL:"rgba(0,210,106,.08)",red:"#FF4757",rL:"rgba(255,71,87,.08)",blue:"#4A90FF",bL:"rgba(74,144,255,.08)",purple:"#AA55FF",gold:"#FFD700",text:"#EFEFEF",t2:"#888",t3:"#444"};
+const{useState,useEffect,useMemo,useRef}=React;
+const C={bg:"#060609",card:"#0c0c10",s1:"#0e0e13",s2:"#131318",border:"#1c1c24",b2:"#24242e",accent:"#FF6B00",aL:"rgba(255,107,0,.08)",green:"#00D26A",gL:"rgba(0,210,106,.08)",red:"#FF4757",rL:"rgba(255,71,87,.08)",blue:"#4A90FF",bL:"rgba(74,144,255,.08)",purple:"#AA55FF",gold:"#FFD700",text:"#EFEFEF",t2:"#888",t3:"#444"};
 const fmtYen=n=>`¥${Number(n).toLocaleString()}`;
-const LS={get(k,d){try{const v=localStorage.getItem("daikounaw_"+k);return v?JSON.parse(v):d;}catch{return d;}},set(k,v){try{localStorage.setItem("daikounaw_"+k,JSON.stringify(v));}catch{}}};
-function getAnonId(){let id=LS.get("anonId",null);if(!id){id="anon_"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS.set("anonId",id);}return id;}
+const LS={get(k,d){try{const v=localStorage.getItem("dn_"+k);return v?JSON.parse(v):d;}catch{return d;}},set(k,v){try{localStorage.setItem("dn_"+k,JSON.stringify(v));}catch{}}};
 const ago=ts=>{const s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?`${Math.floor(s/60)}分前`:s<86400?`${Math.floor(s/3600)}時間前`:`${Math.floor(s/86400)}日前`;};
-const ROLE_CFG={customer:{emoji:"🍺",label:"お客",color:C.blue,bg:C.bL,bd:C.blue+"33"},driver:{emoji:"🚗",label:"運転手",color:C.accent,bg:C.aL,bd:C.accent+"33"}};
-
-/* 都道府県 */
 const PREFS=["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+const RC={customer:{emoji:"🍺",label:"お客",color:C.blue,bg:C.bL,bd:C.blue+"33",grad:"135deg,#2979FF,#1565C0"},driver:{emoji:"🚗",label:"運転手",color:C.accent,bg:C.aL,bd:C.accent+"33",grad:"135deg,#FF6B00,#FF3D00"}};
+const REACTIONS=[{key:"fire",emoji:"🔥"},{key:"agree",emoji:"💪"},{key:"funny",emoji:"😂"},{key:"heart",emoji:"❤️"}];
+const DEFAULT_CO=[{id:"daikounaw",name:"代行なう運転代行",phone:"050-1724-3179",line:"https://line.me/ti/p/~kuikkusutsa",pref:"福岡県",area:"那珂川市・福岡市南区・春日市・大野城市・太宰府市",hours:"21:00〜翌6:00",baseFare:2000,perKm:500,campaign:"初乗り無料（4km以上）＋LINE登録¥500引",featured:true}];
+const iS={width:"100%",background:"#131318",border:"1px solid #24242e",borderRadius:12,padding:"10px 14px",color:"#efefef",fontSize:14,outline:"none",fontFamily:"'Noto Sans JP',sans-serif",marginBottom:8};
 
-const DEFAULT_COMPANIES=[{id:"daikounaw",name:"代行なう運転代行",phone:"050-1724-3179",line:"https://lin.ee/kuikkusutaa",lineId:"kuikkusutaa",pref:"福岡県",area:"那珂川市・福岡市南区・春日市・大野城市・太宰府市 他",hours:"21:00〜翌6:00",baseFare:2000,perKm:500,campaign:"初乗り無料（4km以上）＋LINE登録で¥500引き",web:"https://daikounaw.com",featured:true,addedAt:0}];
+// 匿名ユーザーID
+function getUid(){let id=LS.get("uid",null);if(!id){id=Math.random().toString(36).slice(2,10);LS.set("uid",id);}return id;}
 
-/* ═══════ 🏠 ホーム ═══════ */
-function HomeScreen({companies,goTo}){
-  const[km,setKm]=useState("");
-  const[from,setFrom]=useState("");
-  const[to,setTo]=useState("");
-  const[showResult,setShowResult]=useState(false);
-  const[prefFilter,setPrefFilter]=useState("すべて");
-  const[searchText,setSearchText]=useState("");
-  const kmNum=parseFloat(km);
+/* ═══ ⚔️ バトル掲示板 ═══ */
+function BattleScreen(){
+  const uid=getUid();
+  const[role,setRole]=useState(()=>LS.get("role",null));
+  const[posts,setPosts]=useState(()=>LS.get("bp",[]));
+  const[composeOpen,setComposeOpen]=useState(false);
+  const[composeText,setComposeText]=useState("");
+  const[filter,setFilter]=useState("hot");
+  const[replyTo,setReplyTo]=useState(null);
+  const[replyText,setReplyText]=useState("");
+  useEffect(()=>{LS.set("bp",posts);},[posts]);
 
-  const openGMap=()=>{if(from&&to)window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`,"_blank");};
+  const pickRole=(r)=>{setRole(r);LS.set("role",r);};
 
-  const filteredCompanies=useMemo(()=>{
-    let list=companies;
-    if(prefFilter!=="すべて") list=list.filter(c=>c.pref===prefFilter);
-    if(searchText.trim()) list=list.filter(c=>c.name.includes(searchText)||c.area.includes(searchText)||c.pref===searchText);
+  const submitPost=()=>{if(!composeText.trim()||!role)return;setPosts(prev=>[{id:"p"+Date.now(),role,uid,text:composeText.trim(),time:Date.now(),reactions:{},reactedBy:{},replies:[]},...prev]);setComposeText("");setComposeOpen(false);};
+
+  const react=(pid,key)=>{if(!role){return;}setPosts(prev=>prev.map(p=>{
+    if(p.id!==pid)return p;
+    const rb={...(p.reactedBy||{})};const rs={...(p.reactions||{})};
+    const prev_key=rb[uid];
+    if(prev_key===key){delete rb[uid];rs[key]=Math.max(0,(rs[key]||1)-1);}
+    else{if(prev_key){rs[prev_key]=Math.max(0,(rs[prev_key]||1)-1);}rb[uid]=key;rs[key]=(rs[key]||0)+1;}
+    return{...p,reactions:rs,reactedBy:rb};
+  }));};
+
+  const submitReply=(pid)=>{if(!replyText.trim()||!role)return;setPosts(prev=>prev.map(p=>p.id===pid?{...p,replies:[...(p.replies||[]),{id:"r"+Date.now(),role,uid,text:replyText.trim(),time:Date.now()}]}:p));setReplyText("");setReplyTo(null);};
+
+  const totalR=p=>Object.values(p.reactions||{}).reduce((a,v)=>a+v,0);
+  const sorted=useMemo(()=>{
+    let list=[...posts];
+    if(filter==="hot")list.sort((a,b)=>totalR(b)-totalR(a));
+    else if(filter==="new")list.sort((a,b)=>b.time-a.time);
+    else list=list.filter(p=>p.role===filter).sort((a,b)=>b.time-a.time);
     return list;
-  },[companies,prefFilter,searchText]);
+  },[posts,filter]);
+  const stats=useMemo(()=>({c:posts.filter(p=>p.role==="customer").length,d:posts.filter(p=>p.role==="driver").length}),[posts]);
 
-  const usedPrefs=useMemo(()=>[...new Set(companies.map(c=>c.pref))].sort(),[companies]);
-
-  return(
-<div style={{paddingBottom:80}}>
-{/* ヘッダー */}
-<div style={{padding:"16px",background:"linear-gradient(160deg,#1a0800,#0d0400,#060609)",borderBottom:`1px solid ${C.accent}33`}}>
-  <div style={{textAlign:"center",marginBottom:8}}>
-    <span style={{fontWeight:900,fontSize:22}}>代行</span><span style={{fontWeight:900,fontSize:22,color:C.accent}}>なう</span>
-  </div>
-  <div style={{textAlign:"center",fontSize:13,color:C.t2,lineHeight:1.7,marginBottom:12}}>全国の運転代行プラットフォーム<br/><span style={{color:C.green,fontWeight:700}}>どの代行業者でも無料で掲載OK</span></div>
-  <div style={{display:"flex",gap:8}}>
-    <button onClick={()=>goTo("register")} style={{flex:1,padding:"12px 0",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:14,fontWeight:900,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>＋ 無料で業者掲載</button>
-  </div>
-</div>
-
-{/* 料金比較 */}
-<div style={{padding:"14px 16px 0"}}>
-  <div style={{fontSize:18,fontWeight:900,marginBottom:2}}>📏 料金比較</div>
-  <div style={{fontSize:12,color:C.t2,marginBottom:12}}>距離を入力して各業者の料金を比較</div>
-
-  {/* 距離入力 */}
-  <div style={{background:C.s2,borderRadius:16,padding:"14px",border:`1px solid ${C.b2}`,marginBottom:10}}>
-    <div style={{fontSize:11,color:C.accent,fontWeight:700,marginBottom:6}}>距離（km）を入力</div>
-    <div style={{display:"flex",alignItems:"center",gap:8}}>
-      <input value={km} onChange={e=>{setKm(e.target.value);setShowResult(false);}} type="number" inputMode="decimal" placeholder="例：5" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:12,padding:"12px 14px",color:C.text,fontSize:20,fontWeight:700,outline:"none",fontFamily:"inherit",textAlign:"center"}}/>
-      <span style={{fontSize:16,color:C.t2,fontWeight:700}}>km</span>
-    </div>
-    <div style={{fontSize:11,color:C.t3,marginTop:6,textAlign:"center"}}>Googleマップで距離を調べて入力してください</div>
-  </div>
-
-  {/* Googleマップで調べる */}
-  <div style={{background:C.s2,borderRadius:16,padding:"12px 14px",border:`1px solid ${C.b2}`,marginBottom:10}}>
-    <div style={{fontSize:11,color:C.blue,fontWeight:700,marginBottom:6}}>🗺️ Googleマップで距離を調べる</div>
-    <div style={{display:"flex",gap:6,marginBottom:6}}>
-      <input value={from} onChange={e=>setFrom(e.target.value)} placeholder="出発地" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 10px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
-      <span style={{color:C.t3,alignSelf:"center"}}>→</span>
-      <input value={to} onChange={e=>setTo(e.target.value)} placeholder="目的地" style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 10px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
-    </div>
-    <button onClick={openGMap} disabled={!from||!to} style={{width:"100%",padding:"10px 0",background:from&&to?"rgba(26,115,232,.15)":"#1a1a1a",color:from&&to?"#4A90FF":"#555",border:from&&to?`1px solid rgba(74,144,255,.4)`:`1px solid ${C.b2}`,borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>🗺️ Googleマップを開く</button>
-  </div>
-
-  <button onClick={()=>setShowResult(true)} disabled={!kmNum||kmNum<=0} style={{width:"100%",padding:"14px 0",background:kmNum>0?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#222",color:kmNum>0?"#000":"#555",border:"none",borderRadius:14,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",marginBottom:14}}>📏 料金を比較する</button>
-</div>
-
-{/* 比較結果 */}
-{showResult&&kmNum>0&&(
-<div style={{padding:"0 16px 14px",animation:"fadeIn .3s ease"}}>
-  <div style={{background:"linear-gradient(135deg,rgba(255,107,0,.08),rgba(255,61,0,.03))",borderRadius:18,padding:14,border:`1px solid rgba(255,107,0,.25)`,marginBottom:10}}>
-    <div style={{fontSize:14,color:C.accent,fontWeight:800,marginBottom:10}}>📊 {kmNum}km の料金比較 ({filteredCompanies.length}社)</div>
-    {filteredCompanies.length===0&&<div style={{textAlign:"center",padding:"20px 0",color:C.t3,fontSize:13}}>該当する業者がありません</div>}
-    {[...filteredCompanies].sort((a,b)=>(a.baseFare+Math.ceil(kmNum)*a.perKm)-(b.baseFare+Math.ceil(kmNum)*b.perKm)).map((co,i)=>{
-      const fare=co.baseFare+Math.ceil(kmNum)*co.perKm;
-      return(
-        <div key={co.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:`1px solid ${C.border}`,animation:`slideUp .2s ease ${i*.03}s both`}}>
-          <div style={{width:26,textAlign:"center",fontSize:i===0?16:13,fontWeight:900,color:i===0?C.gold:i===1?"#C0C0C0":i===2?"#CD7F32":C.t3,flexShrink:0}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}`}</div>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:14,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{co.name}</div>
-            <div style={{fontSize:10,color:C.t2}}>{co.pref} · {co.area}</div>
-            {co.campaign&&<div style={{fontSize:10,color:C.green,marginTop:1}}>🎉 {co.campaign}</div>}
-          </div>
-          <div style={{textAlign:"right",flexShrink:0}}>
-            <div style={{fontSize:20,fontWeight:900,color:C.accent}}>{fmtYen(fare)}</div>
-            <a href={`tel:${co.phone}`} style={{fontSize:10,color:C.green,fontWeight:700,textDecoration:"none"}}>📞 電話</a>
-          </div>
-        </div>
-      );
-    })}
-    <div style={{marginTop:8,fontSize:11,color:C.t3,textAlign:"center"}}>※ 料金は目安です。正確な金額は各業者にお問い合わせください</div>
-  </div>
-</div>)}
-
-{/* 業者一覧 */}
-{!showResult&&(<>
-<div style={{padding:"6px 16px 8px"}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-    <div style={{fontSize:16,fontWeight:900}}>📋 掲載業者 ({filteredCompanies.length}社)</div>
-  </div>
-
-  {/* 検索 */}
-  <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="🔍 業者名・エリアで検索" style={{width:"100%",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 14px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit",marginBottom:8}}/>
-
-  {/* 都道府県フィルター */}
-  <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:6}}>
-    <button onClick={()=>setPrefFilter("すべて")} style={{flexShrink:0,background:prefFilter==="すべて"?C.accent:"transparent",color:prefFilter==="すべて"?"#000":C.t2,border:`1px solid ${prefFilter==="すべて"?C.accent:C.b2}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>すべて</button>
-    {usedPrefs.map(p=>(<button key={p} onClick={()=>setPrefFilter(p)} style={{flexShrink:0,background:prefFilter===p?C.accent:"transparent",color:prefFilter===p?"#000":C.t2,border:`1px solid ${prefFilter===p?C.accent:C.b2}`,borderRadius:20,padding:"5px 12px",fontSize:11,fontWeight:prefFilter===p?700:400,cursor:"pointer",fontFamily:"inherit"}}>{p}</button>))}
-  </div>
-</div>
-
-{filteredCompanies.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:C.t3}}><div style={{fontSize:30,marginBottom:8}}>📋</div><div style={{fontSize:14}}>この地域にはまだ業者がありません</div><div style={{fontSize:12,marginTop:4}}>最初の掲載者になりましょう！</div></div>}
-
-{filteredCompanies.map((co,i)=>(
-<div key={co.id} style={{margin:"0 16px 10px",background:co.featured?`linear-gradient(135deg,${C.aL},${C.card})`:C.card,borderRadius:16,padding:14,border:`1px solid ${co.featured?C.accent+"44":C.b2}`,animation:`slideUp .2s ease ${i*.03}s both`}}>
-  {co.featured&&<div style={{fontSize:10,color:C.accent,fontWeight:700,marginBottom:6}}>⭐ 公式</div>}
-  <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
-    <div style={{width:44,height:44,borderRadius:12,background:`linear-gradient(135deg,${C.accent},#FF3D00)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>🚗</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontWeight:900,fontSize:15,marginBottom:3}}>{co.name}</div>
-      <div style={{fontSize:12,color:C.t2,marginBottom:1}}>📍 {co.pref} · {co.area}</div>
-      <div style={{fontSize:12,color:C.t2,marginBottom:1}}>🕐 {co.hours}</div>
-      <div style={{fontSize:13,fontWeight:700,color:C.accent}}>初乗り{fmtYen(co.baseFare)} · 1km {fmtYen(co.perKm)}</div>
-      {co.campaign&&<div style={{fontSize:11,color:C.green,fontWeight:700,marginTop:2}}>🎉 {co.campaign}</div>}
-    </div>
-  </div>
-  <div style={{display:"flex",gap:8,marginTop:10}}>
-    <a href={`tel:${co.phone}`} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"11px 0",background:"linear-gradient(135deg,#00D26A,#00a050)",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>📞 電話</a>
-    {co.line&&<a href={co.line} target="_blank" rel="noopener" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"11px 0",background:"#06C755",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>💬 LINE</a>}
-  </div>
-</div>))}
-</>)}
-</div>);
-}
-
-/* ═══════ 📋 業者登録 ═══════ */
-function RegisterScreen({companies,setCompanies,goBack}){
-  const[name,setName]=useState("");const[phone,setPhone]=useState("");const[line,setLine]=useState("");
-  const[pref,setPref]=useState("福岡県");const[area,setArea]=useState("");const[hours,setHours]=useState("");
-  const[baseFare,setBaseFare]=useState("2000");const[perKm,setPerKm]=useState("500");
-  const[campaign,setCampaign]=useState("");const[web,setWeb]=useState("");const[done,setDone]=useState(false);
-  const anonId=getAnonId();
-  const submit=()=>{
-    if(!name.trim()||!phone.trim())return;
-    const newCo={id:"co_"+Date.now(),name:name.trim(),phone:phone.trim(),line:line.trim()||null,pref,area:area.trim()||pref,hours:hours.trim()||"未設定",baseFare:parseInt(baseFare)||2000,perKm:parseInt(perKm)||500,campaign:campaign.trim()||null,web:web.trim()||null,featured:false,addedAt:Date.now(),ownerId:anonId};
-    setCompanies(prev=>{const n=[...prev,newCo];LS.set("companies",n);return n;});
-    setDone(true);
+  const share=(p)=>{
+    const rc=RC[p.role];
+    const text=`${rc.emoji}${rc.label}「${p.text.slice(0,60)}」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう #運転代行\nhttps://daikounaw.com`;
+    if(navigator.share)navigator.share({text}).catch(()=>{});
+    else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,"_blank");
   };
-  const deleteCompany=(id)=>{if(!confirm("削除しますか？"))return;setCompanies(prev=>{const n=prev.filter(c=>c.id!==id);LS.set("companies",n);return n;});};
-  const myCompanies=companies.filter(c=>c.ownerId===anonId);
-  const iS={width:"100%",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 14px",color:C.text,fontSize:14,outline:"none",fontFamily:"inherit",marginBottom:8};
-  const selS={...iS,appearance:"none",WebkitAppearance:"none"};
 
-  if(done)return(
+  // 立場選択（初回のみ）
+  if(!role)return(
 <div style={{paddingBottom:80}}>
-  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}><button onClick={goBack} style={{background:"none",border:"none",color:C.t2,fontSize:18,cursor:"pointer",padding:0}}>←</button><span style={{fontWeight:900,fontSize:16}}>掲載完了</span></div>
-  <div style={{padding:"50px 20px",textAlign:"center",animation:"fadeIn .3s ease"}}>
-    <div style={{fontSize:50,marginBottom:12}}>🎉</div>
-    <div style={{fontSize:20,fontWeight:900,marginBottom:6}}>掲載完了！</div>
-    <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:20}}>「{name}」が代行なうに掲載されました。</div>
-    <button onClick={goBack} style={{padding:"14px 32px",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:14,fontWeight:900,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>🏠 ホームに戻る</button>
+  <div style={{padding:"40px 20px",textAlign:"center"}}>
+    <div style={{fontSize:50,marginBottom:8}}>⚔️</div>
+    <div style={{marginBottom:4}}><span style={{fontWeight:900,fontSize:24}}>代行</span><span style={{fontWeight:900,fontSize:24,color:C.accent}}>なう</span></div>
+    <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:30}}>お客 vs 運転手<br/>匿名バトル掲示板</div>
+    <div style={{fontSize:15,fontWeight:700,marginBottom:14}}>あなたの立場は？</div>
+    <div style={{display:"flex",gap:12,maxWidth:320,margin:"0 auto"}}>
+      <button onClick={()=>pickRole("customer")} style={{flex:1,padding:"24px 0",background:`linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04))`,border:`2px solid ${C.blue}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}>
+        <div style={{fontSize:40,marginBottom:6}}>🍺</div>
+        <div style={{fontSize:18,fontWeight:900,color:C.blue}}>お客</div>
+      </button>
+      <button onClick={()=>pickRole("driver")} style={{flex:1,padding:"24px 0",background:`linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04))`,border:`2px solid ${C.accent}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}>
+        <div style={{fontSize:40,marginBottom:6}}>🚗</div>
+        <div style={{fontSize:18,fontWeight:900,color:C.accent}}>運転手</div>
+      </button>
+    </div>
+    <div style={{fontSize:11,color:C.t3,marginTop:16}}>匿名です · あとから変更OK</div>
   </div>
 </div>);
 
+  const rc=RC[role];
+
   return(
 <div style={{paddingBottom:80}}>
-  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:10}}><button onClick={goBack} style={{background:"none",border:"none",color:C.t2,fontSize:18,cursor:"pointer",padding:0}}>←</button><span style={{fontWeight:900,fontSize:16}}>＋ 無料で業者掲載</span></div>
 
-  {myCompanies.length>0&&(
-  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
-    <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:8}}>あなたの掲載中の業者</div>
-    {myCompanies.map(co=>(<div key={co.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:`1px solid ${C.border}`}}><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{co.name}</div><div style={{fontSize:11,color:C.t2}}>{co.pref} · {co.phone}</div></div><button onClick={()=>deleteCompany(co.id)} style={{background:C.rL,border:`1px solid ${C.red}33`,borderRadius:8,padding:"4px 10px",color:C.red,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>削除</button></div>))}
+  {/* VS スコア */}
+  <div style={{padding:"14px 16px 10px",background:"linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609)",borderBottom:`1px solid ${C.purple}33`}}>
+    <div style={{display:"flex",alignItems:"center",marginBottom:6}}>
+      <div style={{flex:1,textAlign:"center"}}>
+        <div style={{fontSize:30,fontWeight:900,color:C.blue,animation:"countUp .4s ease"}}>{stats.c}</div>
+        <div style={{fontSize:12,fontWeight:900,color:C.blue}}>🍺 お客</div>
+      </div>
+      <div style={{fontSize:28,fontWeight:900,color:C.purple,animation:"vs 2.5s ease infinite",padding:"0 10px"}}>⚔️</div>
+      <div style={{flex:1,textAlign:"center"}}>
+        <div style={{fontSize:30,fontWeight:900,color:C.accent,animation:"countUp .4s ease"}}>{stats.d}</div>
+        <div style={{fontSize:12,fontWeight:900,color:C.accent}}>🚗 運転手</div>
+      </div>
+    </div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      <span style={{fontSize:11,color:C.t2}}>あなた:</span>
+      <span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:rc.bg,color:rc.color,border:`1px solid ${rc.bd}`}}>{rc.emoji} {rc.label}</span>
+      <button onClick={()=>{setRole(null);LS.set("role",null);}} style={{background:"none",border:`1px solid ${C.b2}`,borderRadius:8,padding:"2px 8px",color:C.t3,fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>変更</button>
+    </div>
+  </div>
+
+  {/* フィルター */}
+  <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,position:"sticky",top:46,zIndex:40,background:C.s1}}>
+    {[{id:"hot",l:"🔥 注目"},{id:"new",l:"🆕 新着"},{id:"customer",l:"🍺"},{id:"driver",l:"🚗"}].map(f=>(
+      <button key={f.id} onClick={()=>setFilter(f.id)} style={{flex:1,padding:"9px 0",border:"none",borderBottom:filter===f.id?`2px solid ${C.accent}`:"2px solid transparent",background:"transparent",color:filter===f.id?C.text:C.t3,fontSize:12,fontWeight:filter===f.id?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f.l}</button>
+    ))}
+  </div>
+
+  {/* 投稿フォーム */}
+  {composeOpen&&(
+  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}>
+    <textarea value={composeText} onChange={e=>setComposeText(e.target.value)} placeholder={role==="customer"?"お客の本音を投稿…":"運転手の本音を投稿…"} rows={3} style={{width:"100%",background:C.card,border:`1px solid ${C.b2}`,borderRadius:14,padding:"12px 14px",color:C.text,fontSize:15,outline:"none",resize:"none",fontFamily:"inherit",marginBottom:6}}/>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <span style={{fontSize:11,color:C.t3}}>{rc.emoji} {rc.label}として投稿</span>
+      <div style={{display:"flex",gap:6}}>
+        <button onClick={()=>{setComposeOpen(false);setComposeText("");}} style={{padding:"8px 14px",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:10,color:C.t2,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>取消</button>
+        <button onClick={submitPost} disabled={!composeText.trim()} style={{padding:"8px 18px",background:composeText.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:composeText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>投稿🔥</button>
+      </div>
+    </div>
   </div>)}
 
-  <div style={{padding:16}}>
-    <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:16}}>代行なうに<span style={{color:C.green,fontWeight:700}}>完全無料</span>で掲載。<br/>全国のお客様が料金比較して直接電話します。</div>
+  {/* 投稿一覧 */}
+  {sorted.length===0&&(
+  <div style={{textAlign:"center",padding:"50px 20px"}}>
+    <div style={{fontSize:50,marginBottom:10}}>⚔️</div>
+    <div style={{fontSize:16,fontWeight:900,marginBottom:6}}>まだバトルが始まっていません</div>
+    <div style={{fontSize:13,color:C.t2}}>最初の投稿で火をつけよう🔥</div>
+  </div>)}
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>業者名 <span style={{color:C.red}}>*</span></div>
-    <input value={name} onChange={e=>setName(e.target.value)} placeholder="例：○○運転代行" style={iS}/>
+  {sorted.map((p,idx)=>{
+    const prc=RC[p.role];const isMe=p.uid===uid;
+    const myReact=(p.reactedBy||{})[uid];
+    const hot=totalR(p)>=3;
+    return(
+    <div key={p.id} style={{padding:"14px 16px",borderBottom:`1px solid ${C.border}`,animation:`slideUp .15s ease ${Math.min(idx,10)*.02}s both`}}>
+      <div style={{display:"flex",gap:10}}>
+        <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(${prc.grad})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,boxShadow:hot?`0 0 12px ${prc.color}44`:undefined}}>{prc.emoji}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+            <span style={{fontSize:12,padding:"2px 8px",borderRadius:8,fontWeight:700,background:prc.bg,color:prc.color,border:`1px solid ${prc.bd}`}}>{prc.label}</span>
+            {hot&&<span style={{fontSize:10,padding:"1px 6px",borderRadius:6,fontWeight:700,background:C.rL,color:C.red,border:`1px solid ${C.red}33`,animation:"fire .8s ease infinite"}}>🔥炎上</span>}
+            {isMe&&<span style={{fontSize:10,color:C.t3}}>あなた</span>}
+            <span style={{fontSize:10,color:C.t3,marginLeft:"auto"}}>{ago(p.time)}</span>
+          </div>
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>電話番号 <span style={{color:C.red}}>*</span></div>
-    <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="例：090-1234-5678" type="tel" style={iS}/>
+          <div style={{fontSize:15,color:"#ddd",lineHeight:1.75,marginBottom:8,wordBreak:"break-word"}}>{p.text}</div>
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>LINE URL（任意）</div>
-    <input value={line} onChange={e=>setLine(e.target.value)} placeholder="例：https://lin.ee/xxxxx" style={iS}/>
+          {/* リプライ */}
+          {(p.replies||[]).length>0&&(
+          <div style={{marginBottom:8,marginLeft:6,borderLeft:`2px solid ${C.b2}`,paddingLeft:10}}>
+            {p.replies.slice(-3).map(r=>{const rrc=RC[r.role];return(
+              <div key={r.id} style={{marginBottom:5}}>
+                <span style={{fontSize:10,padding:"1px 5px",borderRadius:5,fontWeight:700,background:rrc.bg,color:rrc.color}}>{rrc.emoji}</span>
+                <span style={{fontSize:13,color:C.t2,marginLeft:6}}>{r.text}</span>
+              </div>
+            );})}
+            {p.replies.length>3&&<div style={{fontSize:11,color:C.t3}}>他{p.replies.length-3}件</div>}
+          </div>)}
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>都道府県 <span style={{color:C.red}}>*</span></div>
-    <select value={pref} onChange={e=>setPref(e.target.value)} style={selS}>
-      {PREFS.map(p=><option key={p} value={p}>{p}</option>)}
-    </select>
+          {/* リアクション */}
+          <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
+            {REACTIONS.map(rx=>{
+              const count=(p.reactions||{})[rx.key]||0;
+              const active=myReact===rx.key;
+              return(
+              <button key={rx.key} onClick={()=>react(p.id,rx.key)} style={{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",background:active?`${prc.color}15`:"transparent",border:`1px solid ${active?prc.color+"44":C.b2}`,borderRadius:20,fontSize:12,color:active?prc.color:C.t3,cursor:"pointer",fontFamily:"inherit",fontWeight:active?700:400}}>
+                {rx.emoji}{count>0&&<span style={{fontSize:11}}>{count}</span>}
+              </button>);
+            })}
+            <button onClick={()=>setReplyTo(replyTo===p.id?null:p.id)} style={{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",background:"transparent",border:`1px solid ${replyTo===p.id?C.blue+"44":C.b2}`,borderRadius:20,fontSize:12,color:replyTo===p.id?C.blue:C.t3,cursor:"pointer",fontFamily:"inherit"}}>
+              💬{(p.replies||[]).length>0&&` ${p.replies.length}`}
+            </button>
+            <button onClick={()=>share(p)} style={{padding:"4px 10px",background:"transparent",border:`1px solid ${C.b2}`,borderRadius:20,fontSize:12,color:C.t3,cursor:"pointer",fontFamily:"inherit"}}>📤</button>
+            {isMe&&<button onClick={()=>setPosts(prev=>prev.filter(x=>x.id!==p.id))} style={{padding:"4px 8px",background:"transparent",border:`1px solid ${C.b2}`,borderRadius:20,fontSize:11,color:C.t3,cursor:"pointer",fontFamily:"inherit",marginLeft:"auto"}}>🗑</button>}
+          </div>
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>対応エリア（詳細）</div>
-    <input value={area} onChange={e=>setArea(e.target.value)} placeholder="例：博多・天神・中洲" style={iS}/>
+          {/* リプライ入力 */}
+          {replyTo===p.id&&(
+          <div style={{marginTop:8,display:"flex",gap:6,animation:"fadeIn .15s ease"}}>
+            <input value={replyText} onChange={e=>setReplyText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")submitReply(p.id);}} placeholder="返信..." style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+            <button onClick={()=>submitReply(p.id)} disabled={!replyText.trim()} style={{padding:"8px 14px",background:replyText.trim()?C.accent:"#333",color:replyText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>送信</button>
+          </div>)}
+        </div>
+      </div>
+    </div>);})}
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>営業時間</div>
-    <input value={hours} onChange={e=>setHours(e.target.value)} placeholder="例：21:00〜翌5:00" style={iS}/>
+  {/* 投稿ボタン */}
+  <button onClick={()=>setComposeOpen(!composeOpen)} style={{position:"fixed",bottom:72,right:Math.max(16,(window.innerWidth-480)/2+16),width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",border:"none",color:"#000",fontSize:24,cursor:"pointer",boxShadow:"0 4px 20px rgba(255,107,0,.4)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center",animation:"ctaPulse 2.5s ease infinite"}}>✏️</button>
+</div>);
+}
 
+/* ═══ 🚗 業者一覧 ═══ */
+function CompanyScreen(){
+  const[companies]=useState(()=>LS.get("companies",null)||DEFAULT_CO);
+  const[km,setKm]=useState("");const[pf,setPf]=useState("すべて");const[q,setQ]=useState("");
+  const[showR,setShowR]=useState(false);const kmN=parseFloat(km);
+  const fc=useMemo(()=>{let l=companies;if(pf!=="すべて")l=l.filter(c=>c.pref===pf);if(q.trim())l=l.filter(c=>c.name.includes(q)||c.area.includes(q));return l;},[companies,pf,q]);
+  const prefs=useMemo(()=>[...new Set(companies.map(c=>c.pref))].sort(),[companies]);
+
+  // 業者登録
+  const[regOpen,setRegOpen]=useState(false);
+  const[rName,setRName]=useState("");const[rPhone,setRPhone]=useState("");const[rLine,setRLine]=useState("");
+  const[rPref,setRPref]=useState("福岡県");const[rArea,setRArea]=useState("");const[rHours,setRHours]=useState("");
+  const[rBase,setRBase]=useState("2000");const[rPer,setRPer]=useState("500");const[rCamp,setRCamp]=useState("");
+  const[rDone,setRDone]=useState(false);
+
+  const submitReg=()=>{
+    if(!rName.trim()||!rPhone.trim())return;
+    const cos=LS.get("companies",null)||DEFAULT_CO;
+    const c={id:"co_"+Date.now(),name:rName.trim(),phone:rPhone.trim(),line:rLine.trim()||null,pref:rPref,area:rArea.trim()||rPref,hours:rHours.trim()||"未設定",baseFare:parseInt(rBase)||2000,perKm:parseInt(rPer)||500,campaign:rCamp.trim()||null,featured:false};
+    LS.set("companies",[...cos,c]);
+    setRDone(true);
+  };
+
+  return(
+<div style={{paddingBottom:80}}>
+  <div style={{padding:"14px 16px",borderBottom:`1px solid ${C.border}`}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{fontSize:18,fontWeight:900}}>🚗 代行業者</div>
+      <button onClick={()=>{setRegOpen(!regOpen);setRDone(false);}} style={{padding:"6px 12px",background:regOpen?C.s2:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:regOpen?C.t2:"#000",border:regOpen?`1px solid ${C.b2}`:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>{regOpen?"閉じる":"＋ 無料掲載"}</button>
+    </div>
+
+    {/* 料金比較 */}
+    <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:8}}>
+      <input value={km} onChange={e=>{setKm(e.target.value);setShowR(false);}} type="number" inputMode="decimal" placeholder="距離km" style={{...iS,flex:1,marginBottom:0,textAlign:"center"}}/>
+      <button onClick={()=>setShowR(true)} disabled={!kmN} style={{padding:"10px 16px",background:kmN?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#222",color:kmN?"#000":"#555",border:"none",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>比較</button>
+    </div>
+
+    {/* 検索 */}
+    <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 検索" style={{...iS,fontSize:12}}/>
+    <div style={{display:"flex",gap:5,overflowX:"auto"}}>
+      <button onClick={()=>setPf("すべて")} style={{flexShrink:0,background:pf==="すべて"?C.accent:"transparent",color:pf==="すべて"?"#000":C.t2,border:`1px solid ${pf==="すべて"?C.accent:C.b2}`,borderRadius:20,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>全国</button>
+      {prefs.map(p=>(<button key={p} onClick={()=>setPf(p)} style={{flexShrink:0,background:pf===p?C.accent:"transparent",color:pf===p?"#000":C.t2,border:`1px solid ${pf===p?C.accent:C.b2}`,borderRadius:20,padding:"4px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>{p}</button>))}
+    </div>
+  </div>
+
+  {/* 業者登録フォーム */}
+  {regOpen&&!rDone&&(
+  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}>
+    <div style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:8}}>無料で業者掲載</div>
+    <input value={rName} onChange={e=>setRName(e.target.value)} placeholder="業者名 *" style={iS}/>
+    <input value={rPhone} onChange={e=>setRPhone(e.target.value)} placeholder="電話番号 *" type="tel" style={iS}/>
+    <input value={rLine} onChange={e=>setRLine(e.target.value)} placeholder="LINE URL（任意）" style={iS}/>
+    <select value={rPref} onChange={e=>setRPref(e.target.value)} style={{...iS,appearance:"none"}}>{PREFS.map(p=><option key={p}>{p}</option>)}</select>
+    <input value={rArea} onChange={e=>setRArea(e.target.value)} placeholder="対応エリア" style={iS}/>
+    <input value={rHours} onChange={e=>setRHours(e.target.value)} placeholder="営業時間 例:21:00〜翌5:00" style={iS}/>
     <div style={{display:"flex",gap:8}}>
-      <div style={{flex:1}}><div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>初乗り（円）</div><input value={baseFare} onChange={e=>setBaseFare(e.target.value)} type="number" style={iS}/></div>
-      <div style={{flex:1}}><div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>1kmあたり（円）</div><input value={perKm} onChange={e=>setPerKm(e.target.value)} type="number" style={iS}/></div>
+      <input value={rBase} onChange={e=>setRBase(e.target.value)} type="number" placeholder="初乗り円" style={{...iS,flex:1}}/>
+      <input value={rPer} onChange={e=>setRPer(e.target.value)} type="number" placeholder="1km円" style={{...iS,flex:1}}/>
     </div>
+    <input value={rCamp} onChange={e=>setRCamp(e.target.value)} placeholder="キャンペーン（任意）" style={iS}/>
+    <button onClick={submitReg} disabled={!rName||!rPhone} style={{width:"100%",padding:"13px 0",background:rName&&rPhone?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:rName&&rPhone?"#000":"#666",border:"none",borderRadius:14,fontWeight:900,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>✅ 掲載する（無料）</button>
+  </div>)}
+  {regOpen&&rDone&&(
+  <div style={{padding:"20px 16px",textAlign:"center",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}>
+    <div style={{fontSize:30,marginBottom:6}}>🎉</div>
+    <div style={{fontSize:16,fontWeight:900}}>掲載完了！</div>
+    <div style={{fontSize:12,color:C.t2,marginTop:4}}>ページを再読み込みすると反映されます</div>
+  </div>)}
 
-    <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:4}}>キャンペーン（任意）</div>
-    <input value={campaign} onChange={e=>setCampaign(e.target.value)} placeholder="例：初乗り無料！LINE登録で割引" style={iS}/>
+  {/* 料金比較結果 */}
+  {showR&&kmN>0&&(
+  <div style={{padding:"10px 16px",animation:"fadeIn .2s ease"}}>
+    <div style={{fontSize:13,color:C.accent,fontWeight:800,marginBottom:8}}>📊 {kmN}km 料金ランキング</div>
+    {[...fc].sort((a,b)=>(a.baseFare+Math.ceil(kmN)*a.perKm)-(b.baseFare+Math.ceil(kmN)*b.perKm)).map((co,i)=>(
+      <div key={co.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
+        <span style={{width:22,textAlign:"center",fontSize:i<3?14:12,fontWeight:900,color:i===0?C.gold:i===1?"#C0C0C0":i===2?"#CD7F32":C.t3}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}`}</span>
+        <div style={{flex:1}}><span style={{fontSize:13,fontWeight:700}}>{co.name}</span></div>
+        <span style={{fontSize:18,fontWeight:900,color:C.accent}}>{fmtYen(co.baseFare+Math.ceil(kmN)*co.perKm)}</span>
+      </div>
+    ))}
+  </div>)}
 
-    <button onClick={submit} disabled={!name.trim()||!phone.trim()} style={{width:"100%",padding:"16px 0",background:name&&phone?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:name&&phone?"#000":"#666",border:"none",borderRadius:14,fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",marginTop:8}}>✅ 無料で掲載する</button>
-    <div style={{fontSize:11,color:C.t3,textAlign:"center",marginTop:12,lineHeight:1.7}}>※ 掲載は完全無料・手数料なし<br/>※ お客様から直接電話が来ます</div>
-  </div>
-</div>);
-}
-
-/* ═══════ ⚔️ バトル ═══════ */
-function BattleScreen(){
-  const[posts,setPosts]=useState(()=>LS.get("battlePosts",[]));
-  const[myRole,setMyRole]=useState(()=>LS.get("myRole",null));
-  const[composeOpen,setComposeOpen]=useState(false);const[composeText,setComposeText]=useState("");
-  const[filter,setFilter]=useState("all");const[replyTo,setReplyTo]=useState(null);const[replyText,setReplyText]=useState("");
-  const anonId=getAnonId();
-  useEffect(()=>{LS.set("battlePosts",posts);},[posts]);
-  const submitPost=()=>{if(!composeText.trim()||!myRole)return;setPosts(prev=>[{id:"bp_"+Date.now(),role:myRole,text:composeText.trim(),time:Date.now(),likes:0,likedBy:[],replies:[],authorId:anonId},...prev]);setComposeText("");setComposeOpen(false);};
-  const submitReply=(pid)=>{if(!replyText.trim()||!myRole)return;setPosts(prev=>prev.map(p=>p.id===pid?{...p,replies:[...p.replies,{id:"re_"+Date.now(),role:myRole,text:replyText.trim(),time:Date.now(),authorId:anonId}]}:p));setReplyText("");setReplyTo(null);};
-  const toggleLike=(pid)=>{setPosts(prev=>prev.map(p=>{if(p.id!==pid)return p;const liked=p.likedBy.includes(anonId);return{...p,likes:liked?p.likes-1:p.likes+1,likedBy:liked?p.likedBy.filter(x=>x!==anonId):[...p.likedBy,anonId]};}));};
-  const deletePost=(pid)=>{setPosts(prev=>prev.filter(p=>p.id!==pid));};
-  const selectRole=(r)=>{setMyRole(r);LS.set("myRole",r);};
-  const filtered=useMemo(()=>filter==="all"?posts:posts.filter(p=>p.role===filter),[posts,filter]);
-  const stats=useMemo(()=>({cN:posts.filter(p=>p.role==="customer").length,dN:posts.filter(p=>p.role==="driver").length,cL:posts.filter(p=>p.role==="customer").reduce((a,p)=>a+p.likes,0),dL:posts.filter(p=>p.role==="driver").reduce((a,p)=>a+p.likes,0)}),[posts]);
-
-  if(!myRole)return(
-<div style={{paddingBottom:80}}><div style={{padding:"40px 20px",textAlign:"center"}}>
-  <div style={{fontSize:50,marginBottom:12}}>⚔️</div>
-  <div style={{fontSize:22,fontWeight:900,marginBottom:6}}>バトル掲示板</div>
-  <div style={{fontSize:13,color:C.t2,lineHeight:1.7,marginBottom:28}}>お客 vs 運転手<br/>全国の利用者が匿名で投稿！</div>
-  <div style={{display:"flex",gap:12}}>
-    <button onClick={()=>selectRole("customer")} style={{flex:1,padding:"24px 0",background:"linear-gradient(135deg,rgba(74,144,255,.15),rgba(74,144,255,.05))",border:`2px solid ${C.blue}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}><div style={{fontSize:40,marginBottom:8}}>🍺</div><div style={{fontSize:18,fontWeight:900,color:C.blue}}>お客</div></button>
-    <button onClick={()=>selectRole("driver")} style={{flex:1,padding:"24px 0",background:"linear-gradient(135deg,rgba(255,107,0,.15),rgba(255,107,0,.05))",border:`2px solid ${C.accent}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}><div style={{fontSize:40,marginBottom:8}}>🚗</div><div style={{fontSize:18,fontWeight:900,color:C.accent}}>運転手</div></button>
-  </div>
-  <div style={{fontSize:11,color:C.t3,marginTop:16}}>※ 完全匿名・あとから変更可</div>
-</div></div>);
-
-  const rc=ROLE_CFG[myRole];
-  return(
-<div style={{paddingBottom:80}}>
-<div style={{padding:"12px 16px",background:"linear-gradient(135deg,rgba(170,85,255,.08),rgba(255,107,0,.05))",borderBottom:`1px solid ${C.purple}33`}}>
-  <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:8}}>
-    <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:11,color:C.blue,fontWeight:700}}>🍺 お客</div><div style={{fontSize:24,fontWeight:900,color:C.blue}}>{stats.cN}</div><div style={{fontSize:10,color:C.t2}}>❤️{stats.cL}</div></div>
-    <div style={{fontSize:22,fontWeight:900,color:C.purple,animation:"vs 2s ease infinite"}}>VS</div>
-    <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:11,color:C.accent,fontWeight:700}}>🚗 運転手</div><div style={{fontSize:24,fontWeight:900,color:C.accent}}>{stats.dN}</div><div style={{fontSize:10,color:C.t2}}>❤️{stats.dL}</div></div>
-  </div>
-  <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:rc.bg,color:rc.color,border:`1px solid ${rc.bd}`}}>{rc.emoji} {rc.label}</span><button onClick={()=>{setMyRole(null);LS.set("myRole",null);}} style={{marginLeft:"auto",background:"none",border:`1px solid ${C.b2}`,borderRadius:8,padding:"2px 8px",color:C.t3,fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>変更</button></div>
-</div>
-<div style={{display:"flex",borderBottom:`1px solid ${C.border}`,position:"sticky",top:56,zIndex:40,background:C.s1}}>
-  {[{id:"all",l:"すべて"},{id:"customer",l:"🍺 お客"},{id:"driver",l:"🚗 運転手"}].map(f=>(<button key={f.id} onClick={()=>setFilter(f.id)} style={{flex:1,padding:"9px 0",border:"none",borderBottom:filter===f.id?`2px solid ${C.accent}`:"2px solid transparent",background:"transparent",color:filter===f.id?C.accent:C.t2,fontSize:12,fontWeight:filter===f.id?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f.l}</button>))}
-</div>
-{composeOpen&&(<div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .2s ease"}}><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(${myRole==="customer"?"135deg,#2979FF,#1565C0":"135deg,#FF6B00,#FF3D00"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{rc.emoji}</div><div style={{flex:1}}><textarea value={composeText} onChange={e=>setComposeText(e.target.value)} placeholder="匿名で投稿..." rows={3} style={{width:"100%",background:C.card,border:`1px solid ${C.b2}`,borderRadius:12,padding:"10px 12px",color:C.text,fontSize:14,outline:"none",resize:"none",fontFamily:"inherit"}}/><div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:6}}><button onClick={()=>{setComposeOpen(false);setComposeText("");}} style={{padding:"8px 16px",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:10,color:C.t2,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>取消</button><button onClick={submitPost} disabled={!composeText.trim()} style={{padding:"8px 20px",background:composeText.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:composeText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>投稿</button></div></div></div></div>)}
-{filtered.length===0&&(<div style={{textAlign:"center",padding:"50px 20px",color:C.t3}}><div style={{fontSize:40,marginBottom:10}}>💬</div><div style={{fontSize:14,fontWeight:700}}>まだ投稿がありません</div></div>)}
-{filtered.map(p=>{const prc=ROLE_CFG[p.role];const isMe=p.authorId===anonId;const isLiked=p.likedBy.includes(anonId);return(
-<div key={p.id} style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`}}>
-  <div style={{display:"flex",gap:10}}>
-    <div style={{width:40,height:40,borderRadius:"50%",background:`linear-gradient(${p.role==="customer"?"135deg,#2979FF,#1565C0":"135deg,#FF6B00,#FF3D00"})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{prc.emoji}</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:prc.bg,color:prc.color,border:`1px solid ${prc.bd}`}}>{prc.emoji} {prc.label}</span>{isMe&&<span style={{fontSize:10,color:C.t3}}>（あなた）</span>}<span style={{fontSize:10,color:C.t3,marginLeft:"auto"}}>{ago(p.time)}</span></div>
-      <div style={{fontSize:14,color:"#d0d0d0",lineHeight:1.7,marginBottom:8,wordBreak:"break-word"}}>{p.text}</div>
-      {p.replies.length>0&&(<div style={{marginBottom:8,marginLeft:8,borderLeft:`2px solid ${C.b2}`,paddingLeft:10}}>{p.replies.map(r=>{const rrc=ROLE_CFG[r.role];return(<div key={r.id} style={{marginBottom:6}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:2}}><span style={{fontSize:10,padding:"1px 6px",borderRadius:6,fontWeight:700,background:rrc.bg,color:rrc.color}}>{rrc.emoji} {rrc.label}</span><span style={{fontSize:9,color:C.t3}}>{ago(r.time)}</span></div><div style={{fontSize:13,color:C.t2,lineHeight:1.6}}>{r.text}</div></div>);})}</div>)}
-      <div style={{display:"flex",gap:14,alignItems:"center"}}><button onClick={()=>toggleLike(p.id)} style={{display:"flex",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",color:isLiked?C.red:C.t3,fontSize:13,padding:0,fontFamily:"inherit"}}>{isLiked?"❤️":"🤍"}{p.likes>0&&<span>{p.likes}</span>}</button><button onClick={()=>setReplyTo(replyTo===p.id?null:p.id)} style={{display:"flex",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",color:replyTo===p.id?C.blue:C.t3,fontSize:13,padding:0,fontFamily:"inherit"}}>💬{p.replies.length>0&&<span> {p.replies.length}</span>}</button>{isMe&&<button onClick={()=>deletePost(p.id)} style={{background:"none",border:"none",cursor:"pointer",color:C.t3,fontSize:12,padding:0,fontFamily:"inherit",marginLeft:"auto"}}>🗑</button>}</div>
-      {replyTo===p.id&&(<div style={{marginTop:8,display:"flex",gap:6,animation:"fadeIn .2s ease"}}><input value={replyText} onChange={e=>setReplyText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")submitReply(p.id);}} placeholder="返信..." style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/><button onClick={()=>submitReply(p.id)} disabled={!replyText.trim()} style={{padding:"8px 14px",background:replyText.trim()?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:replyText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>送信</button></div>)}
+  {/* 業者カード */}
+  {!showR&&fc.map((co,i)=>(
+  <div key={co.id} style={{margin:"8px 16px",background:co.featured?`linear-gradient(135deg,${C.aL},${C.card})`:C.card,borderRadius:16,padding:14,border:`1px solid ${co.featured?C.accent+"44":C.b2}`,animation:`slideUp .15s ease ${i*.02}s both`}}>
+    {co.featured&&<span style={{fontSize:10,color:C.accent,fontWeight:700}}>⭐ 公式</span>}
+    <div style={{fontWeight:900,fontSize:15}}>{co.name}</div>
+    <div style={{fontSize:11,color:C.t2}}>{co.pref} · {co.area} · {co.hours}</div>
+    <div style={{fontSize:13,fontWeight:700,color:C.accent,marginTop:2}}>初乗り{fmtYen(co.baseFare)} · 1km{fmtYen(co.perKm)}</div>
+    {co.campaign&&<div style={{fontSize:11,color:C.green,fontWeight:700,marginTop:2}}>🎉 {co.campaign}</div>}
+    <div style={{display:"flex",gap:6,marginTop:8}}>
+      <a href={`tel:${co.phone}`} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"10px 0",background:"linear-gradient(135deg,#00D26A,#00a050)",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>📞 電話</a>
+      {co.line&&<a href={co.line} target="_blank" rel="noopener" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"10px 0",background:"#06C755",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>💬 LINE</a>}
     </div>
-  </div>
-</div>);})}
-<button onClick={()=>setComposeOpen(!composeOpen)} style={{position:"fixed",bottom:72,right:Math.max(16,(window.innerWidth-480)/2+16),width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",border:"none",color:"#000",fontSize:24,cursor:"pointer",boxShadow:"0 4px 20px rgba(255,107,0,.4)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}}>✏️</button>
+  </div>))}
 </div>);
 }
 
-/* ═══════ ℹ️ 案内 ═══════ */
-function InfoScreen(){
-  const[openFaq,setOpenFaq]=useState(null);
-  const faqs=[{q:"代行なうとは？",a:"全国の運転代行プラットフォームです。複数の業者を比較して直接電話・LINEで予約できます。"},{q:"掲載料はかかりますか？",a:"完全無料です。全国どの代行業者でも掲載できます。手数料も一切なし。"},{q:"料金はどう計算されますか？",a:"各業者の初乗り料金＋距離×km単価で計算。正確な料金は各業者にお問い合わせください。"},{q:"バトル掲示板とは？",a:"お客と運転手が匿名で投稿できる掲示板。感想・要望・情報交換に。"},{q:"運転代行とは？",a:"お客様に代わってお車を運転するサービス。飲酒後などに利用します。"}];
-  return(
-<div style={{paddingBottom:80}}>
-<div style={{background:"linear-gradient(160deg,#1a0800,#0d0400,#060609)",padding:"22px 16px",borderBottom:`1px solid ${C.border}`}}>
-  <div style={{fontSize:40,textAlign:"center",animation:"float 2s ease infinite"}}>🚗</div>
-  <div style={{textAlign:"center",marginTop:4}}><span style={{fontWeight:900,fontSize:24}}>代行</span><span style={{fontWeight:900,fontSize:24,color:C.accent}}>なう</span></div>
-  <div style={{textAlign:"center",fontSize:12,color:C.t2,margin:"4px 0 4px"}}>全国の運転代行プラットフォーム</div>
-  <div style={{textAlign:"center",fontSize:11,color:C.green,fontWeight:700,marginBottom:14}}>どの代行業者でも完全無料で掲載OK</div>
-</div>
-<div style={{padding:16}}>
-  <div style={{background:C.card,borderRadius:16,padding:14,border:`1px solid ${C.b2}`,marginBottom:14}}>
-    <div style={{fontSize:14,fontWeight:800,color:C.gold,marginBottom:10}}>⭐ 特徴</div>
-    {[{i:"🌏",t:"全国対応",d:"47都道府県すべての代行業者が掲載可能。"},{i:"💰",t:"完全無料",d:"掲載料・手数料は永久無料。"},{i:"📊",t:"料金比較",d:"距離を入力するだけで複数業者の料金を即時比較。"},{i:"📞",t:"直接予約",d:"お客様から業者に直接電話・LINE。中間マージンなし。"},{i:"⚔️",t:"バトル掲示板",d:"お客と運転手が匿名で自由に投稿。"}].map(({i,t,d})=>(<div key={t} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12}}><div style={{width:36,height:36,borderRadius:10,background:C.aL,border:`1px solid ${C.accent}22`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{i}</div><div><div style={{fontWeight:700,fontSize:13,marginBottom:2}}>{t}</div><div style={{fontSize:12,color:C.t2,lineHeight:1.5}}>{d}</div></div></div>))}
-  </div>
-  <div style={{background:C.card,borderRadius:16,padding:14,border:`1px solid ${C.b2}`,marginBottom:14}}>
-    <div style={{fontSize:14,fontWeight:800,color:C.blue,marginBottom:10}}>❓ よくある質問</div>
-    {faqs.map((f,i)=>(<div key={i} style={{marginBottom:6}}><button onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{width:"100%",textAlign:"left",background:openFaq===i?C.bL:C.s2,border:`1px solid ${openFaq===i?C.blue+"33":C.b2}`,borderRadius:10,padding:"10px 12px",color:C.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}><span style={{color:C.blue,fontSize:12}}>{openFaq===i?"▼":"▶"}</span>{f.q}</button>{openFaq===i&&<div style={{padding:"6px 12px 6px 28px",fontSize:12,color:C.t2,lineHeight:1.7,animation:"fadeIn .2s ease"}}>{f.a}</div>}</div>))}
-  </div>
-  <div style={{textAlign:"center",fontSize:10,color:C.t3,lineHeight:1.9}}>代行なう — 全国運転代行プラットフォーム<br/>© {new Date().getFullYear()} 代行なう</div>
-</div>
-</div>);
-}
-
-/* ═══════ App ═══════ */
-const NAV=[{id:"home",icon:"🏠",label:"ホーム"},{id:"battle",icon:"⚔️",label:"バトル"},{id:"info",icon:"ℹ️",label:"案内"}];
+/* ═══ App ═══ */
+const NAV=[{id:"battle",icon:"⚔️",label:"バトル"},{id:"company",icon:"🚗",label:"配車"}];
 function App(){
-  const[screen,setScreen]=useState("home");
-  const[companies,setCompanies]=useState(()=>{const s=LS.get("companies",null);return s||DEFAULT_COMPANIES;});
+  const[screen,setScreen]=useState("battle");
   const scrollRef=useRef(null);
   useEffect(()=>{if(scrollRef.current)scrollRef.current.scrollTop=0;},[screen]);
   return(
 <div style={{fontFamily:"'Noto Sans JP',sans-serif",background:C.bg,minHeight:"100vh",color:C.text,maxWidth:480,margin:"0 auto",display:"flex",flexDirection:"column"}}>
-  <div style={{background:C.s1,padding:"10px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,zIndex:50}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8}} onClick={()=>setScreen("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
-        <span style={{fontWeight:900,fontSize:20}}>代行</span><span style={{fontWeight:900,fontSize:20,color:C.accent}}>なう</span>
-        <span style={{fontSize:10,color:C.green,fontWeight:700,background:C.gL,padding:"3px 8px",borderRadius:10,border:`1px solid ${C.green}22`}}>{companies.length}社掲載</span>
-      </div>
-      <button onClick={()=>setScreen("register")} style={{padding:"7px 14px",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:"#000",border:"none",borderRadius:12,fontWeight:800,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>＋ 無料掲載</button>
+  <div style={{background:C.s1,padding:"8px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+    <div onClick={()=>setScreen("battle")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+      <span style={{fontWeight:900,fontSize:18}}>代行</span><span style={{fontWeight:900,fontSize:18,color:C.accent}}>なう</span>
     </div>
+    <div style={{fontSize:10,color:C.t2}}>お客 vs 運転手</div>
   </div>
   <div ref={scrollRef} style={{flex:1,overflowY:"auto"}}>
-    {(screen==="home"||screen==="companies")&&<HomeScreen companies={companies} goTo={setScreen}/>}
-    {screen==="register"&&<RegisterScreen companies={companies} setCompanies={setCompanies} goBack={()=>setScreen("home")}/>}
     {screen==="battle"&&<BattleScreen/>}
-    {screen==="info"&&<InfoScreen/>}
+    {screen==="company"&&<CompanyScreen/>}
   </div>
   <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"rgba(6,6,9,.97)",borderTop:`1px solid ${C.border}`,display:"flex",backdropFilter:"blur(16px)",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>
-    {NAV.map(n=>(<button key={n.id} onClick={()=>setScreen(n.id)} style={{flex:1,padding:"10px 0 12px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"inherit",color:screen===n.id||(n.id==="home"&&screen==="register")?C.accent:C.t3}}><span style={{fontSize:18,lineHeight:1}}>{n.icon}</span><span style={{fontSize:9,fontWeight:screen===n.id?700:400}}>{n.label}</span>{(screen===n.id||(n.id==="home"&&screen==="register"))&&<div style={{width:18,height:2,borderRadius:1,background:C.accent,marginTop:1}}/>}</button>))}
+    {NAV.map(n=>(
+      <button key={n.id} onClick={()=>setScreen(n.id)} style={{flex:1,padding:"10px 0 12px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"inherit",color:screen===n.id?C.accent:C.t3}}>
+        <span style={{fontSize:20,lineHeight:1}}>{n.icon}</span>
+        <span style={{fontSize:9,fontWeight:screen===n.id?700:400}}>{n.label}</span>
+        {screen===n.id&&<div style={{width:16,height:2,borderRadius:1,background:C.accent,marginTop:1}}/>}
+      </button>
+    ))}
   </div>
 </div>);
 }
