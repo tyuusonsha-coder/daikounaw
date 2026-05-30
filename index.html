@@ -1,366 +1,212 @@
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <meta name="theme-color" content="#060609"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#060609"/>
+<title>代行なう｜お客 vs 運転手 バトル掲示板</title>
+<meta name="description" content="全国運転代行プラットフォーム。料金比較・匿名バトル掲示板。"/>
+<link rel="canonical" href="https://daikounaw.com/"/>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAY1BMVEUAAAAGBgkMDA8SEhYYGBwfHyMlJSkrKy4xMTU3Nzo+Pj9EREdKSk1QUFJWVlhcXF5iYmRoaGpubm90dHV6ent/f4GFhYaLi4yRkZKXl5idnZmjo6Spqaavr6u1tbHBwb7R0c5GJTj3AAAAsElEQVR4Ae3MBQLDQAwEwEnMzMz//2UdV+3z7oL52X8ZXqJhCC8xYAjMHwLDG4bA+IYhML5hCExvGAKLO4bA8o4hsLr/EBjfMATmdwyB5R1DYH3HEFjfMQS2dwyB3R1D4HDHEDjeMQROdwyByx1D4HrHELjdMQTu9x8Cqxv0GGBxhR4jLG/QY4T1FXqMsb9BjzH2N+gxxv4GPcbY3xBgjIMeA0xjbKjzn3+IH6YPi/gA3ksn7QAAAABJRU5ErkJggg=="/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:#0e0e13;padding:8px 16px;border-bottom:1px solid #1c1c24;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:900;font-size:18px;cursor:pointer}.logo span{color:#FF6B00}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,9,.97);border-top:1px solid #1c1c24;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:#444;font-family:inherit}
+.nav button.on{color:#FF6B00}
+.nav button .ico{font-size:20px;line-height:1}
+.vs{padding:14px 16px 10px;background:linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609);border-bottom:1px solid rgba(170,85,255,.2)}
+.vs .row{display:flex;align-items:center;margin-bottom:6px}
+.vs .side{flex:1;text-align:center}.vs .num{font-size:30px;font-weight:900}.vs .lbl{font-size:12px;font-weight:900}
+.vs .mid{font-size:28px;font-weight:900;color:#AA55FF;padding:0 10px}
+.blue{color:#4A90FF}.org{color:#FF6B00}
+.filters{display:flex;border-bottom:1px solid #1c1c24;position:sticky;top:46px;z-index:40;background:#0e0e13}
+.filters button{flex:1;padding:9px 0;border:none;border-bottom:2px solid transparent;background:transparent;color:#444;font-size:12px;cursor:pointer;font-family:inherit}
+.filters button.on{color:#efefef;border-bottom-color:#FF6B00;font-weight:700}
+.post{padding:14px 16px;border-bottom:1px solid #1c1c24}
+.post .av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.av-c{background:linear-gradient(135deg,#2979FF,#1565C0)}.av-d{background:linear-gradient(135deg,#FF6B00,#FF3D00)}
+.tag{font-size:12px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.tag-c{background:rgba(74,144,255,.08);color:#4A90FF;border:1px solid rgba(74,144,255,.2)}
+.tag-d{background:rgba(255,107,0,.08);color:#FF6B00;border:1px solid rgba(255,107,0,.2)}
+.hot{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:700;background:rgba(255,71,87,.08);color:#FF4757;border:1px solid rgba(255,71,87,.2);display:inline-block;margin-left:6px}
+.rxn{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.rxn button{display:flex;align-items:center;gap:3px;padding:4px 10px;background:transparent;border:1px solid #24242e;border-radius:20px;font-size:12px;color:#444;cursor:pointer;font-family:inherit}
+.rxn button.on{border-color:rgba(255,107,0,.3);color:#FF6B00;font-weight:700;background:rgba(255,107,0,.06)}
+.fab{position:fixed;bottom:72px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FF6B00,#FF3D00);border:none;color:#000;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);z-index:90;display:flex;align-items:center;justify-content:center}
+.card{margin:8px 16px;background:#0c0c10;border-radius:16px;padding:14px;border:1px solid #24242e}
+.card.feat{border-color:rgba(255,107,0,.3);background:linear-gradient(135deg,rgba(255,107,0,.08),#0c0c10)}
+.btn-call{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:linear-gradient(135deg,#00D26A,#00a050);color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.btn-line{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:#06C755;color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.empty{text-align:center;padding:50px 20px;color:#444}
+.compose{padding:12px 16px;border-bottom:1px solid #1c1c24;background:#131318}
+.compose textarea{width:100%;background:#0c0c10;border:1px solid #24242e;border-radius:14px;padding:12px 14px;color:#efefef;font-size:15px;outline:none;resize:none;font-family:inherit}
+.compose .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
+.compose .acts button{padding:8px 18px;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+input[type=text],input[type=number],input[type=tel],select{width:100%;background:#131318;border:1px solid #24242e;border-radius:12px;padding:10px 14px;color:#efefef;font-size:14px;outline:none;font-family:inherit;margin-bottom:8px}
+.reply-box{display:flex;gap:6px;margin-top:8px}
+.reply-box input{flex:1;background:#0c0c10;border:1px solid #24242e;border-radius:10px;padding:8px 12px;color:#efefef;font-size:13px;outline:none;font-family:inherit}
+.reply-box button{padding:8px 14px;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+</style>
+</head><body>
+<div id="app"></div>
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+var uid=localStorage.getItem("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);localStorage.setItem("dn_uid",uid);}
+var role=localStorage.getItem("dn_role");
+var screen="battle",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+var regOpen=false,km="",pf="all",sq="";
 
-  <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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"/>
-  <title>代行なう｜全国運転代行 料金比較＆匿名バトル掲示板【お客 vs 運転手】</title>
-  <meta name="description" content="代行なうは全国対応の運転代行プラットフォーム。料金比較・業者検索・匿名バトル掲示板。お客と運転手が本音をぶつけ合う🔥"/>
-  <meta property="og:title" content="代行なう｜お客 vs 運転手 匿名バトル掲示板🔥"/>
-  <meta property="og:description" content="お客と運転手がガチで本音をぶつけ合う匿名掲示板。全国の運転代行を料金比較。業者は無料掲載OK"/>
-  <meta name="twitter:card" content="summary"/>
-  <link rel="canonical" href="https://daikounaw.com/"/>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"代行なう","url":"https://daikounaw.com","description":"全国対応の運転代行プラットフォーム。料金比較・匿名バトル掲示板。","applicationCategory":"LifestyleApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}</script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
-    html,body,#root{height:100%;}
-    body{background:#060609;font-family:'Noto Sans JP',sans-serif;color:#efefef;overscroll-behavior:none;-webkit-font-smoothing:antialiased;}
-    input,textarea,button,select{font-family:'Noto Sans JP',sans-serif;}
-    a{color:inherit;text-decoration:none;}
-    ::-webkit-scrollbar{width:0;height:0;}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes vs{0%,100%{transform:scale(1)}50%{transform:scale(1.3) rotate(-8deg)}}
-    @keyframes fire{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-    @keyframes ctaPulse{0%,100%{box-shadow:0 4px 16px rgba(255,107,0,.3)}60%{box-shadow:0 4px 28px rgba(255,107,0,.5)}}
-    @keyframes countUp{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
-</head>
-<body>
-<div id="root"></div>
-<noscript><h1>代行なう｜全国運転代行プラットフォーム</h1><p>お客 vs 運転手の匿名バトル掲示板＆全国の代行業者を料金比較。</p></noscript>
-<script type="text/babel">
-const{useState,useEffect,useMemo,useRef,useCallback}=React;
-const C={bg:"#060609",card:"#0c0c10",s1:"#0e0e13",s2:"#131318",border:"#1c1c24",b2:"#24242e",accent:"#FF6B00",aL:"rgba(255,107,0,.08)",green:"#00D26A",gL:"rgba(0,210,106,.08)",red:"#FF4757",rL:"rgba(255,71,87,.08)",blue:"#4A90FF",bL:"rgba(74,144,255,.08)",purple:"#AA55FF",gold:"#FFD700",text:"#EFEFEF",t2:"#888",t3:"#444"};
-const fmtYen=n=>`¥${Number(n).toLocaleString()}`;
-const ago=ts=>{const s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?`${Math.floor(s/60)}分前`:s<86400?`${Math.floor(s/3600)}時間前`:`${Math.floor(s/86400)}日前`;};
-const PREFS=["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
-const RC={customer:{emoji:"🍺",label:"お客",color:C.blue,bg:C.bL,bd:C.blue+"33",grad:"135deg,#2979FF,#1565C0"},driver:{emoji:"🚗",label:"運転手",color:C.accent,bg:C.aL,bd:C.accent+"33",grad:"135deg,#FF6B00,#FF3D00"}};
-const REACTIONS=[{key:"fire",emoji:"🔥"},{key:"agree",emoji:"💪"},{key:"funny",emoji:"😂"},{key:"heart",emoji:"❤️"}];
-const iS={width:"100%",background:"#131318",border:"1px solid #24242e",borderRadius:12,padding:"10px 14px",color:"#efefef",fontSize:14,outline:"none",fontFamily:"'Noto Sans JP',sans-serif",marginBottom:8};
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
+function h(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function ago(ts){var s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function yen(n){return"¥"+Number(n).toLocaleString()}
+function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
 
-/* ═══ Supabase API ═══ */
-const SB_URL="https://kjfmcpwstubgezebmstt.supabase.co";
-const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
-const sbHeaders={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=representation"};
-const sb={
-  async get(table,query=""){try{const r=await fetch(`${SB_URL}/rest/v1/${table}?${query}`,{headers:sbHeaders});return await r.json();}catch(e){console.error(e);return[];}},
-  async post(table,data){try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:"POST",headers:sbHeaders,body:JSON.stringify(data)});return await r.json();}catch(e){console.error(e);return null;}},
-  async patch(table,id,data){try{const r=await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:"PATCH",headers:sbHeaders,body:JSON.stringify(data)});return await r.json();}catch(e){console.error(e);return null;}},
-  async del(table,id){try{await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:"DELETE",headers:sbHeaders});}catch(e){console.error(e);}}
-};
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+async function sbPatch(t,id,d){try{await fetch(SB+t+"?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(d)})}catch(e){}}
+async function sbDel(t,id){try{await fetch(SB+t+"?id=eq."+id,{method:"DELETE",headers:H})}catch(e){}}
 
-// 匿名UID
-function getUid(){let id=localStorage.getItem("dn_uid");if(!id){id=Math.random().toString(36).slice(2,10);localStorage.setItem("dn_uid",id);}return id;}
+async function loadPosts(){
+  var p=await sbGet("posts","order=created_at.desc");
+  var r=await sbGet("replies","order=created_at.asc");
+  posts=Array.isArray(p)?p:[];
+  replies={};
+  if(Array.isArray(r))r.forEach(function(x){if(!replies[x.post_id])replies[x.post_id]=[];replies[x.post_id].push(x)});
+  render();
+}
+async function loadCo(){companies=await sbGet("companies","order=featured.desc,created_at.asc");if(!Array.isArray(companies))companies=[];render();}
 
-/* ═══ ⚔️ バトル掲示板 ═══ */
-function BattleScreen(){
-  const uid=getUid();
-  const[role,setRole]=useState(()=>localStorage.getItem("dn_role"));
-  const[posts,setPosts]=useState([]);
-  const[replies,setReplies]=useState({});
-  const[loading,setLoading]=useState(true);
-  const[composeOpen,setComposeOpen]=useState(false);
-  const[composeText,setComposeText]=useState("");
-  const[filter,setFilter]=useState("new");
-  const[replyTo,setReplyTo]=useState(null);
-  const[replyText,setReplyText]=useState("");
-  const[posting,setPosting]=useState(false);
+function pickRole(r){role=r;localStorage.setItem("dn_role",r);render();}
 
-  // データ読み込み
-  const loadData=useCallback(async()=>{
-    const[p,r]=await Promise.all([
-      sb.get("posts","order=created_at.desc"),
-      sb.get("replies","order=created_at.asc")
-    ]);
-    setPosts(p||[]);
-    const grouped={};(r||[]).forEach(x=>{if(!grouped[x.post_id])grouped[x.post_id]=[];grouped[x.post_id].push(x);});
-    setReplies(grouped);
-    setLoading(false);
-  },[]);
-
-  useEffect(()=>{loadData();const t=setInterval(loadData,15000);return()=>clearInterval(t);},[loadData]);
-
-  const pickRole=(r)=>{setRole(r);localStorage.setItem("dn_role",r);};
-
-  const submitPost=async()=>{
-    if(!composeText.trim()||!role||posting)return;
-    setPosting(true);
-    await sb.post("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role,uid,text:composeText.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
-    setComposeText("");setComposeOpen(false);setPosting(false);
-    loadData();
-  };
-
-  const react=async(post,key)=>{
-    if(!role)return;
-    const rb={...(post.reacted_by||{})};const rs={...(post.reactions||{})};
-    const prev=rb[uid];
-    if(prev===key){delete rb[uid];rs[key]=Math.max(0,(rs[key]||1)-1);}
-    else{if(prev)rs[prev]=Math.max(0,(rs[prev]||1)-1);rb[uid]=key;rs[key]=(rs[key]||0)+1;}
-    await sb.patch("posts",post.id,{reactions:rs,reacted_by:rb});
-    loadData();
-  };
-
-  const submitReply=async(pid)=>{
-    if(!replyText.trim()||!role)return;
-    await sb.post("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role,uid,text:replyText.trim(),created_at:Date.now()});
-    setReplyText("");setReplyTo(null);loadData();
-  };
-
-  const deletePost=async(id)=>{await sb.del("posts",id);loadData();};
-
-  const totalR=p=>Object.values(p.reactions||{}).reduce((a,v)=>a+v,0);
-  const sorted=useMemo(()=>{
-    let list=[...posts];
-    if(filter==="hot")list.sort((a,b)=>totalR(b)-totalR(a));
-    else if(filter==="new")list.sort((a,b)=>b.created_at-a.created_at);
-    else list=list.filter(p=>p.role===filter).sort((a,b)=>b.created_at-a.created_at);
-    return list;
-  },[posts,filter]);
-  const stats=useMemo(()=>({c:posts.filter(p=>p.role==="customer").length,d:posts.filter(p=>p.role==="driver").length}),[posts]);
-
-  const share=(p)=>{
-    const rc=RC[p.role];
-    const text=`${rc.emoji}${rc.label}「${p.text.slice(0,60)}」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう #運転代行\nhttps://daikounaw.com`;
-    if(navigator.share)navigator.share({text}).catch(()=>{});
-    else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,"_blank");
-  };
-
-  if(!role)return(
-<div style={{paddingBottom:80}}><div style={{padding:"40px 20px",textAlign:"center"}}>
-  <div style={{fontSize:50,marginBottom:8}}>⚔️</div>
-  <div style={{marginBottom:4}}><span style={{fontWeight:900,fontSize:24}}>代行</span><span style={{fontWeight:900,fontSize:24,color:C.accent}}>なう</span></div>
-  <div style={{fontSize:14,color:C.t2,lineHeight:1.7,marginBottom:30}}>お客 vs 運転手<br/>匿名バトル掲示板</div>
-  <div style={{fontSize:15,fontWeight:700,marginBottom:14}}>あなたの立場は？</div>
-  <div style={{display:"flex",gap:12,maxWidth:320,margin:"0 auto"}}>
-    <button onClick={()=>pickRole("customer")} style={{flex:1,padding:"24px 0",background:`linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04))`,border:`2px solid ${C.blue}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}>
-      <div style={{fontSize:40,marginBottom:6}}>🍺</div><div style={{fontSize:18,fontWeight:900,color:C.blue}}>お客</div>
-    </button>
-    <button onClick={()=>pickRole("driver")} style={{flex:1,padding:"24px 0",background:`linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04))`,border:`2px solid ${C.accent}55`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",color:C.text}}>
-      <div style={{fontSize:40,marginBottom:6}}>🚗</div><div style={{fontSize:18,fontWeight:900,color:C.accent}}>運転手</div>
-    </button>
-  </div>
-  <div style={{fontSize:11,color:C.t3,marginTop:16}}>匿名 · 変更OK</div>
-</div></div>);
-
-  const rc=RC[role];
-  return(
-<div style={{paddingBottom:80}}>
-  {/* VS */}
-  <div style={{padding:"14px 16px 10px",background:"linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609)",borderBottom:`1px solid ${C.purple}33`}}>
-    <div style={{display:"flex",alignItems:"center",marginBottom:6}}>
-      <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:30,fontWeight:900,color:C.blue,animation:"countUp .4s ease"}}>{stats.c}</div><div style={{fontSize:12,fontWeight:900,color:C.blue}}>🍺 お客</div></div>
-      <div style={{fontSize:28,fontWeight:900,color:C.purple,animation:"vs 2.5s ease infinite",padding:"0 10px"}}>⚔️</div>
-      <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:30,fontWeight:900,color:C.accent,animation:"countUp .4s ease"}}>{stats.d}</div><div style={{fontSize:12,fontWeight:900,color:C.accent}}>🚗 運転手</div></div>
-    </div>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-      <span style={{fontSize:11,padding:"2px 8px",borderRadius:8,fontWeight:700,background:rc.bg,color:rc.color,border:`1px solid ${rc.bd}`}}>{rc.emoji} {rc.label}</span>
-      <button onClick={()=>{setRole(null);localStorage.removeItem("dn_role");}} style={{background:"none",border:`1px solid ${C.b2}`,borderRadius:8,padding:"2px 8px",color:C.t3,fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>変更</button>
-    </div>
-  </div>
-
-  {/* フィルター */}
-  <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,position:"sticky",top:46,zIndex:40,background:C.s1}}>
-    {[{id:"hot",l:"🔥 注目"},{id:"new",l:"🆕 新着"},{id:"customer",l:"🍺"},{id:"driver",l:"🚗"}].map(f=>(
-      <button key={f.id} onClick={()=>setFilter(f.id)} style={{flex:1,padding:"9px 0",border:"none",borderBottom:filter===f.id?`2px solid ${C.accent}`:"2px solid transparent",background:"transparent",color:filter===f.id?C.text:C.t3,fontSize:12,fontWeight:filter===f.id?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f.l}</button>
-    ))}
-  </div>
-
-  {/* 投稿フォーム */}
-  {composeOpen&&(
-  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}>
-    <textarea value={composeText} onChange={e=>setComposeText(e.target.value)} placeholder={role==="customer"?"お客の本音を投稿…":"運転手の本音を投稿…"} rows={3} style={{width:"100%",background:C.card,border:`1px solid ${C.b2}`,borderRadius:14,padding:"12px 14px",color:C.text,fontSize:15,outline:"none",resize:"none",fontFamily:"inherit",marginBottom:6}}/>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <span style={{fontSize:11,color:C.t3}}>{rc.emoji} {rc.label}として投稿</span>
-      <div style={{display:"flex",gap:6}}>
-        <button onClick={()=>{setComposeOpen(false);setComposeText("");}} style={{padding:"8px 14px",background:C.s2,border:`1px solid ${C.b2}`,borderRadius:10,color:C.t2,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>取消</button>
-        <button onClick={submitPost} disabled={!composeText.trim()||posting} style={{padding:"8px 18px",background:composeText.trim()&&!posting?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:composeText.trim()&&!posting?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>{posting?"送信中...":"投稿🔥"}</button>
-      </div>
-    </div>
-  </div>)}
-
-  {/* ローディング */}
-  {loading&&<div style={{textAlign:"center",padding:"40px 0",color:C.t3}}><div style={{display:"inline-block",width:24,height:24,border:`3px solid ${C.b2}`,borderTop:`3px solid ${C.accent}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/><div style={{marginTop:8,fontSize:13}}>読み込み中...</div></div>}
-
-  {/* 投稿一覧 */}
-  {!loading&&sorted.length===0&&(
-  <div style={{textAlign:"center",padding:"50px 20px"}}><div style={{fontSize:50,marginBottom:10}}>⚔️</div><div style={{fontSize:16,fontWeight:900,marginBottom:6}}>まだバトルが始まっていません</div><div style={{fontSize:13,color:C.t2}}>最初の投稿で火をつけよう🔥</div></div>)}
-
-  {sorted.map((p,idx)=>{
-    const prc=RC[p.role];const isMe=p.uid===uid;
-    const myReact=(p.reacted_by||{})[uid];
-    const hot=totalR(p)>=3;
-    const pReplies=replies[p.id]||[];
-    return(
-    <div key={p.id} style={{padding:"14px 16px",borderBottom:`1px solid ${C.border}`,animation:`slideUp .15s ease ${Math.min(idx,10)*.02}s both`}}>
-      <div style={{display:"flex",gap:10}}>
-        <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(${prc.grad})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,boxShadow:hot?`0 0 12px ${prc.color}44`:undefined}}>{prc.emoji}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-            <span style={{fontSize:12,padding:"2px 8px",borderRadius:8,fontWeight:700,background:prc.bg,color:prc.color,border:`1px solid ${prc.bd}`}}>{prc.label}</span>
-            {hot&&<span style={{fontSize:10,padding:"1px 6px",borderRadius:6,fontWeight:700,background:C.rL,color:C.red,border:`1px solid ${C.red}33`,animation:"fire .8s ease infinite"}}>🔥炎上</span>}
-            {isMe&&<span style={{fontSize:10,color:C.t3}}>あなた</span>}
-            <span style={{fontSize:10,color:C.t3,marginLeft:"auto"}}>{ago(p.created_at)}</span>
-          </div>
-          <div style={{fontSize:15,color:"#ddd",lineHeight:1.75,marginBottom:8,wordBreak:"break-word"}}>{p.text}</div>
-
-          {pReplies.length>0&&(
-          <div style={{marginBottom:8,marginLeft:6,borderLeft:`2px solid ${C.b2}`,paddingLeft:10}}>
-            {pReplies.slice(-3).map(r=>{const rrc=RC[r.role];return(
-              <div key={r.id} style={{marginBottom:5}}><span style={{fontSize:10,padding:"1px 5px",borderRadius:5,fontWeight:700,background:rrc.bg,color:rrc.color}}>{rrc.emoji}</span><span style={{fontSize:13,color:C.t2,marginLeft:6}}>{r.text}</span></div>
-            );})}
-            {pReplies.length>3&&<div style={{fontSize:11,color:C.t3}}>他{pReplies.length-3}件</div>}
-          </div>)}
-
-          <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-            {REACTIONS.map(rx=>{
-              const count=(p.reactions||{})[rx.key]||0;const active=myReact===rx.key;
-              return(<button key={rx.key} onClick={()=>react(p,rx.key)} style={{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",background:active?`${prc.color}15`:"transparent",border:`1px solid ${active?prc.color+"44":C.b2}`,borderRadius:20,fontSize:12,color:active?prc.color:C.t3,cursor:"pointer",fontFamily:"inherit",fontWeight:active?700:400}}>{rx.emoji}{count>0&&<span style={{fontSize:11}}>{count}</span>}</button>);
-            })}
-            <button onClick={()=>setReplyTo(replyTo===p.id?null:p.id)} style={{display:"flex",alignItems:"center",gap:3,padding:"4px 10px",background:"transparent",border:`1px solid ${replyTo===p.id?C.blue+"44":C.b2}`,borderRadius:20,fontSize:12,color:replyTo===p.id?C.blue:C.t3,cursor:"pointer",fontFamily:"inherit"}}>💬{pReplies.length>0&&` ${pReplies.length}`}</button>
-            <button onClick={()=>share(p)} style={{padding:"4px 10px",background:"transparent",border:`1px solid ${C.b2}`,borderRadius:20,fontSize:12,color:C.t3,cursor:"pointer",fontFamily:"inherit"}}>📤</button>
-            {isMe&&<button onClick={()=>deletePost(p.id)} style={{padding:"4px 8px",background:"transparent",border:`1px solid ${C.b2}`,borderRadius:20,fontSize:11,color:C.t3,cursor:"pointer",fontFamily:"inherit",marginLeft:"auto"}}>🗑</button>}
-          </div>
-
-          {replyTo===p.id&&(
-          <div style={{marginTop:8,display:"flex",gap:6,animation:"fadeIn .15s ease"}}>
-            <input value={replyText} onChange={e=>setReplyText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")submitReply(p.id);}} placeholder="返信..." style={{flex:1,background:C.card,border:`1px solid ${C.b2}`,borderRadius:10,padding:"8px 12px",color:C.text,fontSize:13,outline:"none",fontFamily:"inherit"}}/>
-            <button onClick={()=>submitReply(p.id)} disabled={!replyText.trim()} style={{padding:"8px 14px",background:replyText.trim()?C.accent:"#333",color:replyText.trim()?"#000":"#666",border:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>送信</button>
-          </div>)}
-        </div>
-      </div>
-    </div>);})}
-
-  <button onClick={()=>setComposeOpen(!composeOpen)} style={{position:"fixed",bottom:72,right:Math.max(16,(window.innerWidth-480)/2+16),width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#FF6B00,#FF3D00)",border:"none",color:"#000",fontSize:24,cursor:"pointer",boxShadow:"0 4px 20px rgba(255,107,0,.4)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center",animation:"ctaPulse 2.5s ease infinite"}}>✏️</button>
-</div>);
+async function submitPost(){
+  if(!compTxt.trim())return;
+  await sbPost("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role:role,uid:uid,text:compTxt.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
+  compTxt="";composing=false;loadPosts();
+}
+async function doReact(pid,key){
+  var p=posts.find(function(x){return x.id===pid});if(!p)return;
+  var rb=Object.assign({},p.reacted_by||{});var rs=Object.assign({},p.reactions||{});
+  var prev=rb[uid];
+  if(prev===key){delete rb[uid];rs[key]=Math.max(0,(rs[key]||1)-1)}
+  else{if(prev)rs[prev]=Math.max(0,(rs[prev]||1)-1);rb[uid]=key;rs[key]=(rs[key]||0)+1}
+  await sbPatch("posts",pid,{reactions:rs,reacted_by:rb});loadPosts();
+}
+async function doReply(pid){
+  if(!replyTxt.trim())return;
+  await sbPost("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role:role,uid:uid,text:replyTxt.trim(),created_at:Date.now()});
+  replyTxt="";replyId=null;loadPosts();
+}
+async function delPost(pid){await sbDel("posts",pid);loadPosts();}
+function share(p){
+  var rc=p.role==="customer"?"🍺お客":"🚗運転手";
+  var t=rc+"「"+p.text.slice(0,60)+"」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう\nhttps://daikounaw.com";
+  if(navigator.share)navigator.share({text:t}).catch(function(){});
+  else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank");
 }
 
-/* ═══ 🚗 業者一覧 ═══ */
-function CompanyScreen(){
-  const[companies,setCompanies]=useState([]);
-  const[loading,setLoading]=useState(true);
-  const[km,setKm]=useState("");const[pf,setPf]=useState("すべて");const[q,setQ]=useState("");
-  const[showR,setShowR]=useState(false);const kmN=parseFloat(km);
-  const[regOpen,setRegOpen]=useState(false);
-  const[rName,setRName]=useState("");const[rPhone,setRPhone]=useState("");const[rLine,setRLine]=useState("");
-  const[rPref,setRPref]=useState("福岡県");const[rArea,setRArea]=useState("");const[rHours,setRHours]=useState("");
-  const[rBase,setRBase]=useState("2000");const[rPer,setRPer]=useState("500");const[rCamp,setRCamp]=useState("");
-  const[rDone,setRDone]=useState(false);const[rPosting,setRPosting]=useState(false);
-
-  const loadCompanies=useCallback(async()=>{const c=await sb.get("companies","order=featured.desc,created_at.asc");setCompanies(c||[]);setLoading(false);},[]);
-  useEffect(()=>{loadCompanies();},[loadCompanies]);
-
-  const fc=useMemo(()=>{let l=companies;if(pf!=="すべて")l=l.filter(c=>c.pref===pf);if(q.trim())l=l.filter(c=>c.name.includes(q)||c.area?.includes(q));return l;},[companies,pf,q]);
-  const prefs=useMemo(()=>[...new Set(companies.map(c=>c.pref))].sort(),[companies]);
-
-  const submitReg=async()=>{
-    if(!rName.trim()||!rPhone.trim()||rPosting)return;
-    setRPosting(true);
-    await sb.post("companies",{id:"co_"+Date.now(),name:rName.trim(),phone:rPhone.trim(),line:rLine.trim()||null,pref:rPref,area:rArea.trim()||rPref,hours:rHours.trim()||"未設定",base_fare:parseInt(rBase)||2000,per_km:parseInt(rPer)||500,campaign:rCamp.trim()||null,featured:false,created_at:Date.now()});
-    setRPosting(false);setRDone(true);loadCompanies();
-  };
-
-  return(
-<div style={{paddingBottom:80}}>
-  <div style={{padding:"14px 16px",borderBottom:`1px solid ${C.border}`}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-      <div style={{fontSize:18,fontWeight:900}}>🚗 代行業者</div>
-      <button onClick={()=>{setRegOpen(!regOpen);setRDone(false);}} style={{padding:"6px 12px",background:regOpen?C.s2:"linear-gradient(135deg,#FF6B00,#FF3D00)",color:regOpen?C.t2:"#000",border:regOpen?`1px solid ${C.b2}`:"none",borderRadius:10,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>{regOpen?"閉じる":"＋ 無料掲載"}</button>
-    </div>
-    <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:8}}>
-      <input value={km} onChange={e=>{setKm(e.target.value);setShowR(false);}} type="number" inputMode="decimal" placeholder="距離km" style={{...iS,flex:1,marginBottom:0,textAlign:"center"}}/>
-      <button onClick={()=>setShowR(true)} disabled={!kmN} style={{padding:"10px 16px",background:kmN?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#222",color:kmN?"#000":"#555",border:"none",borderRadius:12,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>比較</button>
-    </div>
-    <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 検索" style={{...iS,fontSize:12}}/>
-    <div style={{display:"flex",gap:5,overflowX:"auto"}}>
-      <button onClick={()=>setPf("すべて")} style={{flexShrink:0,background:pf==="すべて"?C.accent:"transparent",color:pf==="すべて"?"#000":C.t2,border:`1px solid ${pf==="すべて"?C.accent:C.b2}`,borderRadius:20,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>全国</button>
-      {prefs.map(p=>(<button key={p} onClick={()=>setPf(p)} style={{flexShrink:0,background:pf===p?C.accent:"transparent",color:pf===p?"#000":C.t2,border:`1px solid ${pf===p?C.accent:C.b2}`,borderRadius:20,padding:"4px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>{p}</button>))}
-    </div>
-  </div>
-
-  {/* 登録フォーム */}
-  {regOpen&&!rDone&&(
-  <div style={{padding:"12px 16px",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}>
-    <div style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:8}}>無料で業者掲載</div>
-    <input value={rName} onChange={e=>setRName(e.target.value)} placeholder="業者名 *" style={iS}/>
-    <input value={rPhone} onChange={e=>setRPhone(e.target.value)} placeholder="電話番号 *" type="tel" style={iS}/>
-    <input value={rLine} onChange={e=>setRLine(e.target.value)} placeholder="LINE URL（任意）" style={iS}/>
-    <select value={rPref} onChange={e=>setRPref(e.target.value)} style={{...iS,appearance:"none"}}>{PREFS.map(p=><option key={p}>{p}</option>)}</select>
-    <input value={rArea} onChange={e=>setRArea(e.target.value)} placeholder="対応エリア" style={iS}/>
-    <input value={rHours} onChange={e=>setRHours(e.target.value)} placeholder="営業時間" style={iS}/>
-    <div style={{display:"flex",gap:8}}><input value={rBase} onChange={e=>setRBase(e.target.value)} type="number" placeholder="初乗り円" style={{...iS,flex:1}}/><input value={rPer} onChange={e=>setRPer(e.target.value)} type="number" placeholder="1km円" style={{...iS,flex:1}}/></div>
-    <input value={rCamp} onChange={e=>setRCamp(e.target.value)} placeholder="キャンペーン（任意）" style={iS}/>
-    <button onClick={submitReg} disabled={!rName||!rPhone||rPosting} style={{width:"100%",padding:"13px 0",background:rName&&rPhone&&!rPosting?"linear-gradient(135deg,#FF6B00,#FF3D00)":"#333",color:rName&&rPhone&&!rPosting?"#000":"#666",border:"none",borderRadius:14,fontWeight:900,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>{rPosting?"登録中...":"✅ 掲載する（無料）"}</button>
-  </div>)}
-  {regOpen&&rDone&&(<div style={{padding:"20px 16px",textAlign:"center",borderBottom:`1px solid ${C.border}`,background:C.s2,animation:"fadeIn .15s ease"}}><div style={{fontSize:30,marginBottom:6}}>🎉</div><div style={{fontSize:16,fontWeight:900}}>掲載完了！</div><div style={{fontSize:12,color:C.t2,marginTop:4}}>全ユーザーに公開されました</div></div>)}
-
-  {loading&&<div style={{textAlign:"center",padding:"40px 0",color:C.t3}}><div style={{display:"inline-block",width:24,height:24,border:`3px solid ${C.b2}`,borderTop:`3px solid ${C.accent}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/></div>}
-
-  {/* 料金比較 */}
-  {showR&&kmN>0&&(<div style={{padding:"10px 16px",animation:"fadeIn .2s ease"}}>
-    <div style={{fontSize:13,color:C.accent,fontWeight:800,marginBottom:8}}>📊 {kmN}km 料金ランキング</div>
-    {[...fc].sort((a,b)=>(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)).map((co,i)=>(
-      <div key={co.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-        <span style={{width:22,textAlign:"center",fontSize:i<3?14:12,fontWeight:900,color:i===0?C.gold:i===1?"#C0C0C0":i===2?"#CD7F32":C.t3}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}`}</span>
-        <div style={{flex:1}}><span style={{fontSize:13,fontWeight:700}}>{co.name}</span></div>
-        <span style={{fontSize:18,fontWeight:900,color:C.accent}}>{fmtYen(co.base_fare+Math.ceil(kmN)*co.per_km)}</span>
-      </div>))}
-  </div>)}
-
-  {/* 業者カード */}
-  {!showR&&!loading&&fc.map((co,i)=>(
-  <div key={co.id} style={{margin:"8px 16px",background:co.featured?`linear-gradient(135deg,${C.aL},${C.card})`:C.card,borderRadius:16,padding:14,border:`1px solid ${co.featured?C.accent+"44":C.b2}`,animation:`slideUp .15s ease ${i*.02}s both`}}>
-    {co.featured&&<span style={{fontSize:10,color:C.accent,fontWeight:700}}>⭐ 公式</span>}
-    <div style={{fontWeight:900,fontSize:15}}>{co.name}</div>
-    <div style={{fontSize:11,color:C.t2}}>{co.pref} · {co.area} · {co.hours}</div>
-    <div style={{fontSize:13,fontWeight:700,color:C.accent,marginTop:2}}>初乗り{fmtYen(co.base_fare)} · 1km{fmtYen(co.per_km)}</div>
-    {co.campaign&&<div style={{fontSize:11,color:C.green,fontWeight:700,marginTop:2}}>🎉 {co.campaign}</div>}
-    <div style={{display:"flex",gap:6,marginTop:8}}>
-      <a href={`tel:${co.phone}`} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"10px 0",background:"linear-gradient(135deg,#00D26A,#00a050)",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>📞 電話</a>
-      {co.line&&<a href={co.line} target="_blank" rel="noopener" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"10px 0",background:"#06C755",color:"#fff",borderRadius:12,fontWeight:900,fontSize:13,textDecoration:"none"}}>💬 LINE</a>}
-    </div>
-  </div>))}
-</div>);
+function render(){
+  var app=document.getElementById("app");if(!app)return;
+  var out='<div class="hdr"><div class="logo" onclick="screen=\'battle\';render()">代行<span>なう</span></div><div style="font-size:10px;color:#888">お客 vs 運転手</div></div>';
+  out+='<div style="flex:1;overflow-y:auto">';
+  if(screen==="battle")out+=renderBattle();
+  else out+=renderCompany();
+  out+='</div>';
+  out+='<div class="nav">';
+  out+='<button class="'+(screen==="battle"?"on":"")+'" onclick="screen=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
+  out+='<button class="'+(screen==="company"?"on":"")+'" onclick="screen=\'company\';loadCo()"><span class="ico">🚗</span>配車</button>';
+  out+='</div>';
+  app.innerHTML=out;
 }
 
-/* ═══ App ═══ */
-const NAV=[{id:"battle",icon:"⚔️",label:"バトル"},{id:"company",icon:"🚗",label:"配車"}];
-function App(){
-  const[screen,setScreen]=useState("battle");
-  const scrollRef=useRef(null);
-  useEffect(()=>{if(scrollRef.current)scrollRef.current.scrollTop=0;},[screen]);
-  return(
-<div style={{fontFamily:"'Noto Sans JP',sans-serif",background:C.bg,minHeight:"100vh",color:C.text,maxWidth:480,margin:"0 auto",display:"flex",flexDirection:"column"}}>
-  <div style={{background:C.s1,padding:"8px 16px",borderBottom:`1px solid ${C.border}`,position:"sticky",top:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-    <div onClick={()=>setScreen("battle")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
-      <span style={{fontWeight:900,fontSize:18}}>代行</span><span style={{fontWeight:900,fontSize:18,color:C.accent}}>なう</span>
-    </div>
-    <div style={{fontSize:10,color:C.t2}}>お客 vs 運転手</div>
-  </div>
-  <div ref={scrollRef} style={{flex:1,overflowY:"auto"}}>
-    {screen==="battle"&&<BattleScreen/>}
-    {screen==="company"&&<CompanyScreen/>}
-  </div>
-  <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"rgba(6,6,9,.97)",borderTop:`1px solid ${C.border}`,display:"flex",backdropFilter:"blur(16px)",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>
-    {NAV.map(n=>(
-      <button key={n.id} onClick={()=>setScreen(n.id)} style={{flex:1,padding:"10px 0 12px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"inherit",color:screen===n.id?C.accent:C.t3}}>
-        <span style={{fontSize:20,lineHeight:1}}>{n.icon}</span>
-        <span style={{fontSize:9,fontWeight:screen===n.id?700:400}}>{n.label}</span>
-        {screen===n.id&&<div style={{width:16,height:2,borderRadius:1,background:C.accent,marginTop:1}}/>}
-      </button>))}
-  </div>
-</div>);
+function renderBattle(){
+  if(!role){
+    return '<div style="padding:40px 20px;text-align:center"><div style="font-size:50px;margin-bottom:8px">⚔️</div><div class="logo" style="font-size:24px;margin-bottom:4px">代行<span>なう</span></div><div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:30px">お客 vs 運転手<br>匿名バトル掲示板</div><div style="font-size:15px;font-weight:700;margin-bottom:14px">あなたの立場は？</div><div style="display:flex;gap:12px;max-width:320px;margin:0 auto"><button onclick="pickRole(\'customer\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04));border:2px solid rgba(74,144,255,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🍺</div><div style="font-size:18px;font-weight:900;color:#4A90FF">お客</div></button><button onclick="pickRole(\'driver\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border:2px solid rgba(255,107,0,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🚗</div><div style="font-size:18px;font-weight:900;color:#FF6B00">運転手</div></button></div><div style="font-size:11px;color:#444;margin-top:16px">匿名 · 変更OK</div></div>';
+  }
+  var cN=posts.filter(function(p){return p.role==="customer"}).length;
+  var dN=posts.filter(function(p){return p.role==="driver"}).length;
+  var rc=role==="customer";
+  var o='<div class="vs"><div class="row"><div class="side"><div class="num blue">'+cN+'</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">'+dN+'</div><div class="lbl org">🚗 運転手</div></div></div>';
+  o+='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="tag '+(rc?"tag-c":"tag-d")+'">'+(rc?"🍺 お客":"🚗 運転手")+'</span><button onclick="role=null;localStorage.removeItem(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>';
+  o+='<div class="filters">';
+  ["hot:🔥 注目","new:🆕 新着","customer:🍺","driver:🚗"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
+  o+='</div>';
+  if(composing){
+    o+='<div class="compose"><textarea rows="3" id="ctxt" placeholder="'+(rc?"お客の本音を投稿…":"運転手の本音を投稿…")+'">'+h(compTxt)+'</textarea><div class="acts"><button onclick="composing=false;compTxt=\'\';render()" style="background:#131318;color:#888;border:1px solid #24242e">取消</button><button onclick="compTxt=document.getElementById(\'ctxt\').value;submitPost()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000">投稿🔥</button></div></div>';
+  }
+  var sorted=posts.slice();
+  if(filter==="hot")sorted.sort(function(a,b){return totalR(b)-totalR(a)});
+  else if(filter==="customer")sorted=sorted.filter(function(p){return p.role==="customer"});
+  else if(filter==="driver")sorted=sorted.filter(function(p){return p.role==="driver"});
+  if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">⚔️</div><div style="font-size:16px;font-weight:900;margin-bottom:6px">まだバトルが始まっていません</div><div>最初の投稿で火をつけよう🔥</div></div>';
+  sorted.forEach(function(p){
+    var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
+    var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
+    o+='<div class="post"><div style="display:flex;gap:10px"><div class="av '+(isC?"av-c":"av-d")+'">'+(isC?"🍺":"🚗")+'</div><div style="flex:1;min-width:0">';
+    o+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="tag '+(isC?"tag-c":"tag-d")+'">'+(isC?"お客":"運転手")+'</span>';
+    if(hot)o+='<span class="hot">🔥炎上</span>';
+    if(isMe)o+='<span style="font-size:10px;color:#444">あなた</span>';
+    o+='<span style="font-size:10px;color:#444;margin-left:auto">'+ago(p.created_at)+'</span></div>';
+    o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
+    if(reps.length){
+      o+='<div style="margin-bottom:8px;margin-left:6px;border-left:2px solid #24242e;padding-left:10px">';
+      reps.slice(-3).forEach(function(r){o+='<div style="margin-bottom:5px"><span class="tag '+(r.role==="customer"?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 5px">'+(r.role==="customer"?"🍺":"🚗")+'</span><span style="font-size:13px;color:#888;margin-left:6px">'+h(r.text)+'</span></div>'});
+      if(reps.length>3)o+='<div style="font-size:11px;color:#444">他'+(reps.length-3)+'件</div>';
+      o+='</div>';
+    }
+    o+='<div class="rxn">';
+    [["fire","🔥"],["agree","💪"],["funny","😂"],["heart","❤️"]].forEach(function(rx){
+      var cnt=(p.reactions||{})[rx[0]]||0;var on=myR===rx[0];
+      o+='<button class="'+(on?"on":"")+'" onclick="doReact(\''+p.id+'\',\''+rx[0]+'\')">'+rx[1]+(cnt>0?'<span>'+cnt+'</span>':'')+'</button>';
+    });
+    o+='<button onclick="replyId=replyId===\''+p.id+'\'?null:\''+p.id+'\';replyTxt=\'\';render()">💬'+(reps.length>0?' '+reps.length:'')+'</button>';
+    o+='<button onclick="share(posts.find(function(x){return x.id===\''+p.id+'\'}))">📤</button>';
+    if(isMe)o+='<button onclick="delPost(\''+p.id+'\')" style="margin-left:auto">🗑</button>';
+    o+='</div>';
+    if(replyId===p.id)o+='<div class="reply-box"><input id="rtxt" placeholder="返信..." onkeydown="if(event.key===\'Enter\'){replyTxt=this.value;doReply(\''+p.id+'\')}"><button onclick="replyTxt=document.getElementById(\'rtxt\').value;doReply(\''+p.id+'\')" style="background:#FF6B00;color:#000">送信</button></div>';
+    o+='</div></div></div>';
+  });
+  o+='<button class="fab" onclick="composing=!composing;render()">✏️</button>';
+  return o;
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+function renderCompany(){
+  var o='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24"><div style="font-size:18px;font-weight:900;margin-bottom:8px">🚗 代行業者</div>';
+  o+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px"><input type="number" id="kmin" placeholder="距離km" style="flex:1;text-align:center;margin-bottom:0" value="'+km+'"><button onclick="km=document.getElementById(\'kmin\').value;render()" style="padding:10px 16px;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">比較</button></div>';
+  o+='</div>';
+  var kmN=parseFloat(km);
+  if(kmN>0){
+    var sorted=companies.slice().sort(function(a,b){return(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)});
+    o+='<div style="padding:10px 16px"><div style="font-size:13px;color:#FF6B00;font-weight:800;margin-bottom:8px">📊 '+kmN+'km 料金ランキング</div>';
+    sorted.forEach(function(co,i){
+      var fare=co.base_fare+Math.ceil(kmN)*co.per_km;
+      var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+      o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1c1c24"><span style="width:22px;text-align:center;font-weight:900;color:'+(i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":"#444")+'">'+medal+'</span><div style="flex:1"><span style="font-size:13px;font-weight:700">'+h(co.name)+'</span></div><span style="font-size:18px;font-weight:900;color:#FF6B00">'+yen(fare)+'</span></div>';
+    });
+    o+='</div>';
+  }else{
+    companies.forEach(function(co){
+      o+='<div class="card'+(co.featured?" feat":"")+'">';
+      if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">⭐ 公式</span>';
+      o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
+      o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+' · '+h(co.hours||"")+'</div>';
+      o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">初乗り'+yen(co.base_fare)+' · 1km'+yen(co.per_km)+'</div>';
+      if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
+      o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
+      if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
+      o+='</div></div>';
+    });
+  }
+  return o;
+}
+
+loadPosts();
+setInterval(loadPosts,15000);
 </script>
-</body>
-</html>
+</body></html>
