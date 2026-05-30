@@ -58,9 +58,12 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
 var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
-var uid=localStorage.getItem("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);localStorage.setItem("dn_uid",uid);}
-var role=localStorage.getItem("dn_role");
-var screen="battle",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSet("dn_uid",uid);}
+var role=lsGet("dn_role");
+var scr="battle",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
 var regOpen=false,km="";
 
 function h(t){return String(t).replace(/&/g,”&”).replace(/</g,”<”).replace(/>/g,”>”).replace(/”/g,”"”)}
@@ -80,12 +83,12 @@ var r=await sbGet(“replies”,“order=created_at.asc”);
 posts=Array.isArray(p)?p:[];
 replies={};
 if(Array.isArray(r))r.forEach(function(x){if(!replies[x.post_id])replies[x.post_id]=[];replies[x.post_id].push(x)});
-if(silent&&(composing||replyId!=null||regOpen||screen===“company”))return;
+if(silent&&(composing||replyId!=null||regOpen||scr===“company”))return;
 render();
 }
 async function loadCo(){companies=await sbGet(“companies”,“order=featured.desc,created_at.asc”);if(!Array.isArray(companies))companies=[];render();}
 
-function pickRole(r){role=r;localStorage.setItem(“dn_role”,r);render();}
+function pickRole(r){role=r;lsSet(“dn_role”,r);render();}
 
 async function submitPost(){
 if(!compTxt.trim())return;
@@ -138,14 +141,14 @@ else window.open(“https://twitter.com/intent/tweet?text=”+encodeURIComponent
 
 function render(){
 var app=document.getElementById(“app”);if(!app)return;
-var out=’<div class="hdr"><div class="logo" onclick="screen=\'battle\';render()">代行<span>なう</span></div><div style="font-size:10px;color:#888">お客 vs 運転手</div></div>’;
+var out=’<div class="hdr"><div class="logo" onclick="scr=\'battle\';render()">代行<span>なう</span></div><div style="font-size:10px;color:#888">お客 vs 運転手</div></div>’;
 out+=’<div style="flex:1;overflow-y:auto">’;
-if(screen===“battle”)out+=renderBattle();
+if(scr===“battle”)out+=renderBattle();
 else out+=renderCompany();
 out+=’</div>’;
 out+=’<div class="nav">’;
-out+=’<button class=”’+(screen===“battle”?“on”:””)+’” onclick=“screen='battle';render()”><span class="ico">⚔️</span>バトル</button>’;
-out+=’<button class=”’+(screen===“company”?“on”:””)+’” onclick=“screen='company';loadCo()”><span class="ico">🚗</span>配車</button>’;
+out+=’<button class=”’+(scr===“battle”?“on”:””)+’” onclick=“scr='battle';render()”><span class="ico">⚔️</span>バトル</button>’;
+out+=’<button class=”’+(scr===“company”?“on”:””)+’” onclick=“scr='company';loadCo()”><span class="ico">🚗</span>配車</button>’;
 out+=’</div>’;
 app.innerHTML=out;
 }
@@ -158,7 +161,7 @@ var cN=posts.filter(function(p){return p.role===“customer”}).length;
 var dN=posts.filter(function(p){return p.role===“driver”}).length;
 var rc=role===“customer”;
 var o=’<div class="vs"><div class="row"><div class="side"><div class="num blue">’+cN+’</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">’+dN+’</div><div class="lbl org">🚗 運転手</div></div></div>’;
-o+=’<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class=“tag ‘+(rc?“tag-c”:“tag-d”)+’”>’+(rc?“🍺 お客”:“🚗 運転手”)+’</span><button onclick="role=null;localStorage.removeItem(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>’;
+o+=’<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class=“tag ‘+(rc?“tag-c”:“tag-d”)+’”>’+(rc?“🍺 お客”:“🚗 運転手”)+’</span><button onclick="role=null;lsDel(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>’;
 o+=’<div class="filters">’;
 [“hot:🔥 注目”,“new:🆕 新着”,“customer:🍺”,“driver:🚗”].forEach(function(f){var p=f.split(”:”);o+=’<button class=”’+(filter===p[0]?“on”:””)+’” onclick=“filter='’+p[0]+’';render()”>’+p[1]+’</button>’});
 o+=’</div>’;
@@ -256,6 +259,7 @@ o+=’</div></div>’;
 return o;
 }
 
+try{render();}catch(e){}
 loadPosts();
 setInterval(function(){loadPosts(true)},15000);
 </script>
