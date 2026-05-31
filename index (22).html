@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#060609"/>
+<title>代行なう｜お客 vs 運転手 バトル掲示板</title>
+<meta name="description" content="全国運転代行プラットフォーム。料金比較・匿名バトル掲示板。"/>
+<link rel="canonical" href="https://daikounaw.com/"/>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAY1BMVEUAAAAGBgkMDA8SEhYYGBwfHyMlJSkrKy4xMTU3Nzo+Pj9EREdKSk1QUFJWVlhcXF5iYmRoaGpubm90dHV6ent/f4GFhYaLi4yRkZKXl5idnZmjo6Spqaavr6u1tbHBwb7R0c5GJTj3AAAAsElEQVR4Ae3MBQLDQAwEwEnMzMz//2UdV+3z7oL52X8ZXqJhCC8xYAjMHwLDG4bA+IYhML5hCExvGAKLO4bA8o4hsLr/EBjfMQTmdwyB5R1DYH3HEFjfMQS2dwyB3R1D4HDHEDjeMQROdwyByx1D4HrHELjdMQTu9x8Cqxv0GGBxhR4jLG/QY4T1FXqMsb9BjzH2N+gxxv4GPcbY3xBgjIMeA0xjbKjzn3+IH6YPi/gA3ksn7QAAAABJRU5ErkJggg=="/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:#0e0e13;padding:8px 16px;border-bottom:1px solid #1c1c24;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:900;font-size:18px;cursor:pointer}.logo span{color:#FF6B00}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,9,.97);border-top:1px solid #1c1c24;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:#444;font-family:inherit}
+.nav button.on{color:#FF6B00}
+.nav button .ico{font-size:20px;line-height:1}
+.vs{padding:14px 16px 10px;background:linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609);border-bottom:1px solid rgba(170,85,255,.2)}
+.vs .row{display:flex;align-items:center;margin-bottom:6px}
+.vs .side{flex:1;text-align:center}.vs .num{font-size:30px;font-weight:900}.vs .lbl{font-size:12px;font-weight:900}
+.vs .mid{font-size:28px;font-weight:900;color:#AA55FF;padding:0 10px}
+.blue{color:#4A90FF}.org{color:#FF6B00}
+.filters{display:flex;border-bottom:1px solid #1c1c24;position:sticky;top:46px;z-index:40;background:#0e0e13}
+.filters button{flex:1;padding:9px 0;border:none;border-bottom:2px solid transparent;background:transparent;color:#444;font-size:12px;cursor:pointer;font-family:inherit}
+.filters button.on{color:#efefef;border-bottom-color:#FF6B00;font-weight:700}
+.post{padding:14px 16px;border-bottom:1px solid #1c1c24}
+.post .av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.av-c{background:linear-gradient(135deg,#2979FF,#1565C0)}.av-d{background:linear-gradient(135deg,#FF6B00,#FF3D00)}
+.tag{font-size:12px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.tag-c{background:rgba(74,144,255,.08);color:#4A90FF;border:1px solid rgba(74,144,255,.2)}
+.tag-d{background:rgba(255,107,0,.08);color:#FF6B00;border:1px solid rgba(255,107,0,.2)}
+.hot{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:700;background:rgba(255,71,87,.08);color:#FF4757;border:1px solid rgba(255,71,87,.2);display:inline-block;margin-left:6px}
+.rxn{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.rxn button{display:flex;align-items:center;gap:3px;padding:4px 10px;background:transparent;border:1px solid #24242e;border-radius:20px;font-size:12px;color:#444;cursor:pointer;font-family:inherit}
+.rxn button.on{border-color:rgba(255,107,0,.3);color:#FF6B00;font-weight:700;background:rgba(255,107,0,.06)}
+.fab{position:fixed;bottom:72px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FF6B00,#FF3D00);border:none;color:#000;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);z-index:90;display:flex;align-items:center;justify-content:center}
+.card{margin:8px 16px;background:#0c0c10;border-radius:16px;padding:14px;border:1px solid #24242e}
+.card.feat{border-color:rgba(255,107,0,.3);background:linear-gradient(135deg,rgba(255,107,0,.08),#0c0c10)}
+.btn-call{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:linear-gradient(135deg,#00D26A,#00a050);color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.btn-line{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:#06C755;color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.empty{text-align:center;padding:50px 20px;color:#444}
+.compose{padding:12px 16px;border-bottom:1px solid #1c1c24;background:#131318}
+.compose textarea{width:100%;background:#0c0c10;border:1px solid #24242e;border-radius:14px;padding:12px 14px;color:#efefef;font-size:15px;outline:none;resize:none;font-family:inherit}
+.compose .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
+.compose .acts button{padding:8px 18px;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+input[type=text],input[type=number],input[type=tel],select{width:100%;background:#131318;border:1px solid #24242e;border-radius:12px;padding:10px 14px;color:#efefef;font-size:14px;outline:none;font-family:inherit;margin-bottom:8px}
+.reply-box{display:flex;gap:6px;margin-top:8px}
+.reply-box input{flex:1;background:#0c0c10;border:1px solid #24242e;border-radius:10px;padding:8px 12px;color:#efefef;font-size:13px;outline:none;font-family:inherit}
+.reply-box button{padding:8px 14px;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+.reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
+.reg-submit{width:100%;padding:13px 0;border:none;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:4px}
+</style>
+</head><body>
+<div id="app"></div>
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSet("dn_uid",uid);}
+var role=lsGet("dn_role");
+var scr="battle",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+var regOpen=false,km="";
+
+function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function ago(ts){var s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function yen(n){return "¥"+Number(n).toLocaleString()}
+function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
+function val(id){var e=document.getElementById(id);return e?e.value:""}
+
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+async function sbPatch(t,id,d){try{await fetch(SB+t+"?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(d)})}catch(e){}}
+async function sbDel(t,id){try{await fetch(SB+t+"?id=eq."+id,{method:"DELETE",headers:H})}catch(e){}}
+
+async function loadPosts(silent){
+var p=await sbGet("posts","order=created_at.desc");
+var r=await sbGet("replies","order=created_at.asc");
+posts=Array.isArray(p)?p:[];
+replies={};
+if(Array.isArray(r))r.forEach(function(x){if(!replies[x.post_id])replies[x.post_id]=[];replies[x.post_id].push(x)});
+if(silent&&(composing||replyId!=null||regOpen||scr==="company"))return;
+render();
+}
+async function loadCo(){companies=await sbGet("companies","order=featured.desc,created_at.asc");if(!Array.isArray(companies))companies=[];render();}
+
+function pickRole(r){role=r;lsSet("dn_role",r);render();}
+
+async function submitPost(){
+if(!compTxt.trim())return;
+await sbPost("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role:role,uid:uid,text:compTxt.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
+compTxt="";composing=false;loadPosts();
+}
+async function doReact(pid,key){
+var p=posts.find(function(x){return x.id===pid});if(!p)return;
+var rb=Object.assign({},p.reacted_by||{});var rs=Object.assign({},p.reactions||{});
+var prev=rb[uid];
+if(prev===key){delete rb[uid];rs[key]=Math.max(0,(rs[key]||1)-1)}
+else{if(prev)rs[prev]=Math.max(0,(rs[prev]||1)-1);rb[uid]=key;rs[key]=(rs[key]||0)+1}
+await sbPatch("posts",pid,{reactions:rs,reacted_by:rb});loadPosts();
+}
+async function doReply(pid){
+if(!replyTxt.trim())return;
+await sbPost("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role:role,uid:uid,text:replyTxt.trim(),created_at:Date.now()});
+replyTxt="";replyId=null;loadPosts();
+}
+async function delPost(pid){await sbDel("posts",pid);loadPosts();}
+
+async function submitCompany(){
+var name=val("r_name").trim();
+var pref=val("r_pref").trim();
+var phone=val("r_phone").trim();
+var base=parseInt(val("r_base"),10);
+var perkm=parseInt(val("r_km"),10);
+if(!name||!pref||!phone||isNaN(base)||isNaN(perkm)){alert("店名・都道府県・初乗り・1km・電話番号は必須です");return;}
+var d={
+id:"c"+Date.now()+Math.random().toString(36).slice(2,5),
+name:name,pref:pref,area:val("r_area").trim(),hours:val("r_hours").trim(),
+base_fare:base,per_km:perkm,phone:phone,line:val("r_line").trim(),
+campaign:val("r_campaign").trim(),featured:false,created_at:Date.now()
+};
+var res=await sbPost("companies",d);
+if(Array.isArray(res)&&res.length){
+alert("登録しました！一覧に掲載されました。");
+regOpen=false;loadCo();
+}else{
+alert("登録に失敗しました。通信状況を確認して、もう一度お試しください。");
+}
+}
+
+function share(p){
+var rc=p.role==="customer"?"🍺お客":"🚗運転手";
+var t=rc+"「"+p.text.slice(0,60)+"」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう\nhttps://daikounaw.com";
+if(navigator.share)navigator.share({text:t}).catch(function(){});
+else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank");
+}
+
+function render(){
+var app=document.getElementById("app");if(!app)return;
+var out='<div class="hdr"><div class="logo" onclick="scr=\'battle\';render()">代行<span>なう</span></div><div style="font-size:10px;color:#888">お客 vs 運転手</div></div>';
+out+='<div style="flex:1;overflow-y:auto">';
+if(scr==="battle")out+=renderBattle();
+else out+=renderCompany();
+out+='</div>';
+out+='<div class="nav">';
+out+='<button class="'+(scr==="battle"?"on":"")+'" onclick="scr=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
+out+='<button class="'+(scr==="company"?"on":"")+'" onclick="scr=\'company\';loadCo()"><span class="ico">🚗</span>配車</button>';
+out+='</div>';
+app.innerHTML=out;
+}
+
+function renderBattle(){
+if(!role){
+return '<div style="padding:40px 20px;text-align:center"><div style="font-size:50px;margin-bottom:8px">⚔️</div><div class="logo" style="font-size:24px;margin-bottom:4px">代行<span>なう</span></div><div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:30px">お客 vs 運転手<br>匿名バトル掲示板</div><div style="font-size:15px;font-weight:700;margin-bottom:14px">あなたの立場は？</div><div style="display:flex;gap:12px;max-width:320px;margin:0 auto"><button onclick="pickRole(\'customer\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04));border:2px solid rgba(74,144,255,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🍺</div><div style="font-size:18px;font-weight:900;color:#4A90FF">お客</div></button><button onclick="pickRole(\'driver\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border:2px solid rgba(255,107,0,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🚗</div><div style="font-size:18px;font-weight:900;color:#FF6B00">運転手</div></button></div><div style="font-size:11px;color:#444;margin-top:16px">匿名 · 変更OK</div></div>';
+}
+var cN=posts.filter(function(p){return p.role==="customer"}).length;
+var dN=posts.filter(function(p){return p.role==="driver"}).length;
+var rc=role==="customer";
+var o='<div class="vs"><div class="row"><div class="side"><div class="num blue">'+cN+'</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">'+dN+'</div><div class="lbl org">🚗 運転手</div></div></div>';
+o+='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="tag '+(rc?"tag-c":"tag-d")+'">'+(rc?"🍺 お客":"🚗 運転手")+'</span><button onclick="role=null;lsDel(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>';
+o+='<div class="filters">';
+["hot:🔥 注目","new:🆕 新着","customer:🍺","driver:🚗"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
+o+='</div>';
+if(composing){
+o+='<div class="compose"><textarea rows="3" id="ctxt" placeholder="'+(rc?"お客の本音を投稿…":"運転手の本音を投稿…")+'">'+h(compTxt)+'</textarea><div class="acts"><button onclick="composing=false;compTxt=\'\';render()" style="background:#131318;color:#888;border:1px solid #24242e">取消</button><button onclick="compTxt=document.getElementById(\'ctxt\').value;submitPost()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000">投稿🔥</button></div></div>';
+}
+var sorted=posts.slice();
+if(filter==="hot")sorted.sort(function(a,b){return totalR(b)-totalR(a)});
+else if(filter==="customer")sorted=sorted.filter(function(p){return p.role==="customer"});
+else if(filter==="driver")sorted=sorted.filter(function(p){return p.role==="driver"});
+if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">⚔️</div><div style="font-size:16px;font-weight:900;margin-bottom:6px">まだバトルが始まっていません</div><div>最初の投稿で火をつけよう🔥</div></div>';
+sorted.forEach(function(p){
+var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
+var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
+o+='<div class="post"><div style="display:flex;gap:10px"><div class="av '+(isC?"av-c":"av-d")+'">'+(isC?"🍺":"🚗")+'</div><div style="flex:1;min-width:0">';
+o+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="tag '+(isC?"tag-c":"tag-d")+'">'+(isC?"お客":"運転手")+'</span>';
+if(hot)o+='<span class="hot">🔥炎上</span>';
+if(isMe)o+='<span style="font-size:10px;color:#444">あなた</span>';
+o+='<span style="font-size:10px;color:#444;margin-left:auto">'+ago(p.created_at)+'</span></div>';
+o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
+if(reps.length){
+o+='<div style="margin-bottom:8px;margin-left:6px;border-left:2px solid #24242e;padding-left:10px">';
+reps.slice(-3).forEach(function(r){o+='<div style="margin-bottom:5px"><span class="tag '+(r.role==="customer"?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 5px">'+(r.role==="customer"?"🍺":"🚗")+'</span><span style="font-size:13px;color:#888;margin-left:6px">'+h(r.text)+'</span></div>'});
+if(reps.length>3)o+='<div style="font-size:11px;color:#444">他'+(reps.length-3)+'件</div>';
+o+='</div>';
+}
+o+='<div class="rxn">';
+[["fire","🔥"],["agree","💪"],["funny","😂"],["heart","❤️"]].forEach(function(rx){
+var cnt=(p.reactions||{})[rx[0]]||0;var on=myR===rx[0];
+o+='<button class="'+(on?"on":"")+'" onclick="doReact(\''+p.id+'\',\''+rx[0]+'\')">'+rx[1]+(cnt>0?'<span>'+cnt+'</span>':'')+'</button>';
+});
+o+='<button onclick="replyId=replyId===\''+p.id+'\'?null:\''+p.id+'\';replyTxt=\'\';render()">💬'+(reps.length>0?' '+reps.length:'')+'</button>';
+o+='<button onclick="share(posts.find(function(x){return x.id===\''+p.id+'\'}))">📤</button>';
+if(isMe)o+='<button onclick="delPost(\''+p.id+'\')" style="margin-left:auto">🗑</button>';
+o+='</div>';
+if(replyId===p.id)o+='<div class="reply-box"><input id="rtxt" placeholder="返信..." onkeydown="if(event.key===\'Enter\'){replyTxt=this.value;doReply(\''+p.id+'\')}"><button onclick="replyTxt=document.getElementById(\'rtxt\').value;doReply(\''+p.id+'\')" style="background:#FF6B00;color:#000">送信</button></div>';
+o+='</div></div></div>';
+});
+o+='<button class="fab" onclick="composing=!composing;render()">✏️</button>';
+return o;
+}
+
+function renderCompany(){
+var o='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24">';
+o+='<div style="display:flex;align-items:center;justify-content:space-between">';
+o+='<div style="font-size:18px;font-weight:900">🚗 代行業者</div>';
+o+='<button onclick="regOpen=!regOpen;render()" style="padding:7px 13px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;'+(regOpen?'background:#131318;color:#888;border:1px solid #24242e':'background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none')+'">'+(regOpen?'✕ 閉じる':'＋ 無料登録')+'</button>';
+o+='</div>';
+if(!regOpen){
+o+='<div style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="number" id="kmin" placeholder="距離km" style="flex:1;text-align:center;margin-bottom:0" value="'+km+'"><button onclick="km=document.getElementById(\'kmin\').value;render()" style="padding:10px 16px;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">比較</button></div>';
+}
+o+='</div>';
+
+if(regOpen){
+o+='<div class="card feat" style="margin-top:12px">';
+o+='<div style="font-size:16px;font-weight:900;margin-bottom:2px">🎉 代行業者 無料登録</div>';
+o+='<div style="font-size:11px;color:#888;margin-bottom:14px">登録は無料です。入力して登録すると、下の一覧と料金比較に掲載されます。</div>';
+o+='<span class="reg-label">店名・会社名 <span style="color:#FF6B00">必須</span></span><input type="text" id="r_name" placeholder="例：代行なう運転代行">';
+o+='<span class="reg-label">都道府県 <span style="color:#FF6B00">必須</span></span><input type="text" id="r_pref" placeholder="例：福岡県">';
+o+='<span class="reg-label">エリア</span><input type="text" id="r_area" placeholder="例：福岡市南区・春日市・大野城市">';
+o+='<span class="reg-label">営業時間</span><input type="text" id="r_hours" placeholder="例：21:00〜翌6:00">';
+o+='<div style="display:flex;gap:8px"><div style="flex:1"><span class="reg-label">初乗り料金(円) <span style="color:#FF6B00">必須</span></span><input type="number" id="r_base" placeholder="2000"></div><div style="flex:1"><span class="reg-label">1kmあたり(円) <span style="color:#FF6B00">必須</span></span><input type="number" id="r_km" placeholder="500"></div></div>';
+o+='<span class="reg-label">電話番号 <span style="color:#FF6B00">必須</span></span><input type="tel" id="r_phone" placeholder="例：09012345678">';
+o+='<span class="reg-label">LINE URL（任意）</span><input type="text" id="r_line" placeholder="https://lin.ee/xxxx">';
+o+='<span class="reg-label">キャンペーン（任意）</span><input type="text" id="r_campaign" placeholder="例：初乗り無料（4km以上）">';
+o+='<button class="reg-submit" onclick="submitCompany()">この内容で無料登録する</button>';
+o+='</div>';
+return o;
+}
+
+var kmN=parseFloat(km);
+if(kmN>0){
+var sorted=companies.slice().sort(function(a,b){return(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)});
+o+='<div style="padding:10px 16px"><div style="font-size:13px;color:#FF6B00;font-weight:800;margin-bottom:8px">📊 '+kmN+'km 料金ランキング</div>';
+sorted.forEach(function(co,i){
+var fare=co.base_fare+Math.ceil(kmN)*co.per_km;
+var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1c1c24"><span style="width:22px;text-align:center;font-weight:900;color:'+(i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":"#444")+'">'+medal+'</span><div style="flex:1"><span style="font-size:13px;font-weight:700">'+h(co.name)+'</span></div><span style="font-size:18px;font-weight:900;color:#FF6B00">'+yen(fare)+'</span></div>';
+});
+o+='</div>';
+}else{
+if(!companies.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">🚗</div><div style="font-size:15px;font-weight:900;margin-bottom:6px">まだ登録業者がいません</div><div>「＋無料登録」から最初の登録をどうぞ</div></div>';
+companies.forEach(function(co){
+o+='<div class="card'+(co.featured?" feat":"")+'">';
+if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">⭐ 公式</span>';
+o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
+o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+' · '+h(co.hours||"")+'</div>';
+o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">初乗り'+yen(co.base_fare)+' · 1km'+yen(co.per_km)+'</div>';
+if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
+o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
+if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
+o+='</div></div>';
+});
+}
+return o;
+}
+
+try{render();}catch(e){}
+loadPosts();
+setInterval(function(){loadPosts(true)},15000);
+</script>
+</body></html>
