@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>DISRI CLUB</title>
+<style>
+:root{
+  --bg:#04060c;--bg1:#080c14;--bg2:#070b12;
+  --c1:#00ffe0;--c2:#ff1a5e;--c3:#f5c400;--c4:#3d5afe;
+  --magenta:#ff1a9d;--violet:#b44fff;
+  --tx:#e6f0fb;--tx2:rgba(210,228,245,.7);--tx3:rgba(180,200,220,.45);
+  --line:#142231;--red:#ff0020;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:16px;color:var(--tx)}
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px)}
+.bg-road{position:fixed;inset:0;z-index:0;background:
+  radial-gradient(ellipse 90% 50% at 50% 0%,rgba(80,0,80,.25) 0%,transparent 60%),
+  radial-gradient(ellipse 80% 40% at 50% 110%,rgba(0,80,90,.18) 0%,transparent 70%),
+  linear-gradient(180deg,#04060c 0%,#060818 50%,#030610 100%)}
+.blink{animation:blink .9s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+.shell{position:relative;z-index:10;width:100%;height:100%;display:flex;flex-direction:column}
+
+/* TOP */
+.topbar{height:54px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;
+background:linear-gradient(180deg,rgba(4,6,12,.97),rgba(4,6,12,.4));border-bottom:1px solid var(--line);z-index:200}
+.logo{font-size:18px;font-weight:900;letter-spacing:.18em;cursor:pointer;white-space:nowrap;
+background:linear-gradient(90deg,var(--c1),var(--violet),var(--magenta),var(--c1));background-size:300% 100%;
+-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+animation:logo-shift 6s linear infinite}
+@keyframes logo-shift{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.logo-dot{-webkit-text-fill-color:var(--magenta);color:var(--magenta)}
+.top-sep{flex:1}
+.top-pill{display:flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.08em;padding:5px 11px;
+border:1px solid var(--c2);border-radius:4px;color:var(--c2);background:rgba(255,26,94,.08)}
+.top-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c2);animation:blink .8s step-end infinite}
+
+.content{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen.active{display:flex}
+.screen::-webkit-scrollbar{width:4px}.screen::-webkit-scrollbar-thumb{background:var(--line)}
+
+/* ROOM */
+.room-head{padding:16px 18px 10px;flex-shrink:0}
+.room-title{font-size:23px;font-weight:900;color:#fff;letter-spacing:.04em;line-height:1.3}
+.room-sub{font-size:14px;color:var(--c1);margin-top:6px;letter-spacing:.05em;display:flex;align-items:center;gap:7px}
+.room-sub .dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1);animation:blink 1.2s step-end infinite}
+
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 16px 16px;align-content:start}
+.tile{position:relative;border:1px solid var(--line);border-radius:14px;padding:16px 12px;text-align:center;
+background:linear-gradient(160deg,rgba(10,14,24,.9),rgba(4,6,12,.92));overflow:hidden;transition:all .25s;min-height:150px;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.tile.you{grid-column:1/-1;border-color:rgba(0,255,224,.4);background:linear-gradient(160deg,rgba(0,30,28,.5),rgba(4,8,12,.92));
+box-shadow:inset 0 0 30px rgba(0,255,224,.05)}
+.tile.talking{border-color:var(--c3);box-shadow:0 0 24px rgba(245,196,0,.3),inset 0 0 20px rgba(245,196,0,.06)}
+.tile.talking .tile-av{box-shadow:0 0 22px rgba(245,196,0,.5)}
+.tile-av{width:74px;height:74px;border-radius:50%;border:2px solid var(--c1);display:flex;align-items:center;justify-content:center;
+font-size:38px;background:rgba(0,255,224,.07);overflow:hidden;flex-shrink:0;transition:box-shadow .25s}
+.tile.you .tile-av{width:96px;height:96px;border-color:var(--c1);box-shadow:0 0 18px rgba(0,255,224,.3)}
+.tile-av svg{width:100%;height:100%;display:block}
+.tile-name{font-size:18px;font-weight:bold;color:#fff;letter-spacing:.03em}
+.tile.you .tile-name{font-size:21px;color:var(--c1)}
+.tile-role{font-size:13px;color:var(--tx2)}
+.tile-mic{position:absolute;top:10px;right:12px;font-size:16px}
+.tile-mic.off{opacity:.35}
+.live-badge{position:absolute;top:10px;left:12px;font-size:11px;letter-spacing:.1em;color:var(--red);
+display:flex;align-items:center;gap:4px}
+.live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s step-end infinite}
+
+/* live visualizer on your tile */
+.viz{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:26px;width:120px}
+.viz .bar{width:5px;border-radius:2px;background:linear-gradient(0deg,var(--c1),rgba(0,255,224,.3));height:4px;transition:height .07s}
+
+/* SUBTITLE */
+.subtitle{position:absolute;left:0;right:0;bottom:0;z-index:300;padding:18px 18px 22px;pointer-events:none;
+background:linear-gradient(0deg,rgba(4,6,12,.96) 30%,transparent);transform:translateY(110%);transition:transform .3s}
+.subtitle.show{transform:translateY(0)}
+.sub-name{font-size:14px;color:var(--c3);letter-spacing:.06em;margin-bottom:5px;font-weight:bold}
+.sub-text{font-size:22px;line-height:1.5;color:#fff;font-weight:bold;text-shadow:0 0 12px rgba(0,0,0,.6)}
+
+/* MIC DOCK */
+.mic-dock{flex-shrink:0;padding:14px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;
+background:linear-gradient(0deg,rgba(4,6,12,.97),transparent);position:relative;z-index:250}
+.mic-status{font-size:15px;color:var(--tx2);letter-spacing:.04em;text-align:center;min-height:20px}
+.mic-btn{width:78px;height:78px;border-radius:50%;border:3px solid rgba(0,255,224,.4);background:rgba(0,255,224,.08);
+color:var(--c1);font-size:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.mic-btn:active{transform:scale(.94)}
+.mic-btn.on{border-color:var(--c1);background:rgba(0,255,224,.18);box-shadow:0 0 30px rgba(0,255,224,.5);
+animation:micpulse 1.4s ease-in-out infinite}
+@keyframes micpulse{0%,100%{box-shadow:0 0 18px rgba(0,255,224,.35)}50%{box-shadow:0 0 36px rgba(0,255,224,.7)}}
+.mic-btn.thinking{border-color:var(--c3);color:var(--c3);background:rgba(245,196,0,.12)}
+.mic-hint{font-size:13px;color:var(--tx3);text-align:center}
+
+/* AVATAR SCREEN */
+.av-wrap{padding:18px 18px 90px}
+.sec-title{font-size:20px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:.04em}
+.sec-sub{font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:18px}
+.av-preview{width:180px;height:180px;border-radius:20px;border:2px solid rgba(0,255,224,.3);margin:0 auto 18px;
+display:flex;align-items:center;justify-content:center;font-size:80px;background:rgba(0,255,224,.05);overflow:hidden;
+box-shadow:0 0 26px rgba(0,255,224,.15)}
+.av-preview svg{width:100%;height:100%;display:block}
+.fld{margin-bottom:14px}
+.fld-lbl{font-size:14px;color:var(--c1);letter-spacing:.05em;margin-bottom:7px;font-weight:bold}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;padding:13px 14px;
+color:#fff;font-family:inherit;font-size:17px;outline:none;transition:border-color .15s;-webkit-text-fill-color:#fff;caret-color:var(--c1)}
+.inp::placeholder{color:rgba(255,255,255,.3)}
+.inp:focus{border-color:rgba(0,255,224,.5);background:rgba(255,255,255,.08)}
+textarea.inp{resize:none;line-height:1.5}
+.btn{width:100%;padding:15px;border:1px solid var(--c1);border-radius:9px;background:rgba(0,255,224,.1);
+color:var(--c1);font-family:inherit;font-size:17px;font-weight:bold;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.98)}
+.btn:hover{background:rgba(0,255,224,.18);box-shadow:0 0 14px rgba(0,255,224,.25)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-sec{margin-top:10px;border-color:var(--line);color:var(--tx2);background:transparent}
+.gen-loading{text-align:center;padding:14px;font-size:15px;letter-spacing:.1em;color:var(--c3);display:none}
+.gen-loading.show{display:block}
+.gen-loading .d{animation:blink .6s step-end infinite}
+.gen-loading .d:nth-child(2){animation-delay:.2s}.gen-loading .d:nth-child(3){animation-delay:.4s}
+.preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.preset{padding:9px 14px;border:1px solid var(--line);border-radius:7px;font-size:14px;color:var(--tx2);cursor:pointer;transition:all .15s}
+.preset:hover{border-color:var(--c1);color:var(--c1)}
+.av-gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:22px}
+.av-cell{aspect-ratio:1;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;
+font-size:30px;cursor:pointer;background:rgba(255,255,255,.03);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.av-cell:active{transform:scale(.92)}
+.av-cell.sel{border-color:var(--c1);background:rgba(0,255,224,.14);box-shadow:0 0 14px rgba(0,255,224,.35)}
+
+/* BOTTOM NAV */
+.bottomnav{height:66px;flex-shrink:0;display:flex;align-items:center;
+background:linear-gradient(0deg,rgba(4,6,12,.99),rgba(4,6,12,.6));border-top:1px solid var(--line);z-index:200}
+.nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--tx2);transition:color .15s}
+.nv.active{color:var(--c1)}
+.nv.active .nv-ic{text-shadow:0 0 10px var(--c1)}
+.nv-ic{font-size:24px}
+.nv-lbl{font-size:12px;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="bg-road"></div>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="logo" onclick="go('room')">DISRI<span class="logo-dot">.</span>CLUB</div>
+    <div class="top-sep"></div>
+    <a href="index.html" style="text-decoration:none;font-size:11px;color:var(--tx2);padding:5px 9px;border:1px solid var(--line);border-radius:7px;white-space:nowrap">← 代行なう</a>
+    <div class="top-pill" id="memCount">LIVE 5</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ROOM -->
+    <div class="screen active" id="sRoom">
+      <div class="room-head">
+        <div class="room-title">深夜のたまり場ルーム</div>
+        <div class="room-sub"><span class="dot"></span><span id="roomState">みんな声で話してます</span></div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="subtitle" id="subtitle">
+        <div class="sub-name" id="subName"></div>
+        <div class="sub-text" id="subText"></div>
+      </div>
+      <div class="mic-dock">
+        <div class="mic-status" id="micStatus">マイクを押して話しかけよう</div>
+        <div class="mic-btn off" id="micBtn" onclick="toggleMic()">🎙</div>
+        <div class="mic-hint" id="micHint">タップで会話に参加</div>
+      </div>
+    </div>
+
+    <!-- AVATAR -->
+    <div class="screen" id="sAvatar">
+      <div class="av-wrap">
+        <div class="sec-title">アバターを選ぶ</div>
+        <div class="sec-sub">好きなアバターをタップして選んでください。</div>
+        <div class="av-preview" id="avPreview">🐉</div>
+        <div class="av-gallery" id="avGallery"></div>
+        <button class="btn" onclick="go('room')">これにする</button>
+      </div>
+    </div>
+
+    <!-- ME -->
+    <div class="screen" id="sMe">
+      <div class="av-wrap">
+        <div class="sec-title">自分の設定</div>
+        <div class="sec-sub">名前を変えられます。アバターは「アバター」タブから。</div>
+        <div class="av-preview" id="meAvPreview">🐉</div>
+        <div class="fld">
+          <div class="fld-lbl">表示名</div>
+          <input class="inp" id="meName" maxlength="16" placeholder="なまえ">
+        </div>
+        <button class="btn" onclick="saveMe()">保存する</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottomnav">
+    <div class="nv active" id="nvRoom" onclick="go('room')"><div class="nv-ic">◉</div><div class="nv-lbl">ルーム</div></div>
+    <div class="nv" id="nvAvatar" onclick="go('avatar')"><div class="nv-ic">✦</div><div class="nv-lbl">アバター</div></div>
+    <div class="nv" id="nvMe" onclick="go('me')"><div class="nv-ic">◈</div><div class="nv-lbl">自分</div></div>
+  </div>
+</div>
+
+<script>
+/* ===== STATE ===== */
+var me = { name:'あなた', av:'🐉', avSvg:null };
+var members = [
+  { id:'neon',  name:'ネオン',   role:'テンション高め', av:'🦊', avSvg:null,
+    persona:'明るくてノリがいい。語尾に勢いがある。' },
+  { id:'shizuku', name:'シズク', role:'おっとり',     av:'🌙', avSvg:null,
+    persona:'落ち着いていて優しい。ゆっくり話す。' },
+  { id:'ghost', name:'ゴースト', role:'皮肉屋',       av:'💀', avSvg:null,
+    persona:'クールで皮肉っぽいが根は優しい。短く話す。' },
+  { id:'luna',  name:'ルナ',     role:'元気',         av:'⚡', avSvg:null,
+    persona:'元気いっぱいで好奇心旺盛。質問が多い。' }
+];
+var ambientLines = [
+  ['neon','今夜もこのルーム、いい感じに賑わってきたね！'],
+  ['shizuku','静かな夜って、なんだか落ち着くよね…'],
+  ['ghost','で、誰か面白い話のひとつでもないわけ？'],
+  ['luna','ねえねえ、最近ハマってることある？聞きたい！'],
+  ['neon','声でこうやって集まれるの、やっぱ最高だわ'],
+  ['shizuku','遠くにいても、声があると近く感じるね'],
+  ['ghost','……まあ、悪くない夜だよ'],
+  ['luna','誰かマイク押して話してよ〜！待ってる！']
+];
+var screen='room';
+var ambientTimer=null, busy=false, micOn=false;
+var audioCtx=null, analyser=null, micStream=null, vizRaf=null;
+var recog=null, synthVoice=null;
+
+/* ===== NAV ===== */
+function go(s){
+  screen=s;
+  document.querySelectorAll('.screen').forEach(function(e){e.classList.remove('active')});
+  document.querySelectorAll('.nv').forEach(function(e){e.classList.remove('active')});
+  var map={room:['sRoom','nvRoom'],avatar:['sAvatar','nvAvatar'],me:['sMe','nvMe']};
+  document.getElementById(map[s][0]).classList.add('active');
+  document.getElementById(map[s][1]).classList.add('active');
+  if(s==='room'){ startAmbient(); }
+  else { stopAmbient(); }
+  if(s==='avatar'){ renderGallery(); renderMeAv(); }
+  if(s==='me'){ document.getElementById('meName').value=me.name; renderMeAv(); }
+}
+
+/* ===== GRID ===== */
+function avInner(o,big){
+  if(o.avSvg) return o.avSvg;
+  return o.av;
+}
+function renderGrid(){
+  var g=document.getElementById('grid'); g.innerHTML='';
+  // you
+  var you=document.createElement('div'); you.className='tile you'; you.id='tile-you';
+  you.innerHTML=
+    '<div class="live-badge">LIVE</div>'+
+    '<div class="tile-mic off" id="youMic">🔇</div>'+
+    '<div class="tile-av" id="youAv">'+avInner(me)+'</div>'+
+    '<div class="tile-name">'+esc(me.name)+'</div>'+
+    '<div class="viz" id="viz"></div>';
+  g.appendChild(you);
+  // build viz bars
+  var viz=you.querySelector('#viz');
+  for(var i=0;i<14;i++){var b=document.createElement('div');b.className='bar';viz.appendChild(b);}
+  // members
+  members.forEach(function(m){
+    var t=document.createElement('div'); t.className='tile'; t.id='tile-'+m.id;
+    t.innerHTML=
+      '<div class="tile-mic">🎙</div>'+
+      '<div class="tile-av">'+avInner(m)+'</div>'+
+      '<div class="tile-name">'+esc(m.name)+'</div>'+
+      '<div class="tile-role">'+esc(m.role)+'</div>';
+    g.appendChild(t);
+  });
+}
+
+/* ===== SUBTITLE + SPEAK ===== */
+function showSub(name,text){
+  document.getElementById('subName').textContent=name;
+  document.getElementById('subText').textContent=text;
+  document.getElementById('subtitle').classList.add('show');
+}
+function hideSub(){ document.getElementById('subtitle').classList.remove('show'); }
+function highlight(id,on){
+  var t=document.getElementById('tile-'+id);
+  if(t) t.classList.toggle('talking',on);
+}
+function speak(text){
+  return new Promise(function(resolve){
+    try{
+      if(!('speechSynthesis' in window)){ setTimeout(resolve, Math.min(4000,text.length*90)); return; }
+      var u=new SpeechSynthesisUtterance(text);
+      u.lang='ja-JP'; u.rate=1.02; u.pitch=1.0;
+      if(synthVoice) u.voice=synthVoice;
+      u.onend=resolve; u.onerror=resolve;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+      setTimeout(resolve, Math.min(9000,2000+text.length*110)); // safety
+    }catch(e){ setTimeout(resolve,1500); }
+  });
+}
+async function memberSay(id,text){
+  var m=memberById(id); if(!m)return;
+  busy=true; highlight(id,true); showSub(m.name,text);
+  await speak(text);
+  highlight(id,false);
+  busy=false;
+}
+
+/* ===== AMBIENT LOOP ===== */
+function startAmbient(){
+  if(ambientTimer) return;
+  ambientTimer=setInterval(function(){
+    if(busy||micOn||screen!=='room') return;
+    if(Math.random()<0.7){
+      var line=ambientLines[Math.floor(Math.random()*ambientLines.length)];
+      memberSay(line[0], line[1]);
+    }
+  }, 9000);
+}
+function stopAmbient(){ if(ambientTimer){clearInterval(ambientTimer);ambientTimer=null;} }
+
+/* ===== MIC + SPEECH-TO-TEXT ===== */
+async function toggleMic(){
+  if(micOn){ stopMic(); return; }
+  // start mic
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    setMicStatus('マイクの使用が許可されませんでした'); return;
+  }
+  micOn=true;
+  document.getElementById('micBtn').classList.add('on');
+  document.getElementById('micBtn').classList.remove('thinking');
+  document.getElementById('youMic').className='tile-mic';
+  document.getElementById('youMic').textContent='🎙';
+  startViz();
+  setMicStatus('聞いています… 話し終えたら自動で送ります');
+  startRecognition();
+}
+function stopMic(){
+  micOn=false;
+  document.getElementById('micBtn').classList.remove('on');
+  document.getElementById('youMic').className='tile-mic off';
+  document.getElementById('youMic').textContent='🔇';
+  stopViz();
+  if(recog){ try{recog.stop();}catch(e){} }
+  if(micStream){ micStream.getTracks().forEach(function(t){t.stop()}); micStream=null; }
+  setMicStatus('マイクを押して話しかけよう');
+}
+function setMicStatus(t){ document.getElementById('micStatus').textContent=t; }
+
+/* visualizer (real mic level) */
+function startViz(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    var src=audioCtx.createMediaStreamSource(micStream);
+    analyser=audioCtx.createAnalyser(); analyser.fftSize=64;
+    src.connect(analyser);
+    var data=new Uint8Array(analyser.frequencyBinCount);
+    var bars=document.querySelectorAll('#viz .bar');
+    function loop(){
+      if(!micOn){return;}
+      analyser.getByteFrequencyData(data);
+      for(var i=0;i<bars.length;i++){
+        var v=data[i+2]||0;
+        bars[i].style.height=(4+(v/255)*22)+'px';
+      }
+      vizRaf=requestAnimationFrame(loop);
+    }
+    loop();
+  }catch(e){}
+}
+function stopViz(){
+  if(vizRaf)cancelAnimationFrame(vizRaf);
+  document.querySelectorAll('#viz .bar').forEach(function(b){b.style.height='4px'});
+}
+
+/* speech recognition */
+function startRecognition(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    setMicStatus('この端末では音声認識が使えません');
+    document.getElementById('micHint').textContent='※ iPhoneのSafariは未対応。Chrome等でお試しを';
+    return;
+  }
+  recog=new SR();
+  recog.lang='ja-JP'; recog.interimResults=false; recog.maxAlternatives=1;
+  recog.onresult=function(ev){
+    var said=ev.results[0][0].transcript;
+    showSub(me.name, said);
+    onUserSaid(said);
+  };
+  recog.onerror=function(ev){ setMicStatus('もう一度お試しください'); };
+  recog.onend=function(){ if(micOn){ try{recog.start();}catch(e){} } };
+  try{ recog.start(); }catch(e){}
+}
+
+/* ===== AI conversation ===== */
+async function onUserSaid(text){
+  if(busy)return;
+  if(recog){ try{recog.stop();}catch(e){} }
+  document.getElementById('micBtn').classList.add('thinking');
+  setMicStatus('みんなが考えています…');
+  var m=members[Math.floor(Math.random()*members.length)];
+  var prompt='あなたは深夜の音声チャットルーム「DISRI CLUB」のメンバー「'+m.name+'」です。'+
+    '性格：'+m.persona+'\n'+
+    '今、参加者がこう話しかけました：「'+text+'」\n'+
+    'この発言に対して、声に出して返す自然な日本語の返事を1〜2文だけ出力してください。'+
+    'カジュアルで、説明や前置きや引用符は不要。返事のセリフだけを書いてください。';
+  var reply='';
+  try{ reply=await callClaude(prompt); }catch(e){ reply=''; }
+  if(!reply) reply='うんうん、なるほどね。もう少し聞かせてよ。';
+  document.getElementById('micBtn').classList.remove('thinking');
+  await memberSay(m.id, reply);
+  if(micOn){ setMicStatus('聞いています… 続けてどうぞ'); if(recog){try{recog.start();}catch(e){}} }
+}
+
+async function callClaude(prompt){
+  var res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:300,
+      messages:[{role:'user', content:prompt}]})
+  });
+  var data=await res.json();
+  return (data.content||[]).filter(function(b){return b.type==='text'}).map(function(b){return b.text}).join(' ').trim();
+}
+
+/* ===== AI AVATAR (SVG) ===== */
+var avatarChoices=['🐉','🦊','🐺','🦅','🦉','🐯','🦁','🐱','🦈','🐍','🦂','🦇','🐙','🤖','👾','👽','💀','👻','⚡','🔥'];
+function renderGallery(){
+  var g=document.getElementById('avGallery'); if(!g)return; g.innerHTML='';
+  avatarChoices.forEach(function(a){
+    var c=document.createElement('div');
+    c.className='av-cell'+(me.av===a ? ' sel':'');
+    c.textContent=a;
+    c.onclick=function(){ me.av=a; me.avSvg=null; renderGallery(); renderMeAv(); renderGrid(); };
+    g.appendChild(c);
+  });
+}
+function renderMeAv(){
+  document.getElementById('meAvPreview').innerHTML = me.avSvg || me.av;
+  document.getElementById('avPreview').innerHTML = me.avSvg || me.av;
+}
+
+/* ===== ME ===== */
+function saveMe(){
+  var n=document.getElementById('meName').value.trim();
+  if(n)me.name=n;
+  renderGrid();
+  go('room');
+}
+
+/* ===== utils ===== */
+function memberById(id){for(var i=0;i<members.length;i++)if(members[i].id===id)return members[i];return null;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ===== init ===== */
+function initVoice(){
+  if('speechSynthesis' in window){
+    var pick=function(){
+      var vs=window.speechSynthesis.getVoices();
+      for(var i=0;i<vs.length;i++){ if(vs[i].lang&&vs[i].lang.indexOf('ja')===0){synthVoice=vs[i];break;} }
+    };
+    pick(); window.speechSynthesis.onvoiceschanged=pick;
+  }
+}
+renderGrid(); renderGallery(); renderMeAv(); initVoice(); startAmbient();
+</script>
+
+</body>
+</html>

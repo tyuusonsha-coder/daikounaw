@@ -53,7 +53,7 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 .reply-box input{flex:1;background:#0c0c10;border:1px solid #24242e;border-radius:10px;padding:8px 12px;color:#efefef;font-size:13px;outline:none;font-family:inherit}
 .reply-box button{padding:8px 14px;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
 .reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
-.reg-submit{width:100%;padding:13px 0;border:none;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:4px}
+.reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
 </style>
 </head><body>
 <div id="app"></div>
@@ -66,7 +66,7 @@ function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
 var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSet("dn_uid",uid);}
 var role=lsGet("dn_role");
-var scr="battle",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+var scr="company",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
 var regOpen=false,km="";
 
 function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -136,7 +136,7 @@ alert("登録に失敗しました。通信状況を確認して、もう一度�
 }
 
 function share(p){
-var rc=p.role==="customer"?"🍺お客":"🚗運転手";
+var rc=p.role==="customer"?"🍺お客":"🚘運転手";
 var t=rc+"「"+p.text.slice(0,60)+"」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう\nhttps://daikounaw.com";
 if(navigator.share)navigator.share({text:t}).catch(function(){});
 else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank");
@@ -145,28 +145,29 @@ else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),
 function render(){
 var app=document.getElementById("app");if(!app)return;
 var out='<div class="hdr"><div class="logo" onclick="scr=\'battle\';render()">代行<span>なう</span></div><div style="font-size:10px;color:#888">お客 vs 運転手</div></div>';
-out+='<div style="flex:1;overflow-y:auto">';
+out+='<div style="flex:1;overflow-y:auto;padding-bottom:84px">';
 if(scr==="battle")out+=renderBattle();
 else out+=renderCompany();
 out+='</div>';
 out+='<div class="nav">';
+out+='<button class="'+(scr==="company"?"on":"")+'" onclick="scr=\'company\';loadCo()"><span class="ico">🚘</span>配車</button>';
 out+='<button class="'+(scr==="battle"?"on":"")+'" onclick="scr=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
-out+='<button class="'+(scr==="company"?"on":"")+'" onclick="scr=\'company\';loadCo()"><span class="ico">🚗</span>配車</button>';
+out+='<button onclick="location.href=\'disri.html\'" style="color:#00ffe0"><span class="ico">🎙</span>ルーム</button>';
 out+='</div>';
 app.innerHTML=out;
 }
 
 function renderBattle(){
 if(!role){
-return '<div style="padding:40px 20px;text-align:center"><div style="font-size:50px;margin-bottom:8px">⚔️</div><div class="logo" style="font-size:24px;margin-bottom:4px">代行<span>なう</span></div><div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:30px">お客 vs 運転手<br>匿名バトル掲示板</div><div style="font-size:15px;font-weight:700;margin-bottom:14px">あなたの立場は？</div><div style="display:flex;gap:12px;max-width:320px;margin:0 auto"><button onclick="pickRole(\'customer\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04));border:2px solid rgba(74,144,255,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🍺</div><div style="font-size:18px;font-weight:900;color:#4A90FF">お客</div></button><button onclick="pickRole(\'driver\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border:2px solid rgba(255,107,0,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🚗</div><div style="font-size:18px;font-weight:900;color:#FF6B00">運転手</div></button></div><div style="font-size:11px;color:#444;margin-top:16px">匿名 · 変更OK</div></div>';
+return '<div style="padding:40px 20px;text-align:center"><div style="font-size:50px;margin-bottom:8px">⚔️</div><div class="logo" style="font-size:24px;margin-bottom:4px">代行<span>なう</span></div><div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:30px">お客 vs 運転手<br>匿名バトル掲示板</div><div style="font-size:15px;font-weight:700;margin-bottom:14px">あなたの立場は？</div><div style="display:flex;gap:12px;max-width:320px;margin:0 auto"><button onclick="pickRole(\'customer\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04));border:2px solid rgba(74,144,255,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🍺</div><div style="font-size:18px;font-weight:900;color:#4A90FF">お客</div></button><button onclick="pickRole(\'driver\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border:2px solid rgba(255,107,0,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🚘</div><div style="font-size:18px;font-weight:900;color:#FF6B00">運転手</div></button></div><div style="font-size:11px;color:#444;margin-top:16px">匿名 · 変更OK</div></div>';
 }
 var cN=posts.filter(function(p){return p.role==="customer"}).length;
 var dN=posts.filter(function(p){return p.role==="driver"}).length;
 var rc=role==="customer";
-var o='<div class="vs"><div class="row"><div class="side"><div class="num blue">'+cN+'</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">'+dN+'</div><div class="lbl org">🚗 運転手</div></div></div>';
-o+='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="tag '+(rc?"tag-c":"tag-d")+'">'+(rc?"🍺 お客":"🚗 運転手")+'</span><button onclick="role=null;lsDel(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>';
+var o='<div class="vs"><div class="row"><div class="side"><div class="num blue">'+cN+'</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">'+dN+'</div><div class="lbl org">🚘 運転手</div></div></div>';
+o+='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="tag '+(rc?"tag-c":"tag-d")+'">'+(rc?"🍺 お客":"🚘 運転手")+'</span><button onclick="role=null;lsDel(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>';
 o+='<div class="filters">';
-["hot:🔥 注目","new:🆕 新着","customer:🍺","driver:🚗"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
+["hot:🔥 注目","new:🆕 新着","customer:🍺","driver:🚘"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
 o+='</div>';
 if(composing){
 o+='<div class="compose"><textarea rows="3" id="ctxt" placeholder="'+(rc?"お客の本音を投稿…":"運転手の本音を投稿…")+'">'+h(compTxt)+'</textarea><div class="acts"><button onclick="composing=false;compTxt=\'\';render()" style="background:#131318;color:#888;border:1px solid #24242e">取消</button><button onclick="compTxt=document.getElementById(\'ctxt\').value;submitPost()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000">投稿🔥</button></div></div>';
@@ -179,7 +180,7 @@ if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-botto
 sorted.forEach(function(p){
 var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
 var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
-o+='<div class="post"><div style="display:flex;gap:10px"><div class="av '+(isC?"av-c":"av-d")+'">'+(isC?"🍺":"🚗")+'</div><div style="flex:1;min-width:0">';
+o+='<div class="post"><div style="display:flex;gap:10px"><div class="av '+(isC?"av-c":"av-d")+'">'+(isC?"🍺":"🚘")+'</div><div style="flex:1;min-width:0">';
 o+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="tag '+(isC?"tag-c":"tag-d")+'">'+(isC?"お客":"運転手")+'</span>';
 if(hot)o+='<span class="hot">🔥炎上</span>';
 if(isMe)o+='<span style="font-size:10px;color:#444">あなた</span>';
@@ -187,7 +188,7 @@ o+='<span style="font-size:10px;color:#444;margin-left:auto">'+ago(p.created_at)
 o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
 if(reps.length){
 o+='<div style="margin-bottom:8px;margin-left:6px;border-left:2px solid #24242e;padding-left:10px">';
-reps.slice(-3).forEach(function(r){o+='<div style="margin-bottom:5px"><span class="tag '+(r.role==="customer"?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 5px">'+(r.role==="customer"?"🍺":"🚗")+'</span><span style="font-size:13px;color:#888;margin-left:6px">'+h(r.text)+'</span></div>'});
+reps.slice(-3).forEach(function(r){o+='<div style="margin-bottom:5px"><span class="tag '+(r.role==="customer"?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 5px">'+(r.role==="customer"?"🍺":"🚘")+'</span><span style="font-size:13px;color:#888;margin-left:6px">'+h(r.text)+'</span></div>'});
 if(reps.length>3)o+='<div style="font-size:11px;color:#444">他'+(reps.length-3)+'件</div>';
 o+='</div>';
 }
@@ -210,7 +211,7 @@ return o;
 function renderCompany(){
 var o='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24">';
 o+='<div style="display:flex;align-items:center;justify-content:space-between">';
-o+='<div style="font-size:18px;font-weight:900">🚗 代行業者</div>';
+o+='<div style="font-size:18px;font-weight:900">🚘 代行業者</div>';
 o+='<button onclick="regOpen=!regOpen;render()" style="padding:7px 13px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;'+(regOpen?'background:#131318;color:#888;border:1px solid #24242e':'background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none')+'">'+(regOpen?'✕ 閉じる':'＋ 無料登録')+'</button>';
 o+='</div>';
 if(!regOpen){
@@ -235,6 +236,16 @@ o+='</div>';
 return o;
 }
 
+var recent=posts.slice(0,3);
+if(recent.length){
+o+='<div style="padding:12px 16px 4px">';
+o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:13px;color:#FF6B00;font-weight:800">⚔️ 最近のバトル</div><button onclick="scr=\'battle\';render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:3px 10px;color:#888;font-size:11px;cursor:pointer;font-family:inherit">すべて見る ›</button></div>';
+recent.forEach(function(p){var isC=p.role==="customer";
+o+='<div onclick="scr=\'battle\';render()" style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #1c1c24;cursor:pointer"><span class="tag '+(isC?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 6px;white-space:nowrap">'+(isC?"🍺お客":"🚘運転手")+'</span><span style="font-size:13px;color:#ddd;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(p.text)+'</span><span style="font-size:10px;color:#444;white-space:nowrap">'+ago(p.created_at)+'</span></div>';
+});
+o+='</div>';
+}
+
 var kmN=parseFloat(km);
 if(kmN>0){
 var sorted=companies.slice().sort(function(a,b){return(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)});
@@ -246,7 +257,7 @@ o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bot
 });
 o+='</div>';
 }else{
-if(!companies.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">🚗</div><div style="font-size:15px;font-weight:900;margin-bottom:6px">まだ登録業者がいません</div><div>「＋無料登録」から最初の登録をどうぞ</div></div>';
+if(!companies.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">🚘</div><div style="font-size:15px;font-weight:900;margin-bottom:6px">まだ登録業者がいません</div><div>「＋無料登録」から最初の登録をどうぞ</div></div>';
 companies.forEach(function(co){
 o+='<div class="card'+(co.featured?" feat":"")+'">';
 if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">⭐ 公式</span>';
@@ -263,6 +274,7 @@ return o;
 }
 
 try{render();}catch(e){}
+loadCo();
 loadPosts();
 setInterval(function(){loadPosts(true)},15000);
 </script>
