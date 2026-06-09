@@ -98,6 +98,7 @@ function joinRoom(){
       startWithVideoMuted: true,
       startAudioOnly: true,
       prejoinPageEnabled: false,
+      prejoinConfig: { enabled: false },
       disableDeepLinking: true,
       defaultLanguage: 'ja'
     },
@@ -115,6 +116,7 @@ function joinRoom(){
       var l=document.getElementById('loading'); if(l) l.style.display='none';
     });
     api.addListener('readyToClose', function(){ leaveRoom(); });
+    setTimeout(function(){ var l=document.getElementById('loading'); if(l) l.style.display='none'; }, 5000);
   }catch(e){
     document.getElementById('loading').textContent='ルームに接続できませんでした。少し待って再度お試しください。';
   }
