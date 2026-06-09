@@ -208,6 +208,8 @@ background:linear-gradient(0deg,rgba(4,6,12,.99),rgba(4,6,12,.6));border-top:1px
 <script>
 /* ===== STATE ===== */
 var me = { name:'あなた', av:'🐉', avSvg:null };
+function saveProfile(){ try{ localStorage.setItem('disri_me', JSON.stringify({name:me.name, av:me.av})); }catch(e){} }
+function loadProfile(){ try{ var s=localStorage.getItem('disri_me'); if(s){ var o=JSON.parse(s); if(o&&o.name)me.name=o.name; if(o&&o.av)me.av=o.av; } }catch(e){} }
 var members = [
   { id:'neon',  name:'ネオン',   role:'テンション高め', av:'🦊', avSvg:null,
     persona:'明るくてノリがいい。語尾に勢いがある。' },
@@ -438,7 +440,7 @@ function renderGallery(){
     var c=document.createElement('div');
     c.className='av-cell'+(me.av===a ? ' sel':'');
     c.textContent=a;
-    c.onclick=function(){ me.av=a; me.avSvg=null; renderGallery(); renderMeAv(); renderGrid(); };
+    c.onclick=function(){ me.av=a; me.avSvg=null; saveProfile(); renderGallery(); renderMeAv(); renderGrid(); };
     g.appendChild(c);
   });
 }
@@ -451,6 +453,7 @@ function renderMeAv(){
 function saveMe(){
   var n=document.getElementById('meName').value.trim();
   if(n)me.name=n;
+  saveProfile();
   renderGrid();
   go('room');
 }
@@ -469,7 +472,7 @@ function initVoice(){
     pick(); window.speechSynthesis.onvoiceschanged=pick;
   }
 }
-renderGrid(); renderGallery(); renderMeAv(); initVoice(); startAmbient();
+loadProfile(); renderGrid(); renderGallery(); renderMeAv(); initVoice(); startAmbient();
 </script>
 
 </body>
