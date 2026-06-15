@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>代行なうパチンコ</title>
+<style>
+  :root{
+    --bg:#0a0a12;
+    --panel:#14141f;
+    --line:#26263a;
+    --pink:#ff2d78;
+    --cyan:#00e5ff;
+    --gold:#ffd23f;
+    --green:#39ff88;
+    --txt:#eef0ff;
+    --dim:#8b8da6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(900px 500px at 50% -10%, rgba(255,45,120,.18), transparent 60%),
+      radial-gradient(700px 500px at 100% 110%, rgba(0,229,255,.12), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+    display:flex;justify-content:center;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .app{width:100%;max-width:430px;padding:14px 14px 28px;display:flex;flex-direction:column;gap:12px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .brand{line-height:1;}
+  .brand .sm{font-size:11px;letter-spacing:.32em;color:var(--cyan);font-weight:700;}
+  .brand .lg{
+    font-size:24px;font-weight:900;letter-spacing:.02em;margin-top:4px;
+    background:linear-gradient(90deg,var(--pink),var(--gold));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 22px rgba(255,45,120,.35);
+  }
+  .balance{
+    text-align:right;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:8px 12px;min-width:118px;
+  }
+  .balance .label{font-size:10px;color:var(--dim);letter-spacing:.18em;}
+  .balance .val{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--gold);text-shadow:0 0 14px rgba(255,210,63,.5);}
+  .balance .val::before{content:"\25CF";font-size:13px;color:var(--pink);margin-right:6px;vertical-align:2px;}
+
+  .stage{
+    position:relative;border-radius:18px;overflow:hidden;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,#101019,#0c0c14);
+    box-shadow:0 0 0 1px rgba(255,45,120,.08), 0 18px 50px rgba(0,0,0,.6);
+  }
+  canvas{display:block;width:100%;height:auto;touch-action:none;}
+
+  /* 抽選オーバーレイ */
+  .draw{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    flex-direction:column;gap:14px;background:rgba(6,6,12,.82);backdrop-filter:blur(2px);z-index:5;
+  }
+  .draw.on{display:flex;}
+  .reels{display:flex;gap:10px;}
+  .reel{
+    width:54px;height:72px;border-radius:10px;overflow:hidden;
+    background:#05050a;border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;
+    color:var(--cyan);text-shadow:0 0 16px rgba(0,229,255,.6);
+  }
+  .draw .msg{font-size:15px;font-weight:800;letter-spacing:.1em;color:var(--dim);}
+  .draw.win .reel{color:var(--gold);border-color:var(--gold);text-shadow:0 0 22px rgba(255,210,63,.9);}
+  .draw.win .msg{color:var(--gold);font-size:20px;animation:flash .5s steps(2) infinite;}
+  @keyframes flash{50%{opacity:.35;}}
+
+  .controls{display:flex;gap:10px;}
+  .fire{
+    flex:1;border:0;border-radius:14px;cursor:pointer;
+    padding:18px;font-size:19px;font-weight:900;letter-spacing:.16em;color:#1a0010;
+    background:linear-gradient(180deg,var(--pink),#c01d5c);
+    box-shadow:0 8px 24px rgba(255,45,120,.4), inset 0 1px 0 rgba(255,255,255,.4);
+    transition:transform .05s, filter .1s;user-select:none;
+  }
+  .fire:active{transform:translateY(2px);filter:brightness(1.12);}
+  .fire:disabled{filter:grayscale(.7) brightness(.6);box-shadow:none;cursor:not-allowed;}
+  .auto{
+    width:96px;border:1px solid var(--line);border-radius:14px;background:var(--panel);
+    color:var(--txt);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.06em;
+  }
+  .auto.on{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.25) inset;}
+
+  .row{display:flex;gap:10px;}
+  .btn{
+    flex:1;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    color:var(--txt);padding:13px;font-size:14px;font-weight:800;cursor:pointer;
+  }
+  .btn.free{border-color:var(--green);color:var(--green);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  .note{font-size:11px;line-height:1.7;color:var(--dim);text-align:center;padding:0 6px;}
+  .note b{color:var(--pink);}
+
+  /* 景品モーダル */
+  .modal{
+    position:fixed;inset:0;z-index:20;display:none;
+    align-items:flex-end;justify-content:center;background:rgba(0,0,0,.6);
+  }
+  .modal.on{display:flex;}
+  .sheet{
+    width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--line);
+    border-radius:20px 20px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height:86vh;overflow:auto;
+  }
+  .sheet h2{font-size:18px;font-weight:900;margin-bottom:4px;}
+  .sheet .sub{font-size:12px;color:var(--dim);margin-bottom:14px;}
+  .prize{
+    display:flex;align-items:center;gap:12px;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;
+  }
+  .prize .ic{
+    width:44px;height:44px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:22px;background:#0c0c14;border:1px solid var(--line);
+  }
+  .prize .info{flex:1;min-width:0;}
+  .prize .nm{font-size:14px;font-weight:800;}
+  .prize .cost{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums;margin-top:2px;}
+  .prize button{
+    border:0;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,var(--gold),#e0a91f);color:#1a1200;white-space:nowrap;
+  }
+  .prize button:disabled{filter:grayscale(.8) brightness(.6);cursor:not-allowed;}
+  .closebar{display:flex;justify-content:flex-end;}
+  .closebar button{background:none;border:0;color:var(--dim);font-size:24px;cursor:pointer;line-height:1;}
+
+  /* クーポン表示 */
+  .coupon{
+    background:linear-gradient(135deg,#1a1024,#0c0c14);border:1px dashed var(--gold);
+    border-radius:14px;padding:18px;text-align:center;margin-top:6px;
+  }
+  .coupon .t{font-size:13px;color:var(--dim);}
+  .coupon .n{font-size:17px;font-weight:900;color:var(--gold);margin:6px 0;}
+  .coupon .code{
+    font-size:26px;font-weight:900;letter-spacing:.14em;font-variant-numeric:tabular-nums;
+    color:var(--cyan);text-shadow:0 0 16px rgba(0,229,255,.5);margin:8px 0;
+  }
+  .coupon .hint{font-size:11px;color:var(--dim);line-height:1.6;}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#1c1c2b;border:1px solid var(--line);border-radius:30px;
+    padding:11px 20px;font-size:13px;font-weight:800;opacity:0;pointer-events:none;
+    transition:opacity .25s, transform .25s;z-index:50;white-space:nowrap;
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="sm">DAIKO NOW</div>
+      <div class="lg">代行なうパチンコ</div>
+    </div>
+    <div class="balance">
+      <div class="label">もちだま</div>
+      <div class="val" id="balance">0</div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <canvas id="board" width="402" height="540"></canvas>
+    <div class="draw" id="draw">
+      <div class="reels">
+        <div class="reel" id="r0">7</div>
+        <div class="reel" id="r1">7</div>
+        <div class="reel" id="r2">7</div>
+      </div>
+      <div class="msg" id="drawMsg">抽選中...</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="fire" id="fire">打 つ</button>
+    <button class="auto" id="auto">連射 OFF</button>
+  </div>
+
+  <div class="row">
+    <button class="btn free" id="freeBtn">無料で玉をもらう</button>
+    <button class="btn" id="prizeBtn">景品交換</button>
+  </div>
+
+  <p class="note">
+    玉は<b>無料</b>でもらえる遊び専用です。お金で玉は買えません。<br>
+    当たった景品は代行なうのクーポンで、現金には換えられません。
+  </p>
+</div>
+
+<!-- 景品モーダル -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="closebar"><button id="closeModal">&times;</button></div>
+    <h2>景品交換コーナー</h2>
+    <div class="sub">貯めた玉をクーポンと交換できます</div>
+    <div id="prizeList"></div>
+    <div id="couponArea"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =========================================================
+   代行なうパチンコ  単一HTMLファイル / 外部依存なし
+   玉は無料配布・景品はクーポン（換金不可）
+   ========================================================= */
+
+/* ---- セーフな保存（localStorageが使えなくてもメモリで動く） ---- */
+var mem = {};
+function load(key, def){
+  try{ var v = localStorage.getItem(key); return v===null ? def : JSON.parse(v); }
+  catch(e){ return (key in mem) ? mem[key] : def; }
+}
+function save(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e){ mem[key] = val; }
+}
+
+/* ---- 状態 ---- */
+var balance = load("dn_balance", null);
+if(balance === null){ balance = 100; save("dn_balance", balance); } // 初回100玉プレゼント
+
+var prizes = [
+  { id:"line500", icon:"\uD83D\uDCB4", name:"LINE割引 500円OFF", cost:300, pre:"L5" },
+  { id:"off300",  icon:"\uD83C\uDFAB", name:"次回 300円OFF",      cost:200, pre:"O3" },
+  { id:"sticker", icon:"\u2B50",       name:"オリジナルステッカー", cost:800, pre:"ST" },
+  { id:"first0",  icon:"\uD83D\uDE97", name:"初回4km以上 無料",    cost:1500, pre:"F0" }
+];
+
+/* ---- 表示 ---- */
+var balEl = document.getElementById("balance");
+function renderBalance(){ balEl.textContent = balance.toLocaleString(); }
+renderBalance();
+
+var toastEl = document.getElementById("toast"), toastTimer;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove("on"); }, 1800);
+}
+
+/* =========================================================
+   パチンコ盤面（Canvas物理）
+   ========================================================= */
+var cv = document.getElementById("board");
+var ctx = cv.getContext("2d");
+var W = cv.width, H = cv.height;
+
+var GRAV = 0.16, REST = 0.62, BR = 5, PR = 3.4;
+
+/* 釘を配置 */
+var pins = [];
+(function buildPins(){
+  var rows = 9, top = 92, gap = 42;
+  for(var row=0; row<rows; row++){
+    var y = top + row*gap;
+    var offset = (row%2===0) ? 0 : 21;
+    for(var x = 30 + offset; x < W-20; x += 42){
+      pins.push({x:x, y:y});
+    }
+  }
+  // 始動口まわりのガイド釘
+  pins.push({x:W/2-34, y:H-118});
+  pins.push({x:W/2+34, y:H-118});
+})();
+
+/* 始動口（チャッカー） */
+var chucker = { x: W/2, y: H-78, w: 56, h: 16 };
+
+var balls = [];
+function spawnBall(){
+  if(balance <= 0){ toast("玉がありません。無料でもらえます"); return false; }
+  balance--; save("dn_balance", balance); renderBalance();
+  // 上部からランダムに投入
+  var sx = W*0.5 + (Math.random()*120 - 60);
+  balls.push({ x:sx, y:34, vx:(Math.random()*1.2-0.6), vy:1.4, alive:true });
+  return true;
+}
+
+function collidePin(b, p){
+  var dx = b.x - p.x, dy = b.y - p.y;
+  var d = Math.hypot(dx, dy), min = BR + PR;
+  if(d < min && d > 0){
+    var nx = dx/d, ny = dy/d;
+    var overlap = min - d;
+    b.x += nx*overlap; b.y += ny*overlap;
+    var dot = b.vx*nx + b.vy*ny;
+    b.vx = (b.vx - 2*dot*nx) * REST + (Math.random()*0.7-0.35);
+    b.vy = (b.vy - 2*dot*ny) * REST;
+  }
+}
+
+var drawing = false; // 抽選演出中フラグ
+
+function physics(){
+  for(var i=balls.length-1; i>=0; i--){
+    var b = balls[i];
+    b.vy += GRAV;
+    b.x += b.vx; b.y += b.vy;
+
+    if(b.x < BR){ b.x = BR; b.vx = -b.vx*REST; }
+    if(b.x > W-BR){ b.x = W-BR; b.vx = -b.vx*REST; }
+
+    for(var j=0; j<pins.length; j++) collidePin(b, pins[j]);
+
+    if(b.y > H - 60){
+      // 始動口判定
+      if(Math.abs(b.x - chucker.x) < chucker.w/2 && b.vy > 0){
+        balls.splice(i,1);
+        onChucker();
+        continue;
+      }
+    }
+    if(b.y > H + 20){ balls.splice(i,1); } // アウト
+  }
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+
+  // 外枠グロー
+  ctx.strokeStyle = "rgba(255,45,120,.25)";
+  ctx.lineWidth = 2; ctx.strokeRect(3,3,W-6,H-6);
+
+  // 投入口
+  ctx.fillStyle = "rgba(0,229,255,.18)";
+  ctx.fillRect(W/2-70, 18, 140, 8);
+
+  // 釘
+  for(var j=0;j<pins.length;j++){
+    var p = pins[j];
+    ctx.beginPath(); ctx.arc(p.x, p.y, PR, 0, 7);
+    ctx.fillStyle = "#5b6b8c"; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x-0.8, p.y-0.8, PR*0.45, 0, 7);
+    ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.fill();
+  }
+
+  // 始動口
+  var cx = chucker.x, cy = chucker.y;
+  var grd = ctx.createLinearGradient(0, cy-12, 0, cy+10);
+  grd.addColorStop(0, "rgba(57,255,136,.0)");
+  grd.addColorStop(1, "rgba(57,255,136,.55)");
+  ctx.fillStyle = grd;
+  ctx.fillRect(cx - chucker.w/2, cy-12, chucker.w, 26);
+  ctx.strokeStyle = "var(--green)"; // 一部ブラウザ無視されるので下で明示
+  ctx.strokeStyle = "#39ff88"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - chucker.w/2, cy+12);
+  ctx.lineTo(cx - chucker.w/2, cy-6);
+  ctx.moveTo(cx + chucker.w/2, cy+12);
+  ctx.lineTo(cx + chucker.w/2, cy-6);
+  ctx.stroke();
+  ctx.fillStyle = "#39ff88"; ctx.font = "bold 11px sans-serif";
+  ctx.textAlign = "center"; ctx.fillText("CHANCE", cx, cy+6);
+
+  // 玉
+  for(var i=0;i<balls.length;i++){
+    var b = balls[i];
+    var g = ctx.createRadialGradient(b.x-2, b.y-2, 1, b.x, b.y, BR);
+    g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#aab4d6");
+    ctx.beginPath(); ctx.arc(b.x, b.y, BR, 0, 7);
+    ctx.fillStyle = g; ctx.fill();
+  }
+}
+
+function loop(){ if(!drawing) physics(); render(); requestAnimationFrame(loop); }
+loop();
+
+/* =========================================================
+   抽選（始動口入賞）
+   ========================================================= */
+var drawEl = document.getElementById("draw");
+var drawMsg = document.getElementById("drawMsg");
+var reels = [document.getElementById("r0"), document.getElementById("r1"), document.getElementById("r2")];
+
+function onChucker(){
+  // 入賞で必ず小当たり +3玉、さらに抽選演出
+  balance += 3; save("dn_balance", balance); renderBalance();
+  if(drawing) return; // 演出中は重複させない
+  startDraw();
+}
+
+function startDraw(){
+  drawing = true;
+  drawEl.classList.remove("win");
+  drawEl.classList.add("on");
+  drawMsg.textContent = "抽選中...";
+
+  // 当たり判定（約1/8）
+  var win = Math.random() < 0.125;
+  var target = win ? (1 + Math.floor(Math.random()*9)) : null;
+
+  var spins = 0;
+  var spinTimer = setInterval(function(){
+    for(var k=0;k<3;k++) reels[k].textContent = Math.floor(Math.random()*10);
+    spins++;
+  }, 70);
+
+  setTimeout(function(){
+    clearInterval(spinTimer);
+    if(win){
+      reels[0].textContent = target;
+      reels[1].textContent = target;
+      reels[2].textContent = target;
+      bigWin();
+    }else{
+      // ハズレ（わざと惜しい並びに）
+      var a = Math.floor(Math.random()*10);
+      reels[0].textContent = a; reels[1].textContent = a;
+      reels[2].textContent = (a+1)%10;
+      drawMsg.textContent = "ざんねん";
+      setTimeout(endDraw, 900);
+    }
+  }, 1300);
+}
+
+function bigWin(){
+  var payout = 300;
+  balance += payout; save("dn_balance", balance); renderBalance();
+  drawEl.classList.add("win");
+  drawMsg.textContent = "大当り +" + payout + "玉!!";
+  rainBalls();
+  setTimeout(endDraw, 2400);
+}
+
+function endDraw(){
+  drawEl.classList.remove("on","win");
+  drawing = false;
+}
+
+/* 大当たりの玉降り演出 */
+function rainBalls(){
+  var n = 0;
+  var t = setInterval(function(){
+    for(var k=0;k<3;k++){
+      balls.push({x:Math.random()*W, y:-10, vx:(Math.random()*2-1), vy:1});
+    }
+    n++; if(n>14) clearInterval(t);
+  }, 80);
+}
+
+/* =========================================================
+   操作
+   ========================================================= */
+var fireBtn = document.getElementById("fire");
+var autoBtn = document.getElementById("auto");
+var holdTimer = null, autoOn = false;
+
+function fireOnce(){ if(!drawing) spawnBall(); }
+
+fireBtn.addEventListener("pointerdown", function(e){
+  e.preventDefault();
+  fireOnce();
+  holdTimer = setInterval(fireOnce, 220); // 押しっぱで連射
+});
+function stopHold(){ if(holdTimer){ clearInterval(holdTimer); holdTimer=null; } }
+fireBtn.addEventListener("pointerup", stopHold);
+fireBtn.addEventListener("pointerleave", stopHold);
+fireBtn.addEventListener("pointercancel", stopHold);
+
+var autoTimer = null;
+autoBtn.addEventListener("click", function(){
+  autoOn = !autoOn;
+  autoBtn.classList.toggle("on", autoOn);
+  autoBtn.textContent = autoOn ? "連射 ON" : "連射 OFF";
+  if(autoOn){ autoTimer = setInterval(function(){ if(balance>0) fireOnce(); }, 260); }
+  else { clearInterval(autoTimer); }
+});
+
+/* =========================================================
+   無料玉（1日1回）
+   ========================================================= */
+var freeBtn = document.getElementById("freeBtn");
+function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function refreshFree(){
+  var last = load("dn_free", "");
+  if(last === todayStr()){ freeBtn.disabled = true; freeBtn.textContent = "本日受取済み"; }
+  else { freeBtn.disabled = false; freeBtn.textContent = "無料で玉をもらう"; }
+}
+refreshFree();
+freeBtn.addEventListener("click", function(){
+  if(load("dn_free","") === todayStr()) return;
+  balance += 50; save("dn_balance", balance); save("dn_free", todayStr());
+  renderBalance(); refreshFree(); toast("50玉プレゼント!");
+});
+
+/* =========================================================
+   景品交換
+   ========================================================= */
+var modal = document.getElementById("modal");
+var prizeList = document.getElementById("prizeList");
+var couponArea = document.getElementById("couponArea");
+
+function renderPrizes(){
+  prizeList.innerHTML = "";
+  prizes.forEach(function(p){
+    var row = document.createElement("div");
+    row.className = "prize";
+    var enough = balance >= p.cost;
+    row.innerHTML =
+      '<div class="ic">'+p.icon+'</div>'+
+      '<div class="info"><div class="nm">'+p.name+'</div>'+
+      '<div class="cost">'+p.cost.toLocaleString()+' 玉</div></div>';
+    var btn = document.createElement("button");
+    btn.textContent = "交換";
+    btn.disabled = !enough;
+    btn.addEventListener("click", function(){ redeem(p); });
+    row.appendChild(btn);
+    prizeList.appendChild(row);
+  });
+}
+
+function genCode(pre){
+  var n = Math.floor(1000 + Math.random()*9000);
+  return pre + "-" + n;
+}
+
+function redeem(p){
+  if(balance < p.cost) return;
+  balance -= p.cost; save("dn_balance", balance); renderBalance();
+  var code = genCode(p.pre);
+  couponArea.innerHTML =
+    '<div class="coupon">'+
+      '<div class="t">交換完了 / クーポン発行</div>'+
+      '<div class="n">'+p.name+'</div>'+
+      '<div class="code">'+code+'</div>'+
+      '<div class="hint">ご予約時にこの画面（コード）を<br>LINE または 電話でお伝えください</div>'+
+    '</div>';
+  renderPrizes();
+  couponArea.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+document.getElementById("prizeBtn").addEventListener("click", function(){
+  couponArea.innerHTML = "";
+  renderPrizes();
+  modal.classList.add("on");
+});
+document.getElementById("closeModal").addEventListener("click", function(){ modal.classList.remove("on"); });
+modal.addEventListener("click", function(e){ if(e.target===modal) modal.classList.remove("on"); });
+</script>
+</body>
+</html>

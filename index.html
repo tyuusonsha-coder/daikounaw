@@ -17,9 +17,9 @@ body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFo
 .hdr{background:#0e0e13;padding:8px 16px;border-bottom:1px solid #1c1c24;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
 .logo{font-weight:900;font-size:18px;cursor:pointer}.logo span{color:#FF6B00}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,9,.97);border-top:1px solid #1c1c24;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nav button{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:#444;font-family:inherit}
+.nav button{flex:1;padding:13px 0 16px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:#444;font-family:inherit}
 .nav button.on{color:#FF6B00}
-.nav button .ico{font-size:20px;line-height:1}
+.nav button .ico{font-size:26px;line-height:1}
 .vs{padding:14px 16px 10px;background:linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609);border-bottom:1px solid rgba(170,85,255,.2)}
 .vs .row{display:flex;align-items:center;margin-bottom:6px}
 .vs .side{flex:1;text-align:center}.vs .num{font-size:30px;font-weight:900}.vs .lbl{font-size:12px;font-weight:900}
@@ -152,7 +152,8 @@ out+='</div>';
 out+='<div class="nav">';
 out+='<button class="'+(scr==="company"?"on":"")+'" onclick="scr=\'company\';loadCo()"><span class="ico">🚘</span>配車</button>';
 out+='<button class="'+(scr==="battle"?"on":"")+'" onclick="scr=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
-out+='<button onclick="location.href=\'disri.html\'" style="color:#00ffe0"><span class="ico">🎙</span>ルーム</button>';
+out+='<button onclick="location.href=\'pachi.html\'" style="color:#ffd23f"><span class="ico">🎰</span>バチ</button>';
+out+='<button onclick="location.href=\'disri.html\'" style="color:#00ffe0"><span class="ico">📻</span>無線</button>';
 out+='</div>';
 app.innerHTML=out;
 }
@@ -209,7 +210,19 @@ return o;
 }
 
 function renderCompany(){
-var o='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24">';
+var o='<div style="margin:12px 16px 0;display:flex;gap:10px">';
+o+='<div onclick="location.href=\'fc.html\'" style="flex:1;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;background:linear-gradient(135deg,rgba(139,107,255,.22),rgba(90,63,255,.05));border:1px solid rgba(139,107,255,.45)">';
+o+='<div style="font-size:24px">🏢</div>';
+o+='<div style="font-size:13px;font-weight:900;color:#b9a6ff;margin-top:4px">FCオーナー募集</div>';
+o+='<div style="font-size:10px;color:#888;margin-top:2px">独立・開業したい方へ</div>';
+o+='</div>';
+o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;background:linear-gradient(135deg,rgba(255,107,0,.22),rgba(255,61,0,.05));border:1px solid rgba(255,107,0,.45)">';
+o+='<div style="font-size:24px">🚖</div>';
+o+='<div style="font-size:13px;font-weight:900;color:#FF8C2B;margin-top:4px">ドライバー募集</div>';
+o+='<div style="font-size:10px;color:#888;margin-top:2px">夜だけ・副業OK</div>';
+o+='</div>';
+o+='</div>';
+o+='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24">';
 o+='<div style="display:flex;align-items:center;justify-content:space-between">';
 o+='<div style="font-size:18px;font-weight:900">🚘 代行業者</div>';
 o+='<button onclick="regOpen=!regOpen;render()" style="padding:7px 13px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;'+(regOpen?'background:#131318;color:#888;border:1px solid #24242e':'background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none')+'">'+(regOpen?'✕ 閉じる':'＋ 無料登録')+'</button>';
