@@ -228,6 +228,17 @@ function save(key, val){
   catch(e){ mem[key] = val; }
 }
 
+/* ---- Supabase（景品コードの記録・1日1回判定） ---- */
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+
+/* 端末ID（1日1回の判定に使う） */
+var uid=load("dn_uid",null);
+if(!uid){ uid="u"+Date.now()+Math.random().toString(36).slice(2,8); save("dn_uid",uid); }
+
 /* ---- 状態 ---- */
 var balance = load("dn_balance", null);
 if(balance === null){ balance = 100; save("dn_balance", balance); } // 初回100玉プレゼント
@@ -527,10 +538,25 @@ function genCode(pre){
   return pre + "-" + n;
 }
 
-function redeem(p){
+async function redeem(p){
   if(balance < p.cost) return;
+  // 1日1回チェック（この端末が今日すでに交換していないか）
+  var todayStart = new Date(new Date().setHours(0,0,0,0)).toISOString();
+  var existing = await sbGet("coupons","device=eq."+uid+"&created_at=gte."+encodeURIComponent(todayStart)+"&select=id");
+  if(existing && existing.length>0){
+    couponArea.innerHTML =
+      '<div class="coupon">'+
+        '<div class="t">本日は交換済み</div>'+
+        '<div class="n">景品交換は1日1回までです</div>'+
+        '<div class="hint">また明日チャレンジしてください。</div>'+
+      '</div>';
+    couponArea.scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+  // 玉を引いてコードを発行・記録
   balance -= p.cost; save("dn_balance", balance); renderBalance();
   var code = genCode(p.pre);
+  await sbPost("coupons",{code:code, prize:p.name, cost:p.cost, device:uid, used:false});
   couponArea.innerHTML =
     '<div class="coupon">'+
       '<div class="t">交換完了 / クーポン発行</div>'+
