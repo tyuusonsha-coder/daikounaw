@@ -52,6 +52,7 @@
     <div class="hint" id="hint">ボタンを押している間だけ話せます</div>
     <button class="ptt" id="ptt"><span class="ic">🎙</span><span id="pttlbl">押して話す</span></button>
     <div><span class="status"><span class="dot"></span><span id="liveTxt">受信中</span></span></div>
+    <div style="margin-top:14px"><button id="soundOn" onclick="enableSound()" style="background:rgba(0,255,224,.12);color:#00ffe0;border:1px solid #00ffe0;border-radius:999px;padding:9px 20px;font-weight:800;font-size:13px;cursor:pointer">🔊 受信音声を自動再生ON</button></div>
   </div>
 
   <div class="log">
@@ -61,6 +62,8 @@
 
   <div class="note">🔊 ボタンを押している間だけ録音し、離すと全員に届きます。届いた声は自動で順番に再生されます。マナーモードだと聞こえないので音量を上げてください。</div>
 </div>
+
+<audio id="player" playsinline></audio>
 
 <script>
 var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
@@ -114,15 +117,23 @@ async function sendRec(){
 
 // PTTイベント（押下中録音）
 var ptt=document.getElementById("ptt");
-ptt.addEventListener("mousedown",function(e){e.preventDefault();startRec()});
+ptt.addEventListener("mousedown",function(e){e.preventDefault();enableSound();startRec()});
 ptt.addEventListener("mouseup",function(e){e.preventDefault();stopRec()});
 ptt.addEventListener("mouseleave",function(){if(rec&&rec.state==="recording")stopRec()});
-ptt.addEventListener("touchstart",function(e){e.preventDefault();startRec()},{passive:false});
+ptt.addEventListener("touchstart",function(e){e.preventDefault();enableSound();startRec()},{passive:false});
 ptt.addEventListener("touchend",function(e){e.preventDefault();stopRec()},{passive:false});
 
 // 受信＆再生
 var lastTime=new Date(Date.now()-3000).toISOString();
-var pq=[],playing=false;
+var pq=[],playing=false,audioUnlocked=false,player=null;
+function getPlayer(){if(!player)player=document.getElementById("player");return player;}
+function enableSound(){
+  if(audioUnlocked)return;
+  var p=getPlayer();
+  try{ p.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="; p.play().catch(function(){}); }catch(e){}
+  audioUnlocked=true;
+  var b=document.getElementById("soundOn");if(b){b.textContent="🔊 自動再生ON";b.style.opacity=".6";}
+}
 function fmt(t){var d=new Date(t);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);}
 function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
 function addLog(m,me){
@@ -139,9 +150,10 @@ function queuePlay(m){pq.push(m);if(!playing)playNext();}
 function playNext(){
   if(!pq.length){playing=false;return;}
   playing=true;var m=pq.shift();
-  var a=new Audio(m.audio);
-  a.onended=playNext;a.onerror=playNext;
-  a.play().catch(function(){playNext()});
+  var p=getPlayer();
+  p.src=m.audio;
+  p.onended=playNext;p.onerror=playNext;
+  p.play().catch(function(){playing=false;});
 }
 async function poll(){
   var rows=await sbGet("musen","created_at=gt."+encodeURIComponent(lastTime)+"&order=created_at.asc&limit=20");
