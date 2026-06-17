@@ -3,106 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>無線クラブ｜代行なう</title>
+<title>無線｜代行なう</title>
 <style>
-  :root{--bg:#070a12;--bg2:#0e1422;--line:#1d2740;--cyan:#00ffe0;--blue:#00a7ff;--txt:#eaf2ff;--sub:#8597b5;}
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:radial-gradient(130% 70% at 50% 0%,rgba(0,255,224,.08),transparent 60%),var(--bg);color:var(--txt);line-height:1.7;min-height:100vh}
+  :root{--bg:#070a12;--bg2:#0e1422;--line:#1d2740;--cyan:#00ffe0;--blue:#00a7ff;--txt:#eaf2ff;--sub:#8597b5;--red:#ff3b5c;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:radial-gradient(130% 70% at 50% 0%,rgba(0,255,224,.08),transparent 60%),var(--bg);color:var(--txt);min-height:100vh}
   .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
   .top .logo{font-size:18px;font-weight:900;display:flex;align-items:center;gap:7px}
   .back{text-decoration:none;font-size:14px;font-weight:800;color:#fff;padding:9px 16px;background:rgba(0,255,224,.15);border:1px solid var(--cyan);border-radius:999px;white-space:nowrap}
-  .wrap{max-width:520px;margin:0 auto;padding:0 16px}
-  /* lobby */
-  .lobby{text-align:center;padding:40px 12px 30px}
-  .badge{display:inline-block;font-size:11px;letter-spacing:.2em;color:var(--cyan);font-weight:800}
-  .lobby h1{font-size:32px;font-weight:900;margin:8px 0 6px;text-shadow:0 0 26px rgba(0,255,224,.35)}
-  .lobby p{font-size:14px;color:var(--sub);margin-bottom:8px}
-  .live{display:inline-flex;align-items:center;gap:7px;margin:14px 0 26px;font-size:13px;color:var(--cyan);background:rgba(0,255,224,.07);border:1px solid rgba(0,255,224,.3);border-radius:999px;padding:7px 16px}
-  .live .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:bl 1.2s infinite}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+  .name-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .name-row label{font-size:12px;color:var(--sub);white-space:nowrap}
+  .name-row input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none;font-family:inherit}
+  .name-row input:focus{border-color:var(--cyan)}
+  .stage{text-align:center;padding:24px 0 10px}
+  .hint{font-size:13px;color:var(--sub);margin-bottom:18px;min-height:20px}
+  .ptt{width:200px;height:200px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 50% 40%,#10324a,#0a1828);box-shadow:0 0 0 6px rgba(0,255,224,.12),0 14px 40px rgba(0,0,0,.5);color:var(--txt);font-size:18px;font-weight:900;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .1s}
+  .ptt .ic{font-size:46px}
+  .ptt.rec{background:radial-gradient(circle at 50% 40%,#ff5b76,#c41e3a);box-shadow:0 0 0 6px rgba(255,59,92,.3),0 0 40px rgba(255,59,92,.5);transform:scale(1.04);animation:pulse 1s infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 14px rgba(255,59,92,.12),0 0 50px rgba(255,59,92,.6)}}
+  .status{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--cyan);background:rgba(0,255,224,.07);border:1px solid rgba(0,255,224,.3);border-radius:999px;padding:6px 14px;margin-top:18px}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:bl 1.2s infinite}
   @keyframes bl{50%{opacity:.3}}
-  input{width:100%;max-width:300px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 16px;color:var(--txt);font-size:16px;outline:none;text-align:center;font-family:inherit;margin-bottom:14px}
-  input:focus{border-color:var(--cyan)}
-  .join{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#031018;font-weight:900;font-size:18px;padding:17px 40px;border:none;border-radius:16px;cursor:pointer;box-shadow:0 10px 34px rgba(0,255,224,.35)}
-  .join:active{transform:scale(.98)}
-  .feat{display:flex;gap:8px;max-width:360px;margin:30px auto 0}
-  .feat div{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 6px;font-size:11px;color:var(--sub)}
-  .feat div b{display:block;font-size:20px;margin-bottom:4px}
-  .note{font-size:12px;color:var(--sub);background:rgba(0,167,255,.06);border:1px solid rgba(0,167,255,.25);border-radius:12px;padding:12px 14px;margin:26px auto 0;max-width:380px;text-align:left}
-  /* room */
-  #room{padding:10px 0 20px}
-  #jitsi{width:100%;height:70vh;min-height:420px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000}
-  .leave{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:300px;margin:14px auto 0;background:#ff3b5c;color:#fff;font-weight:900;font-size:16px;padding:15px;border:none;border-radius:14px;cursor:pointer}
-  .hidden{display:none}
+  .log{margin-top:24px}
+  .log h3{font-size:12px;color:var(--sub);font-weight:800;margin-bottom:10px;letter-spacing:.05em}
+  .msg{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px}
+  .msg.me{border-color:rgba(0,255,224,.3)}
+  .msg .who{font-size:14px;font-weight:800;flex:1}
+  .msg .tm{font-size:11px;color:var(--sub)}
+  .msg .play{background:var(--cyan);color:#031018;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:13px;cursor:pointer}
+  .now{color:var(--red);font-weight:800}
+  .note{font-size:12px;color:var(--sub);background:rgba(0,167,255,.06);border:1px solid rgba(0,167,255,.25);border-radius:12px;padding:11px 13px;margin-top:18px;-webkit-user-select:auto}
 </style>
 </head>
 <body>
 <div class="top">
-  <div class="logo">📻 無線クラブ</div>
+  <div class="logo">📻 無線</div>
   <a href="index.html" class="back">← 代行なう</a>
 </div>
 
 <div class="wrap">
-  <div id="lobby" class="lobby">
-    <div class="badge">DAIKO NOW ・ VOICE ROOM</div>
-    <h1>無線クラブ</h1>
-    <p>みんなで話せる音声ルーム。<br>運転手もお客も、深夜のひまつぶしに。</p>
-    <div class="live"><span class="dot"></span>入った人みんなで同時に話せます</div>
-    <div><input id="name" placeholder="名前（任意）" maxlength="16"></div>
-    <button class="join" onclick="join()">🎙 ルームに参加</button>
-    <div class="feat">
-      <div><b>🎙</b>声だけ<br>カメラ無し</div>
-      <div><b>👥</b>何人でも<br>OK</div>
-      <div><b>🆓</b>無料</div>
-    </div>
-    <div class="note">※ 参加するとマイクの使用許可を聞かれます。「許可」を押してください。カメラはオフのまま、声だけで話せます。</div>
+  <div class="name-row">
+    <label>名前</label>
+    <input id="name" placeholder="例）山田" maxlength="16">
   </div>
 
-  <div id="room" class="hidden">
-    <div id="jitsi"></div>
-    <button class="leave" onclick="leave()">🚪 退出する</button>
+  <div class="stage">
+    <div class="hint" id="hint">ボタンを押している間だけ話せます</div>
+    <button class="ptt" id="ptt"><span class="ic">🎙</span><span id="pttlbl">押して話す</span></button>
+    <div><span class="status"><span class="dot"></span><span id="liveTxt">受信中</span></span></div>
   </div>
+
+  <div class="log">
+    <h3>📡 やりとり</h3>
+    <div id="msgs"></div>
+  </div>
+
+  <div class="note">🔊 ボタンを押している間だけ録音し、離すと全員に届きます。届いた声は自動で順番に再生されます。マナーモードだと聞こえないので音量を上げてください。</div>
 </div>
 
-<script src="https://meet.jit.si/external_api.js"></script>
 <script>
-var api=null;
-function join(){
-  var name=document.getElementById("name").value.trim();
-  if(!name){ name="ゲスト"+Math.floor(Math.random()*1000); }
-  document.getElementById("lobby").classList.add("hidden");
-  document.getElementById("room").classList.remove("hidden");
-  if(typeof JitsiMeetExternalAPI==="undefined"){
-    alert("接続スクリプトを読み込めませんでした。電波の良い場所でページを開き直してください。");
-    leave();return;
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+
+function myName(){var v=document.getElementById("name").value.trim();return v||"ゲスト"}
+
+var stream=null,rec=null,chunks=[],mime="";
+function pickMime(){
+  var c=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg"];
+  for(var i=0;i<c.length;i++){ if(window.MediaRecorder&&MediaRecorder.isTypeSupported(c[i])) return c[i]; }
+  return "";
+}
+async function ensureMic(){
+  if(stream)return true;
+  try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); return true; }
+  catch(e){ alert("マイクの使用を許可してください（設定で許可が必要な場合があります）"); return false; }
+}
+async function startRec(){
+  if(rec&&rec.state==="recording")return;
+  if(!await ensureMic())return;
+  chunks=[];mime=pickMime();
+  try{ rec=new MediaRecorder(stream, mime?{mimeType:mime}:undefined); }
+  catch(e){ rec=new MediaRecorder(stream); }
+  rec.ondataavailable=function(e){ if(e.data&&e.data.size>0)chunks.push(e.data); };
+  rec.onstop=sendRec;
+  rec.start();
+  var b=document.getElementById("ptt");b.classList.add("rec");
+  document.getElementById("pttlbl").textContent="話してOK…";
+  document.getElementById("hint").innerHTML='<span class="now">● 録音中…離すと送信</span>';
+}
+function stopRec(){
+  if(rec&&rec.state!=="inactive"){ try{rec.stop()}catch(e){} }
+  var b=document.getElementById("ptt");b.classList.remove("rec");
+  document.getElementById("pttlbl").textContent="押して話す";
+  document.getElementById("hint").textContent="ボタンを押している間だけ話せます";
+}
+function blobToB64(blob){return new Promise(function(res){var r=new FileReader();r.onloadend=function(){res(r.result)};r.readAsDataURL(blob)});}
+async function sendRec(){
+  if(!chunks.length)return;
+  var blob=new Blob(chunks,{type:mime||"audio/mp4"});
+  if(blob.size<1000)return;
+  document.getElementById("hint").textContent="送信中…";
+  var b64=await blobToB64(blob);
+  await sbPost("musen",{name:myName(),audio:b64});
+  document.getElementById("hint").textContent="ボタンを押している間だけ話せます";
+}
+
+// PTTイベント（押下中録音）
+var ptt=document.getElementById("ptt");
+ptt.addEventListener("mousedown",function(e){e.preventDefault();startRec()});
+ptt.addEventListener("mouseup",function(e){e.preventDefault();stopRec()});
+ptt.addEventListener("mouseleave",function(){if(rec&&rec.state==="recording")stopRec()});
+ptt.addEventListener("touchstart",function(e){e.preventDefault();startRec()},{passive:false});
+ptt.addEventListener("touchend",function(e){e.preventDefault();stopRec()},{passive:false});
+
+// 受信＆再生
+var lastTime=new Date(Date.now()-3000).toISOString();
+var pq=[],playing=false;
+function fmt(t){var d=new Date(t);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);}
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function addLog(m,me){
+  var box=document.getElementById("msgs");
+  var d=document.createElement("div");d.className="msg"+(me?" me":"");
+  d.innerHTML='<span class="who">'+(me?"あなた":esc(m.name||"ゲスト"))+'</span><span class="tm">'+fmt(m.created_at)+'</span>';
+  var btn=document.createElement("button");btn.className="play";btn.textContent="▶ 再生";
+  btn.onclick=function(){var a=new Audio(m.audio);a.play()};
+  d.appendChild(btn);
+  box.insertBefore(d,box.firstChild);
+  while(box.children.length>30)box.removeChild(box.lastChild);
+}
+function queuePlay(m){pq.push(m);if(!playing)playNext();}
+function playNext(){
+  if(!pq.length){playing=false;return;}
+  playing=true;var m=pq.shift();
+  var a=new Audio(m.audio);
+  a.onended=playNext;a.onerror=playNext;
+  a.play().catch(function(){playNext()});
+}
+async function poll(){
+  var rows=await sbGet("musen","created_at=gt."+encodeURIComponent(lastTime)+"&order=created_at.asc&limit=20");
+  if(rows&&rows.length){
+    rows.forEach(function(m){
+      lastTime=m.created_at;
+      var me=(m.name===myName());
+      addLog(m,me);
+      if(!me)queuePlay(m);
+    });
   }
-  var options={
-    roomName:"DaikounawMusenClub2026",
-    parentNode:document.getElementById("jitsi"),
-    width:"100%",height:"100%",
-    userInfo:{displayName:name},
-    configOverwrite:{
-      startWithVideoMuted:true,
-      startAudioOnly:true,
-      prejoinPageEnabled:false,
-      disableDeepLinking:true,
-      disableInviteFunctions:true
-    },
-    interfaceConfigOverwrite:{
-      TOOLBAR_BUTTONS:["microphone","hangup","participants-pane","settings","tileview","raisehand"],
-      SHOW_JITSI_WATERMARK:false,
-      SHOW_WATERMARK_FOR_GUESTS:false,
-      MOBILE_APP_PROMO:false,
-      DEFAULT_BACKGROUND:"#070a12"
-    }
-  };
-  api=new JitsiMeetExternalAPI("meet.jit.si",options);
-  api.addEventListener("readyToClose",leave);
 }
-function leave(){
-  if(api){ try{api.dispose()}catch(e){} api=null; }
-  document.getElementById("room").classList.add("hidden");
-  document.getElementById("lobby").classList.remove("hidden");
-}
+setInterval(poll,3000);
+poll();
 </script>
 </body>
 </html>
