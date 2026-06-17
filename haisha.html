@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>配車を呼ぶ｜代行なう</title>
+<style>
+  :root{--bg:#080b14;--bg2:#0d1322;--line:#1c2740;--cyan:#00e5ff;--amber:#ffb648;--txt:#e8edf4;--sub:#8493ab;--green:#3ddc84;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:radial-gradient(120% 60% at 50% 0%,rgba(0,229,255,.08),transparent 60%),var(--bg);color:var(--txt);line-height:1.7;min-height:100vh}
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 60px}
+  .back{display:inline-block;color:var(--sub);text-decoration:none;font-size:13px;margin-bottom:16px}
+  .eyebrow{font-size:11px;letter-spacing:.3em;color:var(--cyan);font-weight:700;text-transform:uppercase}
+  h1{font-size:25px;font-weight:800;margin:6px 0 18px;text-shadow:0 0 24px rgba(0,229,255,.3)}
+  .panel{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:22px 18px;margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--sub);margin:14px 0 6px;font-weight:600}
+  label:first-child{margin-top:0}
+  input[type=text],input[type=tel]{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--txt);font-size:16px;font-family:inherit}
+  input:focus{outline:none;border-color:var(--cyan)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--amber));outline:none;margin:12px 0 2px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--cyan);box-shadow:0 0 14px var(--cyan)}
+  input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--cyan)}
+  .kmrow{display:flex;justify-content:space-between;align-items:baseline}
+  .kmrow .v{font-size:22px;font-weight:800;color:var(--cyan)}
+  .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:2px}
+  .price{text-align:center;margin:18px 0 4px}
+  .price .cap{font-size:11px;letter-spacing:.2em;color:var(--amber);font-weight:700}
+  .price .amt{font-size:42px;font-weight:800;text-shadow:0 0 26px rgba(0,229,255,.3)}
+  .bd{text-align:center;font-size:12px;color:var(--sub)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:800;border:none;cursor:pointer;text-decoration:none;margin-top:8px}
+  .btn-main{background:linear-gradient(135deg,var(--cyan),#1aa7c4);color:#041018}
+  .btn-line{background:#06c755;color:#fff}
+  .btn-tel{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan)}
+  .btn-ghost{background:transparent;color:var(--sub);border:1px solid var(--line)}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.5}
+  .note{font-size:12px;color:var(--sub);background:rgba(255,182,72,.06);border:1px solid rgba(255,182,72,.25);border-radius:12px;padding:11px 13px;margin-top:14px}
+  /* status steps */
+  .steps{display:flex;flex-direction:column;gap:0;margin:6px 0}
+  .step{display:flex;align-items:center;gap:14px;padding:12px 0;position:relative}
+  .step .dot{width:30px;height:30px;border-radius:50%;background:#0a0f1c;border:2px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2}
+  .step:not(:last-child)::after{content:"";position:absolute;left:14px;top:36px;width:2px;height:24px;background:var(--line)}
+  .step .lbl{font-size:15px;color:var(--sub)}
+  .step.on .dot{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 14px var(--cyan);color:#041018}
+  .step.on .lbl{color:var(--txt);font-weight:800}
+  .step.on:not(:last-child)::after{background:var(--cyan)}
+  .step.cur .dot{animation:pulse 1.3s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px var(--cyan)}50%{box-shadow:0 0 22px var(--cyan)}}
+  .ordsum{font-size:14px;color:var(--sub);margin-bottom:6px}
+  .ordsum b{color:var(--txt)}
+  .big-status{text-align:center;font-size:22px;font-weight:800;margin:6px 0 16px;color:var(--cyan)}
+  .driver-box{background:rgba(0,229,255,.06);border:1px solid var(--cyan);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14px}
+  /* receipt */
+  .receipt{background:#fff;color:#111;border-radius:14px;padding:24px 22px}
+  .receipt h2{text-align:center;font-size:18px;margin-bottom:4px}
+  .receipt .rsub{text-align:center;font-size:11px;color:#666;margin-bottom:16px}
+  .receipt .ramt{text-align:center;font-size:34px;font-weight:800;margin:10px 0;border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:12px 0}
+  .receipt table{width:100%;font-size:13px;border-collapse:collapse}
+  .receipt td{padding:5px 0;vertical-align:top}
+  .receipt td:first-child{color:#666;width:34%}
+  .receipt .stamp{text-align:right;margin-top:14px;font-size:12px;color:#444}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" class="back">← もどる</a>
+
+  <!-- 画面1：注文フォーム -->
+  <div id="screen-form">
+    <div class="eyebrow">配車を呼ぶ</div>
+    <h1>運転代行を呼ぶ</h1>
+    <div class="panel">
+      <label>お名前</label>
+      <input type="text" id="cname" placeholder="例）田中">
+      <label>電話番号（ドライバーからの連絡用）</label>
+      <input type="tel" id="cphone" placeholder="例）090-1234-5678">
+      <label>出発地（今いる場所）</label>
+      <input type="text" id="pickup" placeholder="例）天神 〇〇ビル前">
+      <label>目的地</label>
+      <input type="text" id="dropoff" placeholder="例）博多区〇〇">
+      <label>だいたいの距離</label>
+      <div class="kmrow"><span style="font-size:13px;color:var(--sub)">乗る距離</span><span class="v" id="kmv">5km</span></div>
+      <input type="range" id="km" min="1" max="30" step="1" value="5">
+      <div class="ticks"><span>1km</span><span>15km</span><span>30km</span></div>
+      <div class="price"><div class="cap">料金の目安</div><div class="amt" id="price">¥2,000</div></div>
+      <div class="bd" id="bd">初乗り5kmまで ¥2,000</div>
+      <div class="note">⚠ 料金はあくまで目安です。実際の距離・経路・待機などで変わる場合があります。</div>
+      <button class="btn btn-main" id="orderBtn" onclick="placeOrder()">🚖 この内容で呼ぶ</button>
+    </div>
+  </div>
+
+  <!-- 画面2：ステータス -->
+  <div id="screen-status" class="hidden">
+    <div class="eyebrow">配車状況</div>
+    <h1 id="bigStatus" class="big-status" style="text-align:left;font-size:25px">受付中…</h1>
+    <div class="panel">
+      <div class="ordsum" id="ordSum"></div>
+      <div id="driverBox"></div>
+      <div class="steps" id="steps"></div>
+    </div>
+    <a class="btn btn-line" href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener">LINEで連絡する</a>
+    <a class="btn btn-tel" href="tel:050-1724-3179">電話する（050-1724-3179）</a>
+    <button class="btn btn-ghost" id="receiptBtn" onclick="showReceipt()" style="display:none">領収書を見る</button>
+    <button class="btn btn-ghost" onclick="resetOrder()">新しく注文する</button>
+  </div>
+
+  <!-- 画面3：領収書 -->
+  <div id="screen-receipt" class="hidden">
+    <div class="eyebrow">領収書</div>
+    <h1>領収書</h1>
+    <div class="receipt" id="receiptBody"></div>
+    <div class="note" style="margin-top:16px">📷 この画面をスクリーンショットして保存するか、LINEで送れます。</div>
+    <a class="btn btn-line" href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener" style="margin-top:14px">LINEを開く</a>
+    <button class="btn btn-ghost" onclick="backToStatus()">もどる</button>
+  </div>
+</div>
+
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+
+var BASE=2000,BASE_KM=5,PER_KM=400;
+function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
+function calcPrice(d){var t=BASE;if(d>BASE_KM)t+=(d-BASE_KM)*PER_KM;return t}
+
+var km=document.getElementById("km");
+function updPrice(){
+  var d=parseInt(km.value,10);
+  document.getElementById("kmv").textContent=d+"km";
+  var p=calcPrice(d);
+  document.getElementById("price").textContent=yen(p);
+  document.getElementById("bd").textContent = d<=BASE_KM ? ("初乗り5kmまで "+yen(BASE)) : ("初乗り"+yen(BASE)+" ＋ 超過"+(d-BASE_KM)+"km×¥"+PER_KM+" = "+yen(p));
+}
+km.addEventListener("input",updPrice);
+updPrice();
+
+var STEPS=[
+  {key:"pending",  ic:"📝", lbl:"受付中"},
+  {key:"accepted", ic:"✅", lbl:"ドライバー決定"},
+  {key:"departed", ic:"🚗", lbl:"向かっています"},
+  {key:"arriving", ic:"📍", lbl:"もうすぐ到着"},
+  {key:"done",     ic:"🏁", lbl:"完了"}
+];
+var BIG={pending:"受付中…",accepted:"ドライバーが決まりました",departed:"ドライバーが向かっています",arriving:"まもなく到着します",done:"ご利用ありがとうございました"};
+var oid=localStorage.getItem("dn_order_id")||null;
+var pollTimer=null;
+var lastOrder=null;
+
+async function placeOrder(){
+  var cname=document.getElementById("cname").value.trim();
+  var cphone=document.getElementById("cphone").value.trim();
+  var pickup=document.getElementById("pickup").value.trim();
+  var dropoff=document.getElementById("dropoff").value.trim();
+  var d=parseInt(km.value,10);
+  if(!cname||!pickup||!dropoff){alert("お名前・出発地・目的地を入力してください");return}
+  var btn=document.getElementById("orderBtn");btn.disabled=true;btn.textContent="送信中…";
+  var rec=await sbPost("orders",{cname:cname,cphone:cphone,pickup:pickup,dropoff:dropoff,km:d,price:calcPrice(d),status:"pending"});
+  btn.disabled=false;btn.textContent="🚖 この内容で呼ぶ";
+  if(rec&&rec[0]&&rec[0].id){
+    oid=rec[0].id;localStorage.setItem("dn_order_id",oid);
+    gotoStatus();
+  }else{
+    alert("送信に失敗しました。電波の良い場所でもう一度お試しください。");
+  }
+}
+
+function show(id){["screen-form","screen-status","screen-receipt"].forEach(function(s){document.getElementById(s).classList.add("hidden")});document.getElementById(id).classList.remove("hidden")}
+
+function gotoStatus(){show("screen-status");poll();if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(poll,4000)}
+
+async function poll(){
+  if(!oid)return;
+  var rows=await sbGet("orders","id=eq."+oid);
+  if(!rows||!rows[0]){return}
+  var o=rows[0];lastOrder=o;
+  document.getElementById("ordSum").innerHTML="<b>"+o.pickup+"</b> → <b>"+o.dropoff+"</b><br>約"+o.km+"km ・ "+yen(o.price);
+  document.getElementById("bigStatus").textContent=BIG[o.status]||o.status;
+  var db=document.getElementById("driverBox");
+  if(o.driver && o.status!=="pending"){db.innerHTML="<div class='driver-box'>担当ドライバー：<b>"+o.driver+"</b></div>"}else{db.innerHTML=""}
+  var idx=STEPS.findIndex(function(s){return s.key===o.status});
+  var html="";
+  STEPS.forEach(function(s,i){
+    var cls=i<idx?"on":(i===idx?"on cur":"");
+    html+="<div class='step "+cls+"'><div class='dot'>"+s.ic+"</div><div class='lbl'>"+s.lbl+"</div></div>";
+  });
+  document.getElementById("steps").innerHTML=html;
+  document.getElementById("receiptBtn").style.display = (o.status==="done") ? "flex" : "none";
+}
+
+function showReceipt(){
+  if(!lastOrder)return;
+  var o=lastOrder;
+  var dt=new Date(o.created_at);
+  var ds=dt.getFullYear()+"年"+(dt.getMonth()+1)+"月"+dt.getDate()+"日";
+  document.getElementById("receiptBody").innerHTML=
+    "<h2>領収書</h2><div class='rsub'>代行なう運転代行</div>"+
+    "<table>"+
+    "<tr><td>発行日</td><td>"+ds+"</td></tr>"+
+    "<tr><td>お名前</td><td>"+(o.cname||"")+" 様</td></tr>"+
+    "<tr><td>区間</td><td>"+o.pickup+" → "+o.dropoff+"</td></tr>"+
+    "<tr><td>距離</td><td>約"+o.km+"km</td></tr>"+
+    "</table>"+
+    "<div class='ramt'>"+yen(o.price)+"</div>"+
+    "<table><tr><td>但し</td><td>運転代行料金として</td></tr></table>"+
+    "<div class='stamp'>合同会社中尊社 ／ 代行なう運転代行<br>TEL 050-1724-3179</div>";
+  show("screen-receipt");
+}
+function backToStatus(){show("screen-status")}
+function resetOrder(){if(pollTimer)clearInterval(pollTimer);localStorage.removeItem("dn_order_id");oid=null;lastOrder=null;document.getElementById("cname").value="";document.getElementById("cphone").value="";document.getElementById("pickup").value="";document.getElementById("dropoff").value="";km.value=5;updPrice();show("screen-form")}
+
+// 既存注文があれば状況画面から
+if(oid){gotoStatus()}
+</script>
+</body>
+</html>

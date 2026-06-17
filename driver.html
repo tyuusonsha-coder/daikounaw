@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ドライバー｜代行なう</title>
+<style>
+  :root{--bg:#080b14;--bg2:#0d1322;--line:#1c2740;--cyan:#00e5ff;--amber:#ffb648;--txt:#e8edf4;--sub:#8493ab;--green:#3ddc84;--red:#ff5b6e;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 60px}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .top .ttl{font-size:18px;font-weight:800}
+  .top .me{font-size:12px;color:var(--cyan);background:rgba(0,229,255,.08);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .sec{font-size:12px;letter-spacing:.2em;color:var(--amber);font-weight:700;margin:18px 0 8px;text-transform:uppercase}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:10px}
+  .card.mine{border-color:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.12)}
+  .route{font-size:15px;font-weight:700}
+  .route b{color:var(--cyan)}
+  .meta{font-size:13px;color:var(--sub);margin-top:3px}
+  .meta .price{color:var(--amber);font-weight:700}
+  .stbadge{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;margin-bottom:6px}
+  .s-accepted{background:rgba(61,220,132,.15);color:var(--green)}
+  .s-departed{background:rgba(0,229,255,.15);color:var(--cyan)}
+  .s-arriving{background:rgba(255,182,72,.15);color:var(--amber)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 14px;border-radius:10px;font-size:14px;font-weight:800;border:none;cursor:pointer;text-decoration:none;margin:6px 6px 0 0}
+  .btn:active{transform:scale(.97)}
+  .b-accept{background:linear-gradient(135deg,var(--green),#27a862);color:#04140a;width:100%;font-size:15px;padding:13px}
+  .b-step{background:var(--cyan);color:#041018}
+  .b-done{background:var(--amber);color:#2a1800}
+  .b-tel{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan)}
+  .b-ghost{background:transparent;color:var(--sub);border:1px solid var(--line)}
+  .actions{margin-top:8px}
+  .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px}
+  .setup{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center}
+  .setup input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--txt);font-size:16px;margin:12px 0;text-align:center;font-family:inherit}
+  .setup input:focus{outline:none;border-color:var(--cyan)}
+  .dot-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;animation:bl 1.2s infinite}
+  @keyframes bl{50%{opacity:.3}}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 初回：名前登録 -->
+  <div id="setup" class="setup hidden">
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">ドライバー登録</div>
+    <div style="font-size:13px;color:var(--sub)">お名前を入力してください（この端末に保存されます）</div>
+    <input type="text" id="dname" placeholder="例）山田">
+    <button class="btn b-accept" onclick="saveName()">はじめる</button>
+  </div>
+
+  <!-- メイン -->
+  <div id="main" class="hidden">
+    <div class="top">
+      <div class="ttl">🚖 ドライバー画面</div>
+      <div class="me"><span id="meName"></span> <span onclick="changeName()" style="cursor:pointer;opacity:.6">⚙</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--sub)"><span class="dot-live"></span>自動更新中（4秒ごと）</div>
+
+    <div class="sec">担当中の案件</div>
+    <div id="mineList"></div>
+
+    <div class="sec">新着の注文（受付中）</div>
+    <div id="pendingList"></div>
+  </div>
+
+</div>
+
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPatch(t,id,d){try{await fetch(SB+t+"?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(d)})}catch(e){}}
+
+function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
+var DNAME=localStorage.getItem("dn_driver")||"";
+var timer=null;
+
+function boot(){
+  if(!DNAME){document.getElementById("setup").classList.remove("hidden");document.getElementById("main").classList.add("hidden");}
+  else{document.getElementById("setup").classList.add("hidden");document.getElementById("main").classList.remove("hidden");document.getElementById("meName").textContent=DNAME;refresh();if(timer)clearInterval(timer);timer=setInterval(refresh,4000);}
+}
+function saveName(){var v=document.getElementById("dname").value.trim();if(!v){alert("お名前を入力してください");return}DNAME=v;localStorage.setItem("dn_driver",v);boot()}
+function changeName(){var v=prompt("ドライバー名を変更",DNAME);if(v&&v.trim()){DNAME=v.trim();localStorage.setItem("dn_driver",DNAME);document.getElementById("meName").textContent=DNAME}}
+
+async function refresh(){
+  // 担当中（自分が受けた未完了）
+  var mine=await sbGet("orders","driver=eq."+encodeURIComponent(DNAME)+"&status=neq.done&order=created_at.desc");
+  var ml=document.getElementById("mineList");
+  if(!mine||mine.length===0){ml.innerHTML="<div class='empty'>担当中の案件はありません</div>"}
+  else{ml.innerHTML=mine.map(mineCard).join("")}
+  // 受付中
+  var pend=await sbGet("orders","status=eq.pending&order=created_at.desc");
+  var pl=document.getElementById("pendingList");
+  if(!pend||pend.length===0){pl.innerHTML="<div class='empty'>新着の注文はありません</div>"}
+  else{pl.innerHTML=pend.map(pendCard).join("")}
+}
+
+function pendCard(o){
+  return "<div class='card'>"+
+    "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
+    "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
+    "<div class='actions'><button class='btn b-accept' onclick=\"accept('"+o.id+"')\">この注文を受ける</button></div>"+
+    "</div>";
+}
+function mineCard(o){
+  var badge={accepted:["s-accepted","受諾済み"],departed:["s-departed","向かっています"],arriving:["s-arriving","もうすぐ到着"]}[o.status]||["s-accepted",o.status];
+  var act="";
+  if(o.status==="accepted")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','departed')\">🚗 出発する</button>";
+  else if(o.status==="departed")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','arriving')\">📍 もうすぐ到着</button>";
+  else if(o.status==="arriving")act="<button class='btn b-done' onclick=\"setStatus('"+o.id+"','done')\">🏁 完了にする</button>";
+  var tel = o.cphone ? "<a class='btn b-tel' href='tel:"+esc(o.cphone)+"'>📞 お客に電話</a>" : "";
+  return "<div class='card mine'>"+
+    "<span class='stbadge "+badge[0]+"'>"+badge[1]+"</span>"+
+    "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
+    "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
+    "<div class='actions'>"+act+" "+tel+"</div>"+
+    "</div>";
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>\"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+
+async function accept(id){
+  await sbPatch("orders",id,{status:"accepted",driver:DNAME,updated_at:new Date().toISOString()});
+  refresh();
+}
+async function setStatus(id,st){
+  await sbPatch("orders",id,{status:st,updated_at:new Date().toISOString()});
+  refresh();
+}
+
+boot();
+</script>
+</body>
+</html>
