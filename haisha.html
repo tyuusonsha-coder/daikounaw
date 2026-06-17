@@ -123,6 +123,11 @@ var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json
 async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
 async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
 
+var actx=null;
+function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
+function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=880;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.35);o.start(t);o.stop(t+0.37);})(i*0.45);}}catch(e){}}
+document.addEventListener("click",unlockAudio);
+
 var BASE=2000,BASE_KM=5,PER_KM=400;
 function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
 function calcPrice(d){var t=BASE;if(d>BASE_KM)t+=(d-BASE_KM)*PER_KM;return t}
@@ -149,6 +154,7 @@ var BIG={pending:"受付中…",accepted:"ドライバーが決まりました",
 var oid=localStorage.getItem("dn_order_id")||null;
 var pollTimer=null;
 var lastOrder=null;
+var lastStatus=null;
 
 async function placeOrder(){
   var cname=document.getElementById("cname").value.trim();
@@ -177,6 +183,8 @@ async function poll(){
   var rows=await sbGet("orders","id=eq."+oid);
   if(!rows||!rows[0]){return}
   var o=rows[0];lastOrder=o;
+  if(lastStatus!==null && lastStatus!==o.status){ beep(o.status==="done"?2:1); }
+  lastStatus=o.status;
   document.getElementById("ordSum").innerHTML="<b>"+o.pickup+"</b> → <b>"+o.dropoff+"</b><br>約"+o.km+"km ・ "+yen(o.price);
   document.getElementById("bigStatus").textContent=BIG[o.status]||o.status;
   var db=document.getElementById("driverBox");
@@ -211,6 +219,8 @@ function showReceipt(){
 }
 function backToStatus(){show("screen-status")}
 function resetOrder(){if(pollTimer)clearInterval(pollTimer);localStorage.removeItem("dn_order_id");oid=null;lastOrder=null;document.getElementById("cname").value="";document.getElementById("cphone").value="";document.getElementById("pickup").value="";document.getElementById("dropoff").value="";km.value=5;updPrice();show("screen-form")}
+
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&oid)poll();});
 
 // 既存注文があれば状況画面から
 if(oid){gotoStatus()}
