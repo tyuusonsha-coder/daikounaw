@@ -47,8 +47,15 @@
   .rcv-card td:first-child{color:#666;width:34%}
   .rcv-card .stamp{text-align:right;margin-top:14px;font-size:12px;color:#444}
   .rcv-close{margin-top:16px;background:#fff;color:#111;border:none;border-radius:10px;padding:12px 28px;font-weight:800;cursor:pointer}
+  #dmapWrap{margin:10px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  #dmap{height:240px;width:100%;background:#0a0f1c}
+  .gpsbar{font-size:12px;color:var(--sub);padding:8px 12px;background:var(--bg2);display:flex;justify-content:space-between;align-items:center}
+  .gpson{color:var(--green)}.gpsoff{color:var(--red)}
+  .leaflet-container{background:#0a0f1c}
   .hidden{display:none}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -70,6 +77,10 @@
     <div style="font-size:12px;color:var(--sub)"><span class="dot-live"></span>自動更新中（4秒ごと）</div>
 
     <div class="sec">担当中の案件</div>
+    <div id="dmapWrap" class="hidden">
+      <div id="dmap"></div>
+      <div class="gpsbar"><span id="gpsState" class="gpsoff">位置取得：オフ</span><span id="gpsDist"></span></div>
+    </div>
     <div id="mineList"></div>
 
     <div class="sec">新着の注文（受付中）</div>
@@ -114,6 +125,7 @@ async function refresh(){
   if(!mine||mine.length===0){ml.innerHTML="<div class='empty'>担当中の案件はありません</div>"}
   else{ml.innerHTML=mine.map(mineCard).join("")}
   if(mine){mine.forEach(function(o){ordMap[o.id]=o})}
+  updateMapForMine(mine);
   // 受付中
   var pend=await sbGet("orders","status=eq.pending&order=created_at.desc");
   var pl=document.getElementById("pendingList");
@@ -176,6 +188,39 @@ function showReceipt(id){
   document.getElementById("receiptOverlay").classList.remove("hidden");
 }
 function closeReceipt(){document.getElementById("receiptOverlay").classList.add("hidden")}
+
+/* ===== 地図（リアルタイム位置） ===== */
+function hav(a,b,c,d){var R=6371,r=function(x){return x*Math.PI/180};var dLa=r(c-a),dLo=r(d-b);var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dLo/2)*Math.sin(dLo/2);return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
+function mkDot(color){return L.divIcon({className:"",html:"<div style='background:"+color+";width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 8px "+color+"'></div>",iconSize:[16,16],iconAnchor:[8,8]});}
+var dmap=null,dDriverMk=null,dCustMk=null,dLine=null,dWatch=null,dActiveId=null,dFit=false,dLastPatch=0;
+function ensureMap(){if(dmap)return;dmap=L.map("dmap",{zoomControl:true,attributionControl:false}).setView([33.59,130.40],13);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(dmap);setTimeout(function(){if(dmap)dmap.invalidateSize()},200);}
+function drawDLine(){if(!dmap||!dDriverMk||!dCustMk)return;var a=dDriverMk.getLatLng(),b=dCustMk.getLatLng();if(dLine)dmap.removeLayer(dLine);dLine=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:"#00e5ff",weight:3,dashArray:"7 6"}).addTo(dmap);var km=hav(a.lat,a.lng,b.lat,b.lng);document.getElementById("gpsDist").textContent="お客まで 約"+km.toFixed(1)+"km";}
+function startGps(){
+  if(dWatch!=null||!navigator.geolocation)return;
+  var gs=document.getElementById("gpsState");gs.textContent="位置取得：オン";gs.className="gpson";
+  dWatch=navigator.geolocation.watchPosition(function(p){
+    var la=p.coords.latitude,lo=p.coords.longitude;ensureMap();
+    if(!dDriverMk){dDriverMk=L.marker([la,lo],{icon:mkDot("#00e5ff")}).addTo(dmap).bindPopup("あなた（車）");}else dDriverMk.setLatLng([la,lo]);
+    if(dActiveId){var now=Date.now();if(now-dLastPatch>4000){dLastPatch=now;sbPatch("orders",dActiveId,{dlat:la,dlng:lo,dloc_at:new Date().toISOString()});}}
+    drawDLine();
+    if(!dFit){dmap.setView([la,lo],15);dFit=true;}
+  },function(){var g=document.getElementById("gpsState");g.textContent="位置取得：許可してください";g.className="gpsoff";},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+}
+function stopGps(){if(dWatch!=null){navigator.geolocation.clearWatch(dWatch);dWatch=null;}var gs=document.getElementById("gpsState");gs.textContent="位置取得：オフ";gs.className="gpsoff";}
+function updateMapForMine(mine){
+  var active=(mine&&mine.length)?mine[0]:null;
+  var wrap=document.getElementById("dmapWrap");
+  if(active){
+    wrap.classList.remove("hidden");dActiveId=active.id;ensureMap();
+    setTimeout(function(){if(dmap)dmap.invalidateSize()},150);
+    startGps();
+    if(active.clat&&active.clng){if(!dCustMk){dCustMk=L.marker([active.clat,active.clng],{icon:mkDot("#ffb648")}).addTo(dmap).bindPopup("お客（出発地）");}else dCustMk.setLatLng([active.clat,active.clng]);}
+    drawDLine();
+  }else{
+    wrap.classList.add("hidden");dActiveId=null;stopGps();dFit=false;
+    if(dmap){if(dCustMk){dmap.removeLayer(dCustMk);dCustMk=null}if(dLine){dmap.removeLayer(dLine);dLine=null}}
+  }
+}
 
 boot();
 </script>
