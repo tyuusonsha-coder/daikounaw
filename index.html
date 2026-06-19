@@ -221,6 +221,7 @@ o+='<div style="font-size:13px;color:#888">あなたの車で、安全におう�
 o+='<div style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12px;color:#3ddc84;background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.3);border-radius:999px;padding:6px 15px"><span style="width:8px;height:8px;border-radius:50%;background:#3ddc84;display:inline-block;animation:none"></span>今夜も稼働中・最短10分でお迎え</div>';
 o+='</div>';
 o+='<div style="padding:0 16px"><a href="haisha.html" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:900;font-size:19px;padding:20px;border-radius:18px;text-decoration:none;box-shadow:0 10px 34px rgba(0,229,255,.4)">🚖 今すぐ配車を呼ぶ</a></div>';
+o+='<div style="padding:10px 16px 0"><a href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#06c755;color:#fff;font-weight:800;font-size:15px;padding:14px;border-radius:14px;text-decoration:none">💬 LINE登録で初回 ¥500 OFF</a></div>';
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;justify-content:space-around;text-align:center">';
 o+='<div><div style="font-size:11px;color:#888">初乗り(5kmまで)</div><div style="font-size:20px;font-weight:900;color:#00e5ff">¥2,000</div></div>';
 o+='<div style="width:1px;background:#24242e"></div>';
@@ -265,7 +266,11 @@ o+='</div></div>';
 if(companies.length>5)o+='<div style="text-align:center;padding:6px"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#00e5ff;cursor:pointer">すべての業者を見る ›</span></div>';
 o+='</div>';
 }
-o+='<div style="padding:22px 16px 10px;text-align:center"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#888;text-decoration:underline;cursor:pointer">業者の料金を比較・無料登録はこちら ›</span></div>';
+o+='<div style="padding:18px 16px 0"><div style="font-size:12px;color:#888;font-weight:800;margin-bottom:8px">🤝 一緒に働く・はじめる</div><div style="display:flex;gap:8px">';
+o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(0,229,255,.12),#0c0c10);border:1px solid rgba(0,229,255,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🚖</div><div style="font-size:13px;font-weight:900;margin-top:5px">ドライバー募集</div><div style="font-size:10px;color:#3ddc84;font-weight:700;margin-top:2px">日額¥5,000保証・純利50%</div></div>';
+o+='<div onclick="location.href=\'fc.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(255,107,0,.12),#0c0c10);border:1px solid rgba(255,107,0,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🏢</div><div style="font-size:13px;font-weight:900;margin-top:5px">FCオーナー募集</div><div style="font-size:10px;color:#ffb648;font-weight:700;margin-top:2px">純利益50%・低資金開業</div></div>';
+o+='</div></div>';
+o+='<div style="padding:18px 16px 10px;text-align:center"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#888;text-decoration:underline;cursor:pointer">業者の料金を比較・無料登録はこちら ›</span></div>';
 return o;
 }
 
