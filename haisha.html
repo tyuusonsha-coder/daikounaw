@@ -59,15 +59,8 @@
   .receipt td{padding:5px 0;vertical-align:top}
   .receipt td:first-child{color:#666;width:34%}
   .receipt .stamp{text-align:right;margin-top:14px;font-size:12px;color:#444}
-  #cmapWrap{margin:10px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
-  #cmap{height:240px;width:100%;background:#0a0f1c}
-  .gpsbar{font-size:12px;color:var(--sub);padding:8px 12px;background:#0a0f1c;display:flex;justify-content:space-between;align-items:center}
-  .gpsbar .gd{color:var(--amber);font-weight:700}
-  .leaflet-container{background:#0a0f1c}
   .hidden{display:none}
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -90,8 +83,8 @@
       <div class="kmrow"><span style="font-size:13px;color:var(--sub)">乗る距離</span><span class="v" id="kmv">5km</span></div>
       <input type="range" id="km" min="1" max="30" step="1" value="5">
       <div class="ticks"><span>1km</span><span>15km</span><span>30km</span></div>
-      <div class="price"><div class="cap">料金の目安</div><div class="amt" id="price">¥2,000</div></div>
-      <div class="bd" id="bd">初乗り5kmまで ¥2,000</div>
+      <div class="price"><div class="cap">料金の目安</div><div class="amt" id="price">¥400</div></div>
+      <div class="bd" id="bd">¥400 × 距離</div>
       <div class="note">⚠ 料金はあくまで目安です。実際の距離・経路・待機などで変わる場合があります。</div>
       <button class="btn btn-main" id="orderBtn" onclick="placeOrder()">🚖 この内容で呼ぶ</button>
     </div>
@@ -104,10 +97,6 @@
     <div class="panel">
       <div class="ordsum" id="ordSum"></div>
       <div id="driverBox"></div>
-      <div id="cmapWrap" class="hidden">
-        <div id="cmap"></div>
-        <div class="gpsbar"><span>🚖 ドライバーの現在地</span><span id="cmapDist" class="gd"></span></div>
-      </div>
       <div class="steps" id="steps"></div>
     </div>
     <a class="btn btn-line" href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener">LINEで連絡する</a>
@@ -139,26 +128,9 @@ function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkit
 function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=880;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.35);o.start(t);o.stop(t+0.37);})(i*0.45);}}catch(e){}}
 document.addEventListener("click",unlockAudio);
 
-/* ===== 地図（ドライバーのリアルタイム位置） ===== */
-function getPos(){return new Promise(function(res){if(!navigator.geolocation){res(null);return;}navigator.geolocation.getCurrentPosition(function(p){res({lat:p.coords.latitude,lng:p.coords.longitude})},function(){res(null)},{enableHighAccuracy:true,timeout:8000,maximumAge:10000});});}
-function hav(a,b,c,d){var R=6371,r=function(x){return x*Math.PI/180};var dLa=r(c-a),dLo=r(d-b);var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dLo/2)*Math.sin(dLo/2);return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
-function mkDot(color){return L.divIcon({className:"",html:"<div style='background:"+color+";width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 8px "+color+"'></div>",iconSize:[16,16],iconAnchor:[8,8]});}
-var cmap=null,cDriverMk=null,cCustMk=null,cLine=null,cFit=false;
-function ensureCmap(){if(cmap)return;cmap=L.map("cmap",{zoomControl:true,attributionControl:false}).setView([33.59,130.40],13);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(cmap);setTimeout(function(){if(cmap)cmap.invalidateSize()},200);}
-function updateCmap(o){
-  var wrap=document.getElementById("cmapWrap");
-  var hasDriver=o.dlat&&o.dlng;
-  if(o.status==="pending"||o.status==="done"||!hasDriver){wrap.classList.add("hidden");return;}
-  wrap.classList.remove("hidden");ensureCmap();setTimeout(function(){if(cmap)cmap.invalidateSize()},120);
-  if(!cDriverMk){cDriverMk=L.marker([o.dlat,o.dlng],{icon:mkDot("#00e5ff")}).addTo(cmap).bindPopup("🚖 ドライバー");}else cDriverMk.setLatLng([o.dlat,o.dlng]);
-  if(o.clat&&o.clng){if(!cCustMk){cCustMk=L.marker([o.clat,o.clng],{icon:mkDot("#ffb648")}).addTo(cmap).bindPopup("📍 あなた");}else cCustMk.setLatLng([o.clat,o.clng]);}
-  if(cCustMk){var a=cDriverMk.getLatLng(),b=cCustMk.getLatLng();if(cLine)cmap.removeLayer(cLine);cLine=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:"#00e5ff",weight:3,dashArray:"7 6"}).addTo(cmap);var km=hav(a.lat,a.lng,b.lat,b.lng);document.getElementById("cmapDist").textContent="あと約"+km.toFixed(1)+"km";}
-  if(!cFit){if(cCustMk){cmap.fitBounds([[o.dlat,o.dlng],[o.clat,o.clng]],{padding:[40,40]});}else{cmap.setView([o.dlat,o.dlng],15);}cFit=true;}
-}
-
-var BASE=2000,BASE_KM=5,PER_KM=400;
+var PER_KM=400;
 function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
-function calcPrice(d){var t=BASE;if(d>BASE_KM)t+=(d-BASE_KM)*PER_KM;return t}
+function calcPrice(d){return d*PER_KM;}
 
 var km=document.getElementById("km");
 function updPrice(){
@@ -166,7 +138,7 @@ function updPrice(){
   document.getElementById("kmv").textContent=d+"km";
   var p=calcPrice(d);
   document.getElementById("price").textContent=yen(p);
-  document.getElementById("bd").textContent = d<=BASE_KM ? ("初乗り5kmまで "+yen(BASE)) : ("初乗り"+yen(BASE)+" ＋ 超過"+(d-BASE_KM)+"km×¥"+PER_KM+" = "+yen(p));
+  document.getElementById("bd").textContent = "¥"+PER_KM+" × "+d+"km = "+yen(p);
 }
 km.addEventListener("input",updPrice);
 updPrice();
@@ -192,10 +164,7 @@ async function placeOrder(){
   var d=parseInt(km.value,10);
   if(!cname||!pickup||!dropoff){alert("お名前・出発地・目的地を入力してください");return}
   var btn=document.getElementById("orderBtn");btn.disabled=true;btn.textContent="送信中…";
-  var pos=await getPos();
-  var payload={cname:cname,cphone:cphone,pickup:pickup,dropoff:dropoff,km:d,price:calcPrice(d),status:"pending"};
-  if(pos){payload.clat=pos.lat;payload.clng=pos.lng;}
-  var rec=await sbPost("orders",payload);
+  var rec=await sbPost("orders",{cname:cname,cphone:cphone,pickup:pickup,dropoff:dropoff,km:d,price:calcPrice(d),status:"pending"});
   btn.disabled=false;btn.textContent="🚖 この内容で呼ぶ";
   if(rec&&rec[0]&&rec[0].id){
     oid=rec[0].id;localStorage.setItem("dn_order_id",oid);
@@ -220,7 +189,6 @@ async function poll(){
   document.getElementById("bigStatus").textContent=BIG[o.status]||o.status;
   var db=document.getElementById("driverBox");
   if(o.driver && o.status!=="pending"){db.innerHTML="<div class='driver-box'>担当ドライバー：<b>"+o.driver+"</b></div>"}else{db.innerHTML=""}
-  updateCmap(o);
   var idx=STEPS.findIndex(function(s){return s.key===o.status});
   var html="";
   STEPS.forEach(function(s,i){
@@ -250,7 +218,7 @@ function showReceipt(){
   show("screen-receipt");
 }
 function backToStatus(){show("screen-status")}
-function resetOrder(){if(pollTimer)clearInterval(pollTimer);localStorage.removeItem("dn_order_id");oid=null;lastOrder=null;document.getElementById("cname").value="";document.getElementById("cphone").value="";document.getElementById("pickup").value="";document.getElementById("dropoff").value="";km.value=5;updPrice();cFit=false;if(cmap){if(cDriverMk){cmap.removeLayer(cDriverMk);cDriverMk=null}if(cCustMk){cmap.removeLayer(cCustMk);cCustMk=null}if(cLine){cmap.removeLayer(cLine);cLine=null}}document.getElementById("cmapWrap").classList.add("hidden");show("screen-form")}
+function resetOrder(){if(pollTimer)clearInterval(pollTimer);localStorage.removeItem("dn_order_id");oid=null;lastOrder=null;document.getElementById("cname").value="";document.getElementById("cphone").value="";document.getElementById("pickup").value="";document.getElementById("dropoff").value="";km.value=5;updPrice();show("screen-form")}
 
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&oid)poll();});
 

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>料金の目安｜代行なう</title>
+<style>
+  :root{
+    --bg:#080b14;
+    --bg2:#0d1322;
+    --line:#1c2740;
+    --cyan:#00e5ff;
+    --amber:#ffb648;
+    --txt:#e8edf4;
+    --sub:#8493ab;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+    background:
+      radial-gradient(120% 60% at 50% 0%, rgba(0,229,255,.10), transparent 60%),
+      var(--bg);
+    color:var(--txt);line-height:1.7;min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:22px 18px 60px}
+  .back{display:inline-block;color:var(--sub);text-decoration:none;font-size:13px;margin-bottom:18px}
+  .back:hover{color:var(--cyan)}
+  .eyebrow{font-size:11px;letter-spacing:.3em;color:var(--cyan);font-weight:700;text-transform:uppercase}
+  h1{font-size:26px;font-weight:800;margin:6px 0 4px;text-shadow:0 0 24px rgba(0,229,255,.3)}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:26px}
+
+  .panel{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:24px 20px}
+
+  .km-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .km-label .t{font-size:14px;color:var(--sub)}
+  .km-label .v{font-size:24px;font-weight:800;color:var(--cyan)}
+  .km-label .v small{font-size:14px;color:var(--sub);font-weight:400;margin-left:2px}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
+    background:linear-gradient(90deg,var(--cyan),var(--amber));outline:none;margin:14px 0 4px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;
+    background:#fff;border:3px solid var(--cyan);cursor:pointer;box-shadow:0 0 14px var(--cyan);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--cyan);
+    cursor:pointer;box-shadow:0 0 14px var(--cyan);
+  }
+  .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:2px}
+
+  .price{text-align:center;margin:26px 0 6px}
+  .price .cap{font-size:12px;letter-spacing:.2em;color:var(--amber);font-weight:700}
+  .price .amt{font-size:52px;font-weight:800;line-height:1.1;text-shadow:0 0 30px rgba(0,229,255,.35)}
+  .price .amt small{font-size:24px;font-weight:700;margin-left:2px}
+  .breakdown{text-align:center;font-size:13px;color:var(--sub);margin-bottom:4px}
+
+  .note{font-size:12px;color:var(--sub);background:rgba(255,182,72,.06);
+    border:1px solid rgba(255,182,72,.25);border-radius:12px;padding:12px 14px;margin-top:20px}
+
+  .cta{display:grid;gap:12px;margin-top:24px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:16px;border-radius:14px;font-size:16px;font-weight:800;text-decoration:none;border:none;cursor:pointer}
+  .btn-line{background:#06c755;color:#fff}
+  .btn-tel{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan)}
+  .btn:active{transform:scale(.98)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back">← 配車にもどる</a>
+    <div class="eyebrow">料金の目安</div>
+    <h1>いくらで呼べる？</h1>
+    <div class="sub">だいたいの距離を選ぶと、料金の目安がすぐわかります。</div>
+
+    <div class="panel">
+      <div class="km-label">
+        <span class="t">乗る距離</span>
+        <span class="v" id="kmv">5<small>km</small></span>
+      </div>
+      <input type="range" id="km" min="1" max="30" step="1" value="5">
+      <div class="ticks"><span>1km</span><span>15km</span><span>30km</span></div>
+
+      <div class="price">
+        <div class="cap">料金の目安</div>
+        <div class="amt" id="price">¥400</div>
+      </div>
+      <div class="breakdown" id="bd">¥400 × 距離</div>
+
+      <div class="note">
+        ⚠ あくまで目安です。実際の距離・経路、高速代や待機などで料金が変わる場合があります。正確な料金は配車時にお伝えします。
+      </div>
+
+      <div class="cta">
+        <a class="btn btn-line" href="https://line.me/R/ti/p/kuikkusutsa" target="_blank" rel="noopener">LINEで呼ぶ</a>
+        <a class="btn btn-tel" href="tel:050-1724-3179">電話で呼ぶ（050-1724-3179）</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  var PER_KM = 400;    // 1kmあたり
+
+  var km = document.getElementById('km');
+  var kmv = document.getElementById('kmv');
+  var price = document.getElementById('price');
+  var bd = document.getElementById('bd');
+
+  function yen(n){ return '¥' + n.toLocaleString('ja-JP'); }
+
+  function calc(){
+    var d = parseInt(km.value, 10);
+    kmv.innerHTML = d + '<small>km</small>';
+    var total = d * PER_KM;
+    price.textContent = yen(total);
+    bd.textContent = '¥' + PER_KM + ' × ' + d + 'km = ' + yen(total);
+  }
+  km.addEventListener('input', calc);
+  calc();
+</script>
+</body>
+</html>
