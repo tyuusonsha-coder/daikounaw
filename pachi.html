@@ -245,11 +245,9 @@ var balance = load("dn_balance", null);
 if(balance === null){ balance = 100; save("dn_balance", balance); } // 初回100玉プレゼント
 
 var prizes = [
-  { id:"line500", icon:"\uD83D\uDCB4", name:"LINE割引 500円OFF", cost:300, pre:"L5" },
-  { id:"off300",  icon:"\uD83C\uDFAB", name:"次回 300円OFF",      cost:200, pre:"O3" },
-  { id:"sticker", icon:"\u2B50",       name:"オリジナルステッカー", cost:800, pre:"ST" },
-  { id:"first0",  icon:"\uD83D\uDE97", name:"初乗り無料（5kmまで）",    cost:1500, pre:"F0" }
+  { id:"off100", icon:"\uD83C\uDF9F", name:"100円OFF", cost:1000, pre:"O1" }
 ];
+
 
 /* ---- 表示 ---- */
 var balEl = document.getElementById("balance");
@@ -540,20 +538,8 @@ function genCode(pre){
 }
 
 async function redeem(p){
-  if(balance < p.cost) return;
-  // 1日1回チェック（この端末が今日すでに交換していないか）
-  var todayStart = new Date(new Date().setHours(0,0,0,0)).toISOString();
-  var existing = await sbGet("coupons","device=eq."+uid+"&created_at=gte."+encodeURIComponent(todayStart)+"&select=id");
-  if(existing && existing.length>0){
-    couponArea.innerHTML =
-      '<div class="coupon">'+
-        '<div class="t">本日は交換済み</div>'+
-        '<div class="n">景品交換は1日1回までです</div>'+
-        '<div class="hint">また明日チャレンジしてください。</div>'+
-      '</div>';
-    couponArea.scrollIntoView({behavior:"smooth", block:"center"});
-    return;
-  }
+  if(balance < p.cost) {alert("玉が足りません");return;}
+
   // 玉を引いてコードを発行・記録
   balance -= p.cost; save("dn_balance", balance); renderBalance();
   var code = genCode(p.pre);
