@@ -3,171 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>無線｜代行なう</title>
+<title>DISRI CLUB｜代行なう</title>
 <style>
-  :root{--bg:#070a12;--bg2:#0e1422;--line:#1d2740;--cyan:#00ffe0;--blue:#00a7ff;--txt:#eaf2ff;--sub:#8597b5;--red:#ff3b5c;}
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:radial-gradient(130% 70% at 50% 0%,rgba(0,255,224,.08),transparent 60%),var(--bg);color:var(--txt);min-height:100vh}
+  :root{--bg:#060912;--bg2:#0d1526;--line:#1c2942;--cyan:#00ffe0;--blue:#00a7ff;--txt:#eaf2ff;--sub:#8ea0be;--red:#ff3b5c;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+    background:radial-gradient(120% 60% at 50% 0%,rgba(0,255,224,.10),transparent 55%),radial-gradient(90% 50% at 50% 100%,rgba(0,120,255,.10),transparent 60%),var(--bg);
+    color:var(--txt);min-height:100vh;overflow-x:hidden}
   .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .top .logo{font-size:18px;font-weight:900;display:flex;align-items:center;gap:7px}
-  .back{text-decoration:none;font-size:14px;font-weight:800;color:#fff;padding:9px 16px;background:rgba(0,255,224,.15);border:1px solid var(--cyan);border-radius:999px;white-space:nowrap}
-  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 40px}
-  .name-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-  .name-row label{font-size:12px;color:var(--sub);white-space:nowrap}
-  .name-row input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none;font-family:inherit}
-  .name-row input:focus{border-color:var(--cyan)}
-  .stage{text-align:center;padding:24px 0 10px}
-  .hint{font-size:13px;color:var(--sub);margin-bottom:18px;min-height:20px}
-  .ptt{width:200px;height:200px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 50% 40%,#10324a,#0a1828);box-shadow:0 0 0 6px rgba(0,255,224,.12),0 14px 40px rgba(0,0,0,.5);color:var(--txt);font-size:18px;font-weight:900;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .1s}
-  .ptt .ic{font-size:46px}
-  .ptt.rec{background:radial-gradient(circle at 50% 40%,#ff5b76,#c41e3a);box-shadow:0 0 0 6px rgba(255,59,92,.3),0 0 40px rgba(255,59,92,.5);transform:scale(1.04);animation:pulse 1s infinite}
-  @keyframes pulse{50%{box-shadow:0 0 0 14px rgba(255,59,92,.12),0 0 50px rgba(255,59,92,.6)}}
-  .status{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--cyan);background:rgba(0,255,224,.07);border:1px solid rgba(0,255,224,.3);border-radius:999px;padding:6px 14px;margin-top:18px}
-  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:bl 1.2s infinite}
-  @keyframes bl{50%{opacity:.3}}
-  .log{margin-top:24px}
-  .log h3{font-size:12px;color:var(--sub);font-weight:800;margin-bottom:10px;letter-spacing:.05em}
-  .msg{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px}
-  .msg.me{border-color:rgba(0,255,224,.3)}
-  .msg .who{font-size:14px;font-weight:800;flex:1}
-  .msg .tm{font-size:11px;color:var(--sub)}
-  .msg .play{background:var(--cyan);color:#031018;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:13px;cursor:pointer}
-  .now{color:var(--red);font-weight:800}
-  .note{font-size:12px;color:var(--sub);background:rgba(0,167,255,.06);border:1px solid rgba(0,167,255,.25);border-radius:12px;padding:11px 13px;margin-top:18px;-webkit-user-select:auto}
+  .top .logo{font-size:16px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .back{text-decoration:none;font-size:13px;font-weight:800;color:#fff;padding:9px 15px;background:rgba(0,255,224,.15);border:1px solid var(--cyan);border-radius:999px;white-space:nowrap}
+  .join{max-width:480px;margin:0 auto;padding:26px 22px 50px;text-align:center}
+  .neon{font-size:40px;font-weight:900;letter-spacing:1px;margin:10px 0 4px;color:#d7fff9;
+    text-shadow:0 0 6px #00ffe0,0 0 14px #00ffe0,0 0 30px #00b7a8,0 0 50px #007d76;animation:flick 3.5s infinite}
+  @keyframes flick{0%,100%{opacity:1}48%{opacity:1}49%{opacity:.75}50%{opacity:1}92%{opacity:1}93%{opacity:.7}94%{opacity:1}}
+  .mic{font-size:96px;line-height:1;margin:6px 0 10px;
+    filter:drop-shadow(0 0 12px rgba(0,255,224,.7)) drop-shadow(0 0 30px rgba(0,167,255,.4))}
+  .title{font-size:30px;font-weight:900;margin:2px 0 12px;text-shadow:0 0 20px rgba(0,255,224,.25)}
+  .lead{font-size:14px;color:var(--sub);margin-bottom:28px;line-height:1.8}
+  .field-label{display:block;text-align:left;font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:8px}
+  .join input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px 16px;color:var(--txt);font-size:16px;outline:none;font-family:inherit;margin-bottom:20px}
+  .join input:focus{border-color:var(--cyan)}
+  .enter{width:100%;background:linear-gradient(135deg,#00ffe0,#00a7ff);color:#041018;border:none;border-radius:14px;padding:18px;font-size:18px;font-weight:900;cursor:pointer;
+    box-shadow:0 0 0 1px rgba(0,255,224,.6),0 10px 34px rgba(0,255,224,.30);display:flex;align-items:center;justify-content:center;gap:8px}
+  .enter:active{transform:scale(.98)}
+  .note{font-size:12.5px;color:var(--sub);background:rgba(0,167,255,.06);border:1px solid rgba(0,167,255,.22);border-radius:12px;padding:13px 15px;margin-top:24px;line-height:1.8;text-align:left}
+  #room{position:fixed;inset:0;top:56px;display:none}
+  #jitsi{width:100%;height:100%}
+  .leave{position:fixed;top:10px;right:16px;z-index:10;background:var(--red);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:14px;font-weight:800;cursor:pointer}
+  .loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:16px}
+  .spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--cyan);border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loading p{font-size:14px;color:var(--sub)}
 </style>
 </head>
 <body>
 <div class="top">
-  <div class="logo">📻 無線</div>
+  <div class="logo">🎙 DISRI CLUB</div>
   <a href="index.html" class="back">← 代行なう</a>
 </div>
-
-<div class="wrap">
-  <div class="name-row">
-    <label>名前</label>
-    <input id="name" placeholder="例）山田" maxlength="16">
-  </div>
-
-  <div class="stage">
-    <div class="hint" id="hint">ボタンを押している間だけ話せます</div>
-    <button class="ptt" id="ptt"><span class="ic">🎙</span><span id="pttlbl">押して話す</span></button>
-    <div><span class="status"><span class="dot"></span><span id="liveTxt">受信中</span></span></div>
-    <div style="margin-top:14px"><button id="soundOn" onclick="enableSound()" style="background:rgba(0,255,224,.12);color:#00ffe0;border:1px solid #00ffe0;border-radius:999px;padding:9px 20px;font-weight:800;font-size:13px;cursor:pointer">🔊 受信音声を自動再生ON</button></div>
-  </div>
-
-  <div class="log">
-    <h3>📡 やりとり</h3>
-    <div id="msgs"></div>
-  </div>
-
-  <div class="note">🔊 ボタンを押している間だけ録音し、離すと全員に届きます。届いた声は自動で順番に再生されます。マナーモードだと聞こえないので音量を上げてください。</div>
+<div class="join" id="joinView">
+  <div class="neon">#代行なう</div>
+  <div class="mic">🎙️</div>
+  <div class="title">深夜のたまり場ルーム</div>
+  <div class="lead">名前を入れて「入室」を押すと、<br>いま入っている人と<br>リアルタイムで声で話せます。</div>
+  <label class="field-label">表示名</label>
+  <input id="name" placeholder="名前を入れてください" maxlength="16">
+  <button class="enter" onclick="joinRoom()">🎙️ 入室する</button>
+  <div class="note">🔊 マイクの使用を求められたら「許可」を押してください。静かな場所でのご利用がおすすめです。退室はルーム内の赤い受話器ボタンから。</div>
 </div>
-
-<audio id="player" playsinline></audio>
-
+<div id="room">
+  <button class="leave" onclick="leaveRoom()">✕ 退室</button>
+  <div id="jitsi"></div>
+  <div class="loading" id="loading"><div class="spin"></div><p>接続しています…</p></div>
+</div>
+<script src="https://meet.jit.si/external_api.js"></script>
 <script>
-var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
-var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
-var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
-async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
-async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
-
-function myName(){var v=document.getElementById("name").value.trim();return v||"ゲスト"}
-
-var stream=null,rec=null,chunks=[],mime="";
-function pickMime(){
-  var c=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg"];
-  for(var i=0;i<c.length;i++){ if(window.MediaRecorder&&MediaRecorder.isTypeSupported(c[i])) return c[i]; }
-  return "";
+var api=null, joined=false;
+function myName(){var v=document.getElementById("name").value.trim();return v||"ゲスト"+Math.floor(Math.random()*1000);}
+function joinRoom(){
+  var name=myName();
+  try{ localStorage.setItem("disri_name",name); }catch(e){}
+  document.getElementById("joinView").style.display="none";
+  document.getElementById("room").style.display="block";
+  document.getElementById("loading").style.display="flex";
+  startJitsi(name);
 }
-async function ensureMic(){
-  if(stream)return true;
-  try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); return true; }
-  catch(e){ alert("マイクの使用を許可してください（設定で許可が必要な場合があります）"); return false; }
+function startJitsi(name){
+  var options={
+    roomName:"DISRI_CLUB_daikounaw_main",width:"100%",height:"100%",
+    parentNode:document.getElementById("jitsi"),userInfo:{displayName:name},
+    configOverwrite:{startWithVideoMuted:true,startAudioOnly:true,prejoinPageEnabled:false,prejoinConfig:{enabled:false},disableDeepLinking:true},
+    interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,TOOLBAR_BUTTONS:['microphone','hangup','tileview','raisehand','settings']}
+  };
+  try{
+    api=new JitsiMeetExternalAPI("meet.jit.si",options);
+    joined=true;
+    api.addEventListener("videoConferenceJoined",function(){hideLoading();});
+    api.addEventListener("videoConferenceLeft",function(){if(joined){setTimeout(function(){reconnect(name);},1500);}});
+    api.addEventListener("readyToClose",function(){leaveRoom();});
+  }catch(e){hideLoading();alert("接続に失敗しました。もう一度お試しください。");}
+  setTimeout(hideLoading,5000);
 }
-async function startRec(){
-  if(rec&&rec.state==="recording")return;
-  if(!await ensureMic())return;
-  chunks=[];mime=pickMime();
-  try{ rec=new MediaRecorder(stream, mime?{mimeType:mime}:undefined); }
-  catch(e){ rec=new MediaRecorder(stream); }
-  rec.ondataavailable=function(e){ if(e.data&&e.data.size>0)chunks.push(e.data); };
-  rec.onstop=sendRec;
-  rec.start();
-  var b=document.getElementById("ptt");b.classList.add("rec");
-  document.getElementById("pttlbl").textContent="話してOK…";
-  document.getElementById("hint").innerHTML='<span class="now">● 録音中…離すと送信</span>';
+function reconnect(name){
+  if(!joined)return;
+  try{ if(api) api.dispose(); }catch(e){}
+  document.getElementById("jitsi").innerHTML="";
+  document.getElementById("loading").style.display="flex";
+  startJitsi(name);
 }
-function stopRec(){
-  if(rec&&rec.state!=="inactive"){ try{rec.stop()}catch(e){} }
-  var b=document.getElementById("ptt");b.classList.remove("rec");
-  document.getElementById("pttlbl").textContent="押して話す";
-  document.getElementById("hint").textContent="ボタンを押している間だけ話せます";
+function hideLoading(){var l=document.getElementById("loading");if(l)l.style.display="none";}
+function leaveRoom(){
+  joined=false;
+  try{ if(api){api.dispose();api=null;} }catch(e){}
+  document.getElementById("jitsi").innerHTML="";
+  document.getElementById("room").style.display="none";
+  document.getElementById("joinView").style.display="block";
 }
-function blobToB64(blob){return new Promise(function(res){var r=new FileReader();r.onloadend=function(){res(r.result)};r.readAsDataURL(blob)});}
-async function sendRec(){
-  if(!chunks.length)return;
-  var blob=new Blob(chunks,{type:mime||"audio/mp4"});
-  if(blob.size<1000)return;
-  document.getElementById("hint").textContent="送信中…";
-  var b64=await blobToB64(blob);
-  await sbPost("musen",{name:myName(),audio:b64});
-  document.getElementById("hint").textContent="ボタンを押している間だけ話せます";
-}
-
-// PTTイベント（押下中録音）
-var ptt=document.getElementById("ptt");
-ptt.addEventListener("mousedown",function(e){e.preventDefault();enableSound();startRec()});
-ptt.addEventListener("mouseup",function(e){e.preventDefault();stopRec()});
-ptt.addEventListener("mouseleave",function(){if(rec&&rec.state==="recording")stopRec()});
-ptt.addEventListener("touchstart",function(e){e.preventDefault();enableSound();startRec()},{passive:false});
-ptt.addEventListener("touchend",function(e){e.preventDefault();stopRec()},{passive:false});
-
-// 受信＆再生
-var lastTime=new Date(Date.now()-3000).toISOString();
-var pq=[],playing=false,audioUnlocked=false,player=null;
-function getPlayer(){if(!player)player=document.getElementById("player");return player;}
-function enableSound(){
-  if(audioUnlocked)return;
-  var p=getPlayer();
-  try{ p.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="; p.play().catch(function(){}); }catch(e){}
-  audioUnlocked=true;
-  var b=document.getElementById("soundOn");if(b){b.textContent="🔊 自動再生ON";b.style.opacity=".6";}
-}
-function fmt(t){var d=new Date(t);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);}
-function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
-function addLog(m,me){
-  var box=document.getElementById("msgs");
-  var d=document.createElement("div");d.className="msg"+(me?" me":"");
-  d.innerHTML='<span class="who">'+(me?"あなた":esc(m.name||"ゲスト"))+'</span><span class="tm">'+fmt(m.created_at)+'</span>';
-  var btn=document.createElement("button");btn.className="play";btn.textContent="▶ 再生";
-  btn.onclick=function(){var a=new Audio(m.audio);a.play()};
-  d.appendChild(btn);
-  box.insertBefore(d,box.firstChild);
-  while(box.children.length>30)box.removeChild(box.lastChild);
-}
-function queuePlay(m){pq.push(m);if(!playing)playNext();}
-function playNext(){
-  if(!pq.length){playing=false;return;}
-  playing=true;var m=pq.shift();
-  var p=getPlayer();
-  p.src=m.audio;
-  p.onended=playNext;p.onerror=playNext;
-  p.play().catch(function(){playing=false;});
-}
-async function poll(){
-  var rows=await sbGet("musen","created_at=gt."+encodeURIComponent(lastTime)+"&order=created_at.asc&limit=20");
-  if(rows&&rows.length){
-    rows.forEach(function(m){
-      lastTime=m.created_at;
-      var me=(m.name===myName());
-      addLog(m,me);
-      if(!me)queuePlay(m);
-    });
-  }
-}
-setInterval(poll,3000);
-poll();
+try{var saved=localStorage.getItem("disri_name");if(saved)document.getElementById("name").value=saved;}catch(e){}
 </script>
 </body>
 </html>
