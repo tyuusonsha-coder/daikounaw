@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /driver.html
+Disallow: /haisha.html
+Disallow: /kakunin.html
+Allow: /
+
+Sitemap: https://daikounaw.com/sitemap.xml
