@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://daikounaw.com/icon.png"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://daikounaw.com/"/>
-<meta property="og:site_name" content="代行なう運転代行"/>
+<meta property="og:site_name" content="代行なう"/>
 <meta property="og:title" content="代行なう運転代行｜福岡市の運転代行"/>
 <meta property="og:description" content="福岡市の運転代行なら代行なう運転代行。高速無料・長距離5000円キャッシュバック。ご依頼は050-1724-3179。"/>
 <script type="application/ld+json">
@@ -63,9 +63,6 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 .reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
 .reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
 </style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"代行なう運転代行","url":"https://daikounaw.com/"}
-</script>
 </head><body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">代行なう運転代行｜福岡市・那珂川市・春日市・大野城市の運転代行</h1>
 <div id="app"></div>
@@ -157,7 +154,7 @@ else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),
 function render(){
 var app=document.getElementById("app");if(!app)return;
 var out='<div class="hdr"><div class="logo" onclick="scr=\'home\';render()"><img src="logo.png" alt="代行なう" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:7px">代行<span>なう</span></div><div style="font-size:10px;color:#888">福岡の運転代行</div></div>';
-out+='<div style="flex:1;overflow-y:auto;padding-bottom:84px">';
+out+='<div style="flex:1;overflow-y:auto;padding-bottom:160px">';
 if(scr==="battle")out+=renderBattle();
 else if(scr==="company")out+=renderCompany();
 else out+=renderHome();
@@ -241,7 +238,7 @@ o+='<div><div style="font-size:11px;color:#888">営業</div><div style="font-siz
 o+='</div>';
 o+='<div style="display:flex;gap:8px;padding:0 16px">';
 [["✅","明朗料金"],["📍","福岡密着"],["🌙","深夜専門"]].forEach(function(b){
-o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #24242e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#aaa;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
+o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #33333e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#ddd;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
 });
 o+='</div>';
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">';
