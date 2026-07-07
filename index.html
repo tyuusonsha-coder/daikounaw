@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://daikounaw.com/icon.png"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://daikounaw.com/"/>
-<meta property="og:site_name" content="代行なう"/>
+<meta property="og:site_name" content="代行なう運転代行"/>
 <meta property="og:title" content="代行なう運転代行｜福岡市の運転代行"/>
 <meta property="og:description" content="福岡市の運転代行なら代行なう運転代行。高速無料・長距離5000円キャッシュバック。ご依頼は050-1724-3179。"/>
 <script type="application/ld+json">
@@ -63,6 +63,9 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 .reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
 .reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"代行なう運転代行","url":"https://daikounaw.com/"}
+</script>
 </head><body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">代行なう運転代行｜福岡市・那珂川市・春日市・大野城市の運転代行</h1>
 <div id="app"></div>
@@ -154,7 +157,7 @@ else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),
 function render(){
 var app=document.getElementById("app");if(!app)return;
 var out='<div class="hdr"><div class="logo" onclick="scr=\'home\';render()"><img src="logo.png" alt="代行なう" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:7px">代行<span>なう</span></div><div style="font-size:10px;color:#888">福岡の運転代行</div></div>';
-out+='<div style="flex:1;overflow-y:auto;padding-bottom:160px">';
+out+='<div style="flex:1;overflow-y:auto;padding-bottom:84px">';
 if(scr==="battle")out+=renderBattle();
 else if(scr==="company")out+=renderCompany();
 else out+=renderHome();
@@ -238,7 +241,7 @@ o+='<div><div style="font-size:11px;color:#888">営業</div><div style="font-siz
 o+='</div>';
 o+='<div style="display:flex;gap:8px;padding:0 16px">';
 [["✅","明朗料金"],["📍","福岡密着"],["🌙","深夜専門"]].forEach(function(b){
-o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #33333e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#ddd;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
+o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #24242e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#aaa;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
 });
 o+='</div>';
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">';
@@ -281,12 +284,6 @@ o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;cursor:pointer;bac
 o+='<div onclick="location.href=\'fc.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(255,107,0,.12),#0c0c10);border:1px solid rgba(255,107,0,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🏢</div><div style="font-size:13px;font-weight:900;margin-top:5px">FCオーナー募集</div><div style="font-size:10px;color:#ffb648;font-weight:700;margin-top:2px">純利益50%・低資金開業</div></div>';
 o+='</div></div>';
 o+='<div style="padding:18px 16px 10px;text-align:center"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#888;text-decoration:underline;cursor:pointer">業者の料金を比較・無料登録はこちら ›</span></div>';
-o+='<div style="margin:8px 16px 24px;padding:18px;background:#0a0a0e;border:1px solid #1c1c24;border-radius:16px;line-height:1.9;font-size:12px;color:#9a9aa6">';
-o+='<div style="font-size:14px;font-weight:900;color:#cfcfe0;margin-bottom:10px">福岡の運転代行なら「代行なう運転代行」</div>';
-o+='<p style="margin-bottom:10px">代行なう運転代行は、福岡市を中心に、那珂川市・春日市・大野城市・太宰府市エリアで運転代行サービスを提供しております。飲み会やお食事でお酒を飲まれた際、お車を安全にご自宅までお送りいたします。タクシーと違い、翌朝もご自身のお車をそのままお使いいただけるのが運転代行の大きなメリットです。</p>';
-o+='<p style="margin-bottom:10px">料金は初乗り不要のわかりやすい設定で、1kmあたり400円、高速道路料金は無料です。営業時間は21時から翌6時まで、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
-o+='<p>博多区・中央区の繁華街はもちろん、福岡市近郊の幅広いエリアに対応しております。深夜の運転代行をお探しの方は、ぜひ代行なう運転代行をご利用ください。</p>';
-o+='</div>';
 return o;
 }
 
