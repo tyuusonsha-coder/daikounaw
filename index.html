@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#060609"/>
-<title>代行なう運転代行｜福岡市の運転代行（那珂川市・春日市・大野城市対応）</title>
+<title>【公式】代行なう運転代行｜福岡市の運転代行（那珂川市・春日市・大野城市対応）</title>
 <meta name="description" content="福岡市の運転代行なら代行なう運転代行。高速無料・長距離5000円キャッシュバック実施中。福岡市・那珂川市・春日市・大野城市に対応。営業21時〜翌6時（木・日休み）。ご依頼は050-1724-3179。"/>
 <link rel="canonical" href="https://daikounaw.com/"/>
 <link rel="icon" type="image/png" href="/icon.png"/>
@@ -12,11 +12,11 @@
 <meta property="og:image" content="https://daikounaw.com/icon.png"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://daikounaw.com/"/>
-<meta property="og:site_name" content="代行なう運転代行"/>
-<meta property="og:title" content="代行なう運転代行｜福岡市の運転代行"/>
+<meta property="og:site_name" content="代行なう"/>
+<meta property="og:title" content="【公式】代行なう運転代行｜福岡市の運転代行"/>
 <meta property="og:description" content="福岡市の運転代行なら代行なう運転代行。高速無料・長距離5000円キャッシュバック。ご依頼は050-1724-3179。"/>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","name":"代行なう運転代行","image":"https://daikounaw.com/icon.png","url":"https://daikounaw.com/","telephone":"050-1724-3179","priceRange":"¥¥","address":{"@type":"PostalAddress","addressRegion":"福岡県","addressLocality":"福岡市","addressCountry":"JP"},"areaServed":["福岡市","那珂川市","春日市","大野城市","太宰府市"],"openingHours":"Mo,Tu,We,Fr,Sa 21:00-06:00","description":"福岡市の運転代行。高速無料・長距離5000円キャッシュバック。"}
+{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://daikounaw.com/#business","name":"代行なう運転代行","alternateName":"代行なう","sameAs":["https://daikonavi.com/fukuoka/c001964/","https://dnud.jp/","https://tyuusonsha.jp/","https://share.google/mAe4VgEGy8dEHTJmN"],"image":"https://daikounaw.com/icon.png","url":"https://daikounaw.com/","telephone":"050-1724-3179","priceRange":"¥¥","address":{"@type":"PostalAddress","addressRegion":"福岡県","addressLocality":"福岡市","addressCountry":"JP"},"areaServed":["福岡市","那珂川市","春日市","大野城市","太宰府市"],"openingHours":"Mo,Tu,We,Fr,Sa 21:00-06:00","description":"福岡市の運転代行。高速無料・長距離5000円キャッシュバック。"}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -63,11 +63,8 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 .reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
 .reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
 </style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"代行なう運転代行","url":"https://daikounaw.com/"}
-</script>
 </head><body>
-<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">代行なう運転代行｜福岡市・那珂川市・春日市・大野城市の運転代行</h1>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">【公式】代行なう運転代行｜福岡市・那珂川市・春日市・大野城市の運転代行 公式サイト</h1>
 <div id="app"></div>
 <script>
 var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
@@ -79,11 +76,13 @@ function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
 var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSet("dn_uid",uid);}
 var role=lsGet("dn_role");
 var scr="home",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+var news=[];
 var regOpen=false,km="";
 
 function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function ago(ts){var s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
 function yen(n){return "¥"+Number(n).toLocaleString()}
+function fmtDate(ts){var d=new Date(Number(ts));return d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)}
 function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
 function val(id){var e=document.getElementById(id);return e?e.value:""}
 
@@ -102,6 +101,7 @@ if(silent&&(composing||replyId!=null||regOpen||scr==="company"))return;
 render();
 }
 async function loadCo(){companies=await sbGet("companies","order=featured.desc,created_at.asc");if(!Array.isArray(companies))companies=[];render();}
+async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=5");if(!Array.isArray(news))news=[];render();}
 
 function pickRole(r){role=r;lsSet("dn_role",r);render();}
 
@@ -157,7 +157,7 @@ else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),
 function render(){
 var app=document.getElementById("app");if(!app)return;
 var out='<div class="hdr"><div class="logo" onclick="scr=\'home\';render()"><img src="logo.png" alt="代行なう" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:7px">代行<span>なう</span></div><div style="font-size:10px;color:#888">福岡の運転代行</div></div>';
-out+='<div style="flex:1;overflow-y:auto;padding-bottom:84px">';
+out+='<div style="flex:1;overflow-y:auto;padding-bottom:160px">';
 if(scr==="battle")out+=renderBattle();
 else if(scr==="company")out+=renderCompany();
 else out+=renderHome();
@@ -241,9 +241,17 @@ o+='<div><div style="font-size:11px;color:#888">営業</div><div style="font-siz
 o+='</div>';
 o+='<div style="display:flex;gap:8px;padding:0 16px">';
 [["✅","明朗料金"],["📍","福岡密着"],["🌙","深夜専門"]].forEach(function(b){
-o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #24242e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#aaa;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
+o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #33333e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#ddd;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
 });
 o+='</div>';
+if(news.length){
+o+='<div style="margin:14px 16px 0;background:#0c0c10;border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:14px 16px">';
+o+='<div style="font-size:12px;color:#00e5ff;font-weight:800;margin-bottom:6px">\ud83d\udce2 \u304a\u77e5\u3089\u305b</div>';
+news.forEach(function(n,i){
+o+='<div style="padding:8px 0'+(i<news.length-1?';border-bottom:1px solid #1c1c24':'')+'"><span style="font-size:11px;color:#888;font-weight:700">'+fmtDate(n.created_at)+'</span><div style="font-size:13px;color:#ddd;line-height:1.6;margin-top:2px;white-space:pre-wrap">'+h(n.body)+'</div></div>';
+});
+o+='</div>';
+}
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">';
 o+='<img src="driver.jpg" alt="運転スタッフ" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid #00e5ff;flex:0 0 auto">';
 o+='<div><div style="font-size:11px;color:#00e5ff;font-weight:800">運転するスタッフ</div><div style="font-size:15px;font-weight:900;margin:2px 0">あなたの車を、安全に。</div><div style="font-size:12px;color:#888;line-height:1.6">深夜も笑顔で、安全運転でお送りします。</div></div>';
@@ -284,6 +292,12 @@ o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;cursor:pointer;bac
 o+='<div onclick="location.href=\'fc.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(255,107,0,.12),#0c0c10);border:1px solid rgba(255,107,0,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🏢</div><div style="font-size:13px;font-weight:900;margin-top:5px">FCオーナー募集</div><div style="font-size:10px;color:#ffb648;font-weight:700;margin-top:2px">純利益50%・低資金開業</div></div>';
 o+='</div></div>';
 o+='<div style="padding:18px 16px 10px;text-align:center"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#888;text-decoration:underline;cursor:pointer">業者の料金を比較・無料登録はこちら ›</span></div>';
+o+='<div style="margin:8px 16px 24px;padding:18px;background:#0a0a0e;border:1px solid #1c1c24;border-radius:16px;line-height:1.9;font-size:12px;color:#9a9aa6">';
+o+='<div style="font-size:14px;font-weight:900;color:#cfcfe0;margin-bottom:10px">福岡の運転代行なら「代行なう運転代行」</div>';
+o+='<p style="margin-bottom:10px">代行なう運転代行は、福岡市を中心に、那珂川市・春日市・大野城市・太宰府市エリアで運転代行サービスを提供しております。飲み会やお食事でお酒を飲まれた際、お車を安全にご自宅までお送りいたします。タクシーと違い、翌朝もご自身のお車をそのままお使いいただけるのが運転代行の大きなメリットです。</p>';
+o+='<p style="margin-bottom:10px">料金は初乗り不要のわかりやすい設定で、1kmあたり400円、高速道路料金は無料です。営業時間は21時から翌6時まで、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
+o+='<p>博多区・中央区の繁華街はもちろん、福岡市近郊の幅広いエリアに対応しております。深夜の運転代行をお探しの方は、ぜひ代行なう運転代行をご利用ください。</p>';
+o+='</div>';
 return o;
 }
 
@@ -367,6 +381,7 @@ return o;
 
 try{render();}catch(e){}
 loadCo();
+loadNews();
 loadPosts();
 setInterval(function(){loadPosts(true)},15000);
 </script>
