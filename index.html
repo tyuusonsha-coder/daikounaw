@@ -8,7 +8,11 @@
 <meta name="description" content="福岡市の運転代行なら代行なう運転代行。高速無料・長距離5000円キャッシュバック実施中。福岡市・那珂川市・春日市・大野城市に対応。営業21時〜翌6時（木・日休み）。ご依頼は050-1724-3179。"/>
 <link rel="canonical" href="https://daikounaw.com/"/>
 <link rel="icon" type="image/png" href="/icon.png"/>
-<link rel="apple-touch-icon" href="/icon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="代行なう"/>
 <meta property="og:image" content="https://daikounaw.com/icon.png"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://daikounaw.com/"/>
@@ -384,6 +388,7 @@ loadCo();
 loadNews();
 loadPosts();
 setInterval(function(){loadPosts(true)},15000);
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}
 </script>
 
 <a href="haisha.html" style="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:9999;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:800;padding:14px 26px;border-radius:999px;box-shadow:0 8px 30px rgba(0,229,255,.5);text-decoration:none;font-size:16px;white-space:nowrap;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">🚖 今すぐ配車を呼ぶ</a>
