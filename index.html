@@ -81,6 +81,7 @@ var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSe
 var role=lsGet("dn_role");
 var scr="home",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
 var news=[];
+var bbsName="";try{bbsName=localStorage.getItem("dn_name")||""}catch(e){}
 var regOpen=false,km="";
 
 function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -108,10 +109,19 @@ async function loadCo(){companies=await sbGet("companies","order=featured.desc,c
 async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=5");if(!Array.isArray(news))news=[];render();}
 
 function pickRole(r){role=r;lsSet("dn_role",r);render();}
+function fmtDT(ts){var d=new Date(Number(ts));return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function bbsWrite(){
+bbsName=document.getElementById("bname").value.trim();
+try{localStorage.setItem("dn_name",bbsName)}catch(e){}
+role=document.getElementById("brole").value;lsSet("dn_role",role);
+compTxt=document.getElementById("ctxt").value;
+if(!compTxt.trim()){alert("本文を入力してください");return;}
+submitPost();
+}
 
 async function submitPost(){
 if(!compTxt.trim())return;
-await sbPost("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role:role,uid:uid,text:compTxt.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
+await sbPost("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role:role,uid:uid,name:bbsName,text:compTxt.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
 compTxt="";composing=false;loadPosts();
 }
 async function doReact(pid,key){
@@ -124,7 +134,7 @@ await sbPatch("posts",pid,{reactions:rs,reacted_by:rb});loadPosts();
 }
 async function doReply(pid){
 if(!replyTxt.trim())return;
-await sbPost("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role:role,uid:uid,text:replyTxt.trim(),created_at:Date.now()});
+await sbPost("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role:role,uid:uid,name:bbsName,text:replyTxt.trim(),created_at:Date.now()});
 replyTxt="";replyId=null;loadPosts();
 }
 async function delPost(pid){await sbDel("posts",pid);loadPosts();}
@@ -176,38 +186,34 @@ app.innerHTML=out;
 }
 
 function renderBattle(){
-if(!role){
-return '<div style="padding:40px 20px;text-align:center"><div style="font-size:50px;margin-bottom:8px">⚔️</div><div class="logo" style="font-size:24px;margin-bottom:4px">代行<span>なう</span></div><div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:30px">お客 vs 運転手<br>匿名バトル掲示板</div><div style="font-size:15px;font-weight:700;margin-bottom:14px">あなたの立場は？</div><div style="display:flex;gap:12px;max-width:320px;margin:0 auto"><button onclick="pickRole(\'customer\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(74,144,255,.12),rgba(74,144,255,.04));border:2px solid rgba(74,144,255,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🍺</div><div style="font-size:18px;font-weight:900;color:#4A90FF">お客</div></button><button onclick="pickRole(\'driver\')" style="flex:1;padding:24px 0;background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border:2px solid rgba(255,107,0,.3);border-radius:20px;cursor:pointer;color:#efefef;font-family:inherit"><div style="font-size:40px;margin-bottom:6px">🚘</div><div style="font-size:18px;font-weight:900;color:#FF6B00">運転手</div></button></div><div style="font-size:11px;color:#444;margin-top:16px">匿名 · 変更OK</div></div>';
-}
-var cN=posts.filter(function(p){return p.role==="customer"}).length;
-var dN=posts.filter(function(p){return p.role==="driver"}).length;
-var rc=role==="customer";
-var o='<div class="vs"><div class="row"><div class="side"><div class="num blue">'+cN+'</div><div class="lbl blue">🍺 お客</div></div><div class="mid">⚔️</div><div class="side"><div class="num org">'+dN+'</div><div class="lbl org">🚘 運転手</div></div></div>';
-o+='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="tag '+(rc?"tag-c":"tag-d")+'">'+(rc?"🍺 お客":"🚘 運転手")+'</span><button onclick="role=null;lsDel(\'dn_role\');render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:2px 8px;color:#444;font-size:10px;cursor:pointer;font-family:inherit">変更</button></div></div>';
+var o='<div style="padding:14px 16px 4px"><div style="font-size:16px;font-weight:900">⚔️ お客 vs 運転手 掲示板</div><div style="font-size:11px;color:#888;margin-top:3px">匿名OK・名前は省略可｜全'+posts.length+'件</div></div>';
+o+='<div class="compose" style="display:block">';
+o+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+o+='<input id="bname" placeholder="名前（省略可）" value="'+h(bbsName)+'" style="flex:1;min-width:0;background:#131318;border:1px solid #24242e;border-radius:10px;color:#efefef;padding:10px;font-size:14px;font-family:inherit;-webkit-appearance:none">';
+o+='<select id="brole" style="background:#131318;border:1px solid #24242e;border-radius:10px;color:#efefef;padding:10px;font-size:14px;font-family:inherit">';
+o+='<option value="customer"'+(role!=="driver"?" selected":"")+'>🍺 お客</option><option value="driver"'+(role==="driver"?" selected":"")+'>🚘 運転手</option>';
+o+='</select></div>';
+o+='<textarea rows="3" id="ctxt" placeholder="本文を入力…">'+h(compTxt)+'</textarea>';
+o+='<div class="acts"><button onclick="bbsWrite()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;flex:1">✏️ 書き込む</button></div></div>';
 o+='<div class="filters">';
-["hot:🔥 注目","new:🆕 新着","customer:🍺","driver:🚘"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
+["new:🆕 新着","hot:🔥 注目","customer:🍺 お客","driver:🚘 運転手"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
 o+='</div>';
-if(composing){
-o+='<div class="compose"><textarea rows="3" id="ctxt" placeholder="'+(rc?"お客の本音を投稿…":"運転手の本音を投稿…")+'">'+h(compTxt)+'</textarea><div class="acts"><button onclick="composing=false;compTxt=\'\';render()" style="background:#131318;color:#888;border:1px solid #24242e">取消</button><button onclick="compTxt=document.getElementById(\'ctxt\').value;submitPost()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000">投稿🔥</button></div></div>';
-}
-var sorted=posts.slice();
+var byTime=posts.slice().sort(function(a,b){return a.created_at-b.created_at});
+var noMap={};byTime.forEach(function(p,i){noMap[p.id]=i+1});
+var sorted=posts.slice().sort(function(a,b){return b.created_at-a.created_at});
 if(filter==="hot")sorted.sort(function(a,b){return totalR(b)-totalR(a)});
 else if(filter==="customer")sorted=sorted.filter(function(p){return p.role==="customer"});
 else if(filter==="driver")sorted=sorted.filter(function(p){return p.role==="driver"});
-if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">⚔️</div><div style="font-size:16px;font-weight:900;margin-bottom:6px">まだバトルが始まっていません</div><div>最初の投稿で火をつけよう🔥</div></div>';
+if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">⚔️</div><div style="font-size:16px;font-weight:900;margin-bottom:6px">まだ書き込みがありません</div><div>最初の1件を書き込もう✏️</div></div>';
 sorted.forEach(function(p){
 var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
 var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
-o+='<div class="post"><div style="display:flex;gap:10px"><div class="av '+(isC?"av-c":"av-d")+'">'+(isC?"🍺":"🚘")+'</div><div style="flex:1;min-width:0">';
-o+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="tag '+(isC?"tag-c":"tag-d")+'">'+(isC?"お客":"運転手")+'</span>';
-if(hot)o+='<span class="hot">🔥炎上</span>';
-if(isMe)o+='<span style="font-size:10px;color:#444">あなた</span>';
-o+='<span style="font-size:10px;color:#444;margin-left:auto">'+ago(p.created_at)+'</span></div>';
+o+='<div class="post">';
+o+='<div style="font-size:12px;color:#777;margin-bottom:6px;line-height:1.5"><span style="color:#00e5ff;font-weight:900">No.'+noMap[p.id]+'</span>　<b style="color:'+(isC?"#4A90FF":"#FF6B00")+'">'+h(p.name||"名無しさん")+'</b>【'+(isC?"🍺お客":"🚘運転手")+'】'+(hot?' <span class="hot">🔥炎上</span>':'')+(isMe?' <span style="color:#444">あなた</span>':'')+'<span style="float:right;color:#444">'+fmtDT(p.created_at)+'</span></div>';
 o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
 if(reps.length){
-o+='<div style="margin-bottom:8px;margin-left:6px;border-left:2px solid #24242e;padding-left:10px">';
-reps.slice(-3).forEach(function(r){o+='<div style="margin-bottom:5px"><span class="tag '+(r.role==="customer"?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 5px">'+(r.role==="customer"?"🍺":"🚘")+'</span><span style="font-size:13px;color:#888;margin-left:6px">'+h(r.text)+'</span></div>'});
-if(reps.length>3)o+='<div style="font-size:11px;color:#444">他'+(reps.length-3)+'件</div>';
+o+='<div style="margin-bottom:8px;margin-left:4px;border-left:2px solid #24242e;padding-left:10px">';
+reps.forEach(function(r,ri){o+='<div style="margin-bottom:5px;font-size:12px;color:#888;line-height:1.6"><span style="color:#555">└'+(ri+1)+'</span> <b style="color:'+(r.role==="customer"?"#4A90FF":"#FF6B00")+'">'+h(r.name||"名無しさん")+'</b>：<span style="color:#aaa">'+h(r.text)+'</span></div>'});
 o+='</div>';
 }
 o+='<div class="rxn">';
@@ -215,14 +221,13 @@ o+='<div class="rxn">';
 var cnt=(p.reactions||{})[rx[0]]||0;var on=myR===rx[0];
 o+='<button class="'+(on?"on":"")+'" onclick="doReact(\''+p.id+'\',\''+rx[0]+'\')">'+rx[1]+(cnt>0?'<span>'+cnt+'</span>':'')+'</button>';
 });
-o+='<button onclick="replyId=replyId===\''+p.id+'\'?null:\''+p.id+'\';replyTxt=\'\';render()">💬'+(reps.length>0?' '+reps.length:'')+'</button>';
+o+='<button onclick="replyId=replyId===\''+p.id+'\'?null:\''+p.id+'\';replyTxt=\'\';render()">💬 レス'+(reps.length>0?' '+reps.length:'')+'</button>';
 o+='<button onclick="share(posts.find(function(x){return x.id===\''+p.id+'\'}))">📤</button>';
 if(isMe)o+='<button onclick="delPost(\''+p.id+'\')" style="margin-left:auto">🗑</button>';
 o+='</div>';
-if(replyId===p.id)o+='<div class="reply-box"><input id="rtxt" placeholder="返信..." onkeydown="if(event.key===\'Enter\'){replyTxt=this.value;doReply(\''+p.id+'\')}"><button onclick="replyTxt=document.getElementById(\'rtxt\').value;doReply(\''+p.id+'\')" style="background:#FF6B00;color:#000">送信</button></div>';
-o+='</div></div></div>';
+if(replyId===p.id)o+='<div class="reply-box"><input id="rtxt" placeholder="No.'+noMap[p.id]+'にレス…" onkeydown="if(event.key===\'Enter\'){replyTxt=this.value;doReply(\''+p.id+'\')}"><button onclick="replyTxt=document.getElementById(\'rtxt\').value;doReply(\''+p.id+'\')" style="background:#FF6B00;color:#000">送信</button></div>';
+o+='</div>';
 });
-o+='<button class="fab" onclick="composing=!composing;render()">✏️</button>';
 return o;
 }
 

@@ -1,106 +1,175 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DISRI CLUB｜代行なう</title>
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#060609"/>
+<title>ディス｜1対1トーク（テレフォンクラブ風）</title>
 <style>
-  :root{--bg:#060912;--bg2:#0d1526;--line:#1c2942;--cyan:#00ffe0;--blue:#00a7ff;--txt:#eaf2ff;--sub:#8ea0be;--red:#ff3b5c;}
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
-    background:radial-gradient(120% 60% at 50% 0%,rgba(0,255,224,.10),transparent 55%),radial-gradient(90% 50% at 50% 100%,rgba(0,120,255,.10),transparent 60%),var(--bg);
-    color:var(--txt);min-height:100vh;overflow-x:hidden}
-  .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .top .logo{font-size:16px;font-weight:900;display:flex;align-items:center;gap:6px}
-  .back{text-decoration:none;font-size:13px;font-weight:800;color:#fff;padding:9px 15px;background:rgba(0,255,224,.15);border:1px solid var(--cyan);border-radius:999px;white-space:nowrap}
-  .join{max-width:480px;margin:0 auto;padding:26px 22px 50px;text-align:center}
-  .neon{font-size:40px;font-weight:900;letter-spacing:1px;margin:10px 0 4px;color:#d7fff9;
-    text-shadow:0 0 6px #00ffe0,0 0 14px #00ffe0,0 0 30px #00b7a8,0 0 50px #007d76;animation:flick 3.5s infinite}
-  @keyframes flick{0%,100%{opacity:1}48%{opacity:1}49%{opacity:.75}50%{opacity:1}92%{opacity:1}93%{opacity:.7}94%{opacity:1}}
-  .mic{font-size:96px;line-height:1;margin:6px 0 10px;
-    filter:drop-shadow(0 0 12px rgba(0,255,224,.7)) drop-shadow(0 0 30px rgba(0,167,255,.4))}
-  .title{font-size:30px;font-weight:900;margin:2px 0 12px;text-shadow:0 0 20px rgba(0,255,224,.25)}
-  .lead{font-size:14px;color:var(--sub);margin-bottom:28px;line-height:1.8}
-  .field-label{display:block;text-align:left;font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:8px}
-  .join input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px 16px;color:var(--txt);font-size:16px;outline:none;font-family:inherit;margin-bottom:20px}
-  .join input:focus{border-color:var(--cyan)}
-  .enter{width:100%;background:linear-gradient(135deg,#00ffe0,#00a7ff);color:#041018;border:none;border-radius:14px;padding:18px;font-size:18px;font-weight:900;cursor:pointer;
-    box-shadow:0 0 0 1px rgba(0,255,224,.6),0 10px 34px rgba(0,255,224,.30);display:flex;align-items:center;justify-content:center;gap:8px}
-  .enter:active{transform:scale(.98)}
-  .note{font-size:12.5px;color:var(--sub);background:rgba(0,167,255,.06);border:1px solid rgba(0,167,255,.22);border-radius:12px;padding:13px 15px;margin-top:24px;line-height:1.8;text-align:left}
-  #room{position:fixed;inset:0;top:56px;display:none}
-  #jitsi{width:100%;height:100%}
-  .leave{position:fixed;top:10px;right:16px;z-index:10;background:var(--red);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:14px;font-weight:800;cursor:pointer}
-  .loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:16px}
-  .spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--cyan);border-radius:50%;animation:sp 1s linear infinite}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .loading p{font-size:14px;color:var(--sub)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;padding:20px 16px;min-height:100vh}
+.back{color:#888;font-size:13px;text-decoration:none}
+h1{font-size:22px;font-weight:900;margin:14px 0 4px}
+h1 span{color:#ff5cc8}
+.sub{font-size:12px;color:#888;margin-bottom:20px;line-height:1.6}
+input,select{width:100%;background:#0c0c10;border:1px solid #33333e;border-radius:12px;color:#efefef;padding:13px;font-size:15px;font-family:inherit;-webkit-appearance:none;margin-bottom:10px}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit}
+.b-call{background:linear-gradient(135deg,#ff5cc8,#b03be0);color:#fff;box-shadow:0 6px 24px rgba(255,92,200,.35)}
+.b-cancel{background:#131318;color:#888;border:1px solid #24242e;margin-top:10px}
+.b-next{background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;margin-top:10px}
+.b-exit{background:#131318;color:#ff5c5c;border:1px solid rgba(255,92,92,.4);margin-top:10px}
+.waitnum{text-align:center;font-size:12px;color:#888;margin-top:16px}
+.pulse{text-align:center;padding:50px 0}
+.pulse .icon{font-size:64px;animation:pp 1.2s infinite}
+@keyframes pp{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.pulse .t{font-size:16px;font-weight:800;margin-top:14px}
+.pulse .d{font-size:12px;color:#888;margin-top:6px}
+.partner{background:linear-gradient(135deg,rgba(255,92,200,.14),#0c0c10);border:1px solid rgba(255,92,200,.4);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center}
+.partner .nm{font-size:18px;font-weight:900}
+.partner .g{font-size:12px;color:#ff9adf;margin-top:2px}
+#jitsi{width:100%;height:52vh;border-radius:16px;overflow:hidden;background:#0c0c10}
+.hidden{display:none}
+.note{font-size:11px;color:#555;line-height:1.7;margin-top:18px}
 </style>
-</head>
-<body>
-<div class="top">
-  <div class="logo">🎙 DISRI CLUB</div>
-  <a href="index.html" class="back">← 代行なう</a>
+</head><body>
+<div id="app">
+<a class="back" href="index.html">‹ 代行なうに戻る</a>
+<h1>🎙️ ディス<span>クラブ</span></h1>
+<div class="sub">深夜の1対1トーク。「探す」を押すと、待機中の誰かとランダムにつながります。</div>
+
+<div id="v-entry">
+<input type="text" id="nick" placeholder="ニックネーム（例：たーぶー）">
+<select id="gender">
+<option value="ヒミツ">性別：ヒミツ</option>
+<option value="男性">性別：男性</option>
+<option value="女性">性別：女性</option>
+</select>
+<button class="btn b-call" onclick="startSearch()">📞 相手を探す</button>
+<div class="waitnum" id="wn"></div>
+<div class="note">・音声のみ・匿名でつながります<br>・不快な相手は「次の相手」ですぐ切れます<br>・個人情報（本名・住所・電話番号）は伝えないでください</div>
 </div>
-<div class="join" id="joinView">
-  <div class="neon">#代行なう</div>
-  <div class="mic">🎙️</div>
-  <div class="title">深夜のたまり場ルーム</div>
-  <div class="lead">名前を入れて「入室」を押すと、<br>いま入っている人と<br>リアルタイムで声で話せます。</div>
-  <label class="field-label">表示名</label>
-  <input id="name" placeholder="名前を入れてください" maxlength="16">
-  <button class="enter" onclick="joinRoom()">🎙️ 入室する</button>
-  <div class="note">🔊 マイクの使用を求められたら「許可」を押してください。静かな場所でのご利用がおすすめです。退室はルーム内の赤い受話器ボタンから。</div>
+
+<div id="v-wait" class="hidden">
+<div class="pulse"><div class="icon">📞</div><div class="t">相手を探しています…</div><div class="d">つながるまでこのままお待ちください</div></div>
+<button class="btn b-cancel" onclick="cancelSearch()">キャンセル</button>
 </div>
-<div id="room">
-  <button class="leave" onclick="leaveRoom()">✕ 退室</button>
-  <div id="jitsi"></div>
-  <div class="loading" id="loading"><div class="spin"></div><p>接続しています…</p></div>
+
+<div id="v-call" class="hidden">
+<div class="partner"><div class="nm" id="pname">-</div><div class="g" id="pgender"></div></div>
+<div id="jitsi"></div>
+<button class="btn b-next" onclick="nextPartner()">⏭ 次の相手を探す</button>
+<button class="btn b-exit" onclick="exitAll()">📴 終了する</button>
+</div>
 </div>
 <script src="https://meet.jit.si/external_api.js"></script>
 <script>
-var api=null, joined=false;
-function myName(){var v=document.getElementById("name").value.trim();return v||"ゲスト"+Math.floor(Math.random()*1000);}
-function joinRoom(){
-  var name=myName();
-  try{ localStorage.setItem("disri_name",name); }catch(e){}
-  document.getElementById("joinView").style.display="none";
-  document.getElementById("room").style.display="block";
-  document.getElementById("loading").style.display="flex";
-  startJitsi(name);
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json"};
+var HP={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+var MYID="t"+Date.now()+Math.random().toString(36).slice(2,6);
+var NICK="",GEN="ヒミツ";
+var pollTimer=null,api=null,inCall=false;
+var FRESH=120000;
+
+function show(id){["v-entry","v-wait","v-call"].forEach(function(v){document.getElementById(v).classList.add("hidden")});document.getElementById(id).classList.remove("hidden")}
+try{var sn=localStorage.getItem("tele_nick");if(sn)document.getElementById("nick").value=sn;}catch(e){}
+
+async function delMine(){try{await fetch(SB+"tele_queue?id=eq."+MYID,{method:"DELETE",headers:H})}catch(e){}}
+
+async function waitCount(){
+try{
+var rows=await (await fetch(SB+"tele_queue?status=eq.waiting&created_at=gt."+(Date.now()-FRESH)+"&select=id",{headers:H})).json();
+document.getElementById("wn").textContent=Array.isArray(rows)&&rows.length?("いま "+rows.length+" 人が待機中です"):"";
+}catch(e){}
 }
-function startJitsi(name){
-  var options={
-    roomName:"DISRI_CLUB_daikounaw_main",width:"100%",height:"100%",
-    parentNode:document.getElementById("jitsi"),userInfo:{displayName:name},
-    configOverwrite:{startWithVideoMuted:true,startAudioOnly:true,prejoinPageEnabled:false,prejoinConfig:{enabled:false},disableDeepLinking:true},
-    interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,TOOLBAR_BUTTONS:['microphone','hangup','tileview','raisehand','settings']}
-  };
-  try{
-    api=new JitsiMeetExternalAPI("meet.jit.si",options);
-    joined=true;
-    api.addEventListener("videoConferenceJoined",function(){hideLoading();});
-    api.addEventListener("videoConferenceLeft",function(){if(joined){setTimeout(function(){reconnect(name);},1500);}});
-    api.addEventListener("readyToClose",function(){leaveRoom();});
-  }catch(e){hideLoading();alert("接続に失敗しました。もう一度お試しください。");}
-  setTimeout(hideLoading,5000);
+waitCount();setInterval(function(){if(!inCall&&document.getElementById("v-entry").classList.contains("hidden")===false)waitCount()},8000);
+
+async function startSearch(){
+NICK=document.getElementById("nick").value.trim()||("匿名"+Math.floor(Math.random()*900+100));
+GEN=document.getElementById("gender").value;
+try{localStorage.setItem("tele_nick",NICK)}catch(e){}
+await delMine();
+await fetch(SB+"tele_queue",{method:"POST",headers:H,body:JSON.stringify({id:MYID,name:NICK,gender:GEN,status:"waiting",created_at:Date.now()})});
+show("v-wait");
+if(pollTimer)clearInterval(pollTimer);
+pollTimer=setInterval(poll,3000);
+poll();
 }
-function reconnect(name){
-  if(!joined)return;
-  try{ if(api) api.dispose(); }catch(e){}
-  document.getElementById("jitsi").innerHTML="";
-  document.getElementById("loading").style.display="flex";
-  startJitsi(name);
+
+async function poll(){
+try{
+// 1) 自分が誰かにマッチされたか確認
+var me=await (await fetch(SB+"tele_queue?id=eq."+MYID,{headers:H})).json();
+if(Array.isArray(me)&&me[0]&&me[0].status==="matched"&&me[0].room){
+connect(me[0].room,me[0].partner_name,me[0].partner_gender);return;
 }
-function hideLoading(){var l=document.getElementById("loading");if(l)l.style.display="none";}
-function leaveRoom(){
-  joined=false;
-  try{ if(api){api.dispose();api=null;} }catch(e){}
-  document.getElementById("jitsi").innerHTML="";
-  document.getElementById("room").style.display="none";
-  document.getElementById("joinView").style.display="block";
+// 2) 待機中の相手を探して早い者勝ちで確保
+var cands=await (await fetch(SB+"tele_queue?status=eq.waiting&id=neq."+MYID+"&created_at=gt."+(Date.now()-FRESH)+"&order=created_at.asc&limit=3",{headers:H})).json();
+if(!Array.isArray(cands))return;
+for(var i=0;i<cands.length;i++){
+var c=cands[i];
+var room="TELE_dn_"+c.id+"_"+MYID;
+var r=await fetch(SB+"tele_queue?id=eq."+c.id+"&status=eq.waiting",{
+method:"PATCH",headers:HP,
+body:JSON.stringify({status:"matched",room:room,partner_name:NICK,partner_gender:GEN})
+});
+var rows=await r.json();
+if(Array.isArray(rows)&&rows.length){
+await fetch(SB+"tele_queue?id=eq."+MYID,{method:"PATCH",headers:H,body:JSON.stringify({status:"matched",room:room,partner_name:c.name,partner_gender:c.gender})});
+connect(room,c.name,c.gender);return;
 }
-try{var saved=localStorage.getItem("disri_name");if(saved)document.getElementById("name").value=saved;}catch(e){}
+}
+}catch(e){}
+}
+
+function connect(room,pn,pg){
+if(inCall)return;
+inCall=true;
+if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+document.getElementById("pname").textContent=pn||"匿名";
+document.getElementById("pgender").textContent=pg?("性別："+pg):"";
+show("v-call");
+try{
+api=new JitsiMeetExternalAPI("meet.jit.si",{
+roomName:room,width:"100%",height:"100%",
+parentNode:document.getElementById("jitsi"),userInfo:{displayName:NICK},
+configOverwrite:{startWithVideoMuted:true,startAudioOnly:true,prejoinPageEnabled:false,prejoinConfig:{enabled:false},disableDeepLinking:true},
+interfaceConfigOverwrite:{MOBILE_APP_PROMO:false,SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,TOOLBAR_BUTTONS:['microphone','hangup']}
+});
+api.addEventListener("readyToClose",function(){nextPartner();});
+}catch(e){alert("接続に失敗しました。もう一度お試しください。");exitAll();}
+}
+
+function disposeCall(){
+inCall=false;
+try{if(api){api.dispose();api=null;}}catch(e){}
+document.getElementById("jitsi").innerHTML="";
+}
+
+async function nextPartner(){
+disposeCall();
+await delMine();
+MYID="t"+Date.now()+Math.random().toString(36).slice(2,6);
+startSearch();
+}
+
+async function cancelSearch(){
+if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+await delMine();
+show("v-entry");waitCount();
+}
+
+async function exitAll(){
+disposeCall();
+if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+await delMine();
+show("v-entry");waitCount();
+}
+
+window.addEventListener("pagehide",function(){
+try{fetch(SB+"tele_queue?id=eq."+MYID,{method:"DELETE",headers:H,keepalive:true})}catch(e){}
+});
 </script>
-</body>
-</html>
+</body></html>
