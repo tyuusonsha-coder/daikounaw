@@ -188,7 +188,7 @@ async function poll(){
   document.getElementById("ordSum").innerHTML="<b>"+o.pickup+"</b> → <b>"+o.dropoff+"</b><br>約"+o.km+"km ・ "+yen(o.price);
   document.getElementById("bigStatus").textContent=BIG[o.status]||o.status;
   var db=document.getElementById("driverBox");
-  if(o.driver && o.status!=="pending"){db.innerHTML="<div class='driver-box'>担当ドライバー：<b>"+o.driver+"</b></div>"}else{db.innerHTML=""}
+  if(o.driver && o.status!=="pending"){var telHtml=o.co_phone?" <a href='tel:"+o.co_phone+"' style='color:#00e5ff;text-decoration:none;font-weight:800'>📞 "+o.co_phone+"</a>":"";db.innerHTML="<div class='driver-box'>担当：<b>"+o.driver+"</b>"+telHtml+"</div>"}else{db.innerHTML=""}
   var idx=STEPS.findIndex(function(s){return s.key===o.status});
   var html="";
   STEPS.forEach(function(s,i){

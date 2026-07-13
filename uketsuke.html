@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#060609"/>
+<title>受注ボード（業者様用）｜代行なう</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;padding:16px;min-height:100vh}
+h1{font-size:18px;font-weight:900;margin-bottom:4px}
+h1 span{color:#00e5ff}
+.sub{font-size:12px;color:#888;margin-bottom:14px}
+input{width:100%;background:#0c0c10;border:1px solid #33333e;border-radius:12px;color:#efefef;padding:12px;font-size:15px;font-family:inherit;-webkit-appearance:none;margin-bottom:8px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit}
+.b-save{background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;margin-bottom:6px}
+.sec{font-size:12px;color:#888;font-weight:800;margin:20px 0 6px}
+.card{background:#0c0c10;border:1px solid #24242e;border-radius:14px;padding:14px;margin-bottom:10px}
+.card.hot{border-color:rgba(0,229,255,.5)}
+.route{font-size:15px;font-weight:800;line-height:1.5}
+.meta{font-size:12px;color:#888;margin-top:4px}
+.price{color:#00e5ff;font-weight:900}
+.b-take{background:linear-gradient(135deg,#3ddc84,#1fa860);color:#04180a;margin-top:10px}
+.b-step{background:#16324a;color:#7fd4ff;margin-top:8px}
+.b-done{background:#2a1a3a;color:#d0a0ff;margin-top:8px}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:6px}
+.s-new{background:rgba(0,229,255,.15);color:#00e5ff}
+.s-mine{background:rgba(61,220,132,.15);color:#3ddc84}
+.msg{font-size:13px;font-weight:700;margin:8px 0;text-align:center}
+.ok{color:#3ddc84}.ng{color:#ff5c5c}
+.empty{color:#666;font-size:13px;text-align:center;padding:18px}
+.tel{color:#00e5ff;text-decoration:none;font-weight:800}
+</style>
+</head><body>
+<div id="app">
+<h1>🚖 受注<span>ボード</span></h1>
+<div class="sub">代行なう掲載業者様用｜新着依頼を早い者勝ちで受注できます</div>
+<input type="text" id="co" placeholder="会社名（例：◯◯運転代行）">
+<input type="tel" id="ph" placeholder="お客様に表示する電話番号">
+<button class="btn b-save" onclick="save()">この内容で待機する</button>
+<div id="msg" class="msg"></div>
+<div class="sec">🆕 新着依頼（受付中）</div>
+<div id="open"></div>
+<div class="sec">✅ 自社の対応中案件</div>
+<div id="mine"></div>
+</div>
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json"};
+function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
+var actx=null;
+function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
+document.addEventListener("click",unlockAudio);
+function beep(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=880;var t=actx.currentTime;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);o.start(t);o.stop(t+0.42);}catch(e){}}
+var CO=localStorage.getItem("uk_co")||"",PH=localStorage.getItem("uk_ph")||"";
+document.getElementById("co").value=CO;
+document.getElementById("ph").value=PH;
+function msg(t,ok){var m=document.getElementById("msg");m.textContent=t;m.className="msg "+(ok?"ok":"ng");}
+function save(){
+CO=document.getElementById("co").value.trim();
+PH=document.getElementById("ph").value.trim();
+if(!CO||!PH){msg("会社名と電話番号を入力してください",false);return;}
+localStorage.setItem("uk_co",CO);localStorage.setItem("uk_ph",PH);
+msg("待機中です。新着依頼が来ると音でお知らせします。",true);
+load();
+}
+var knownIds={};
+async function load(){
+try{
+var open=await (await fetch(SB+"orders?status=eq.pending&order=created_at.desc&limit=20",{headers:H})).json();
+if(!Array.isArray(open))open=[];
+var isNew=false;
+open.forEach(function(o){if(!knownIds[o.id]){knownIds[o.id]=1;isNew=true;}});
+if(isNew && Object.keys(knownIds).length>open.length===false)beep();
+var el=document.getElementById("open"),html="";
+open.forEach(function(o){
+html+='<div class="card hot"><span class="badge s-new">受付中</span>'
++'<div class="route">'+h(o.pickup)+' → '+h(o.dropoff)+'</div>'
++'<div class="meta">約'+h(o.km)+'km ・ <span class="price">'+yen(o.price)+'</span>（1km400円換算）</div>'
++(CO&&PH?'<button class="btn b-take" onclick="take(\''+o.id+'\')">⚡ この依頼を受注する</button>':'<div class="meta">↑会社名を登録すると受注できます</div>')
++'</div>';
+});
+el.innerHTML=html||'<div class="empty">現在、新着依頼はありません</div>';
+if(CO){
+var mine=await (await fetch(SB+"orders?driver=eq."+encodeURIComponent(CO)+"&status=neq.done&order=created_at.desc",{headers:H})).json();
+if(!Array.isArray(mine))mine=[];
+var mh="";
+mine.forEach(function(o){
+var act="";
+if(o.status==="accepted")act='<button class="btn b-step" onclick="step(\''+o.id+'\',\'departed\')">🚗 出発する</button>';
+else if(o.status==="departed")act='<button class="btn b-step" onclick="step(\''+o.id+'\',\'arriving\')">📍 もうすぐ到着</button>';
+else if(o.status==="arriving")act='<button class="btn b-done" onclick="step(\''+o.id+'\',\'done\')">🏁 完了にする</button>';
+mh+='<div class="card"><span class="badge s-mine">'+h(o.status)+'</span>'
++'<div class="route">'+h(o.pickup)+' → '+h(o.dropoff)+'</div>'
++'<div class="meta">お客様：'+h(o.cname||"")+' <a class="tel" href="tel:'+h(o.cphone||"")+'">📞 '+h(o.cphone||"")+'</a> ・ '+yen(o.price)+'</div>'
++act+'</div>';
+});
+document.getElementById("mine").innerHTML=mh||'<div class="empty">対応中の案件はありません</div>';
+}
+}catch(e){}
+}
+async function take(id){
+if(!CO||!PH){msg("先に会社名と電話番号を登録してください",false);return;}
+try{
+var r=await fetch(SB+"orders?id=eq."+id+"&status=eq.pending",{
+method:"PATCH",
+headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},
+body:JSON.stringify({status:"accepted",driver:CO,co_phone:PH,updated_at:new Date().toISOString()})
+});
+var rows=await r.json();
+if(Array.isArray(rows)&&rows.length){msg("受注しました！お客様に会社名と電話番号が表示されています。",true);beep();}
+else{msg("他社が先に受注しました",false);}
+load();
+}catch(e){msg("通信エラー",false);}
+}
+async function step(id,st){
+try{
+await fetch(SB+"orders?id=eq."+id+"&driver=eq."+encodeURIComponent(CO),{
+method:"PATCH",headers:H,
+body:JSON.stringify({status:st,updated_at:new Date().toISOString()})
+});
+load();
+}catch(e){}
+}
+load();
+setInterval(load,5000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)load();});
+</script>
+</body></html>
