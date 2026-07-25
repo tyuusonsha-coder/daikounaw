@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>不動産なう｜仲介手数料0円の個人売買掲示板</title>
-<meta name="description" content="不動産なうは売主と買主が直接つながる個人売買掲示板。土地・戸建・マンションを仲介手数料なしで掲載・検索できます。">
+<title>物々交換なう｜お金を使わない交換掲示板</title>
+<meta name="description" content="物々交換なうは、いらない物と欲しい物を直接交換できる無料掲示板。家電・家具・ホビーなどを手数料なしで交換できます。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
 <style>
@@ -12,9 +12,9 @@
   --ink:#17252E;
   --paper:#F6F2E9;
   --card:#FFFFFF;
-  --green:#205A45;
-  --green-dark:#174534;
-  --gold:#B08A3E;
+  --ai:#2B4C7E;
+  --ai-dark:#1F3A63;
+  --aka:#A8552F;
   --line:#E3DCCB;
   --muted:#6E7A82;
 }
@@ -23,34 +23,36 @@ body{background:var(--paper);color:var(--ink);font-family:"Hiragino Kaku Gothic 
 .serif{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif}
 header{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between}
 .logo{font-family:"Shippori Mincho",serif;font-weight:800;font-size:21px;letter-spacing:.06em}
-.logo small{font-size:10px;font-weight:600;display:block;letter-spacing:.28em;color:#C9B47C;margin-top:1px}
-#postBtn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:14px;font-weight:700;font-family:inherit}
-#postBtn:active{background:var(--green-dark)}
+.logo small{font-size:10px;font-weight:600;display:block;letter-spacing:.24em;color:#9FB6D9;margin-top:1px}
+#postBtn{background:var(--ai);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:14px;font-weight:700;font-family:inherit}
+#postBtn:active{background:var(--ai-dark)}
 .lead{padding:18px 16px 4px}
 .lead h1{font-family:"Shippori Mincho",serif;font-size:17px;font-weight:800;line-height:1.5}
-.lead h1 em{font-style:normal;color:var(--green);border-bottom:3px solid var(--gold)}
+.lead h1 em{font-style:normal;color:var(--ai);border-bottom:3px solid var(--aka)}
 .lead p{font-size:12px;color:var(--muted);margin-top:4px}
+.crossLink{display:block;margin:12px 16px 0;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none}
+.crossLink b{color:#8A6A1E}
 .filters{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;-webkit-overflow-scrolling:touch}
 .filters::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:6px 15px;font-size:13px;font-weight:700;font-family:inherit}
 .chip.on{background:var(--ink);color:#fff}
-.sortRow{display:flex;justify-content:space-between;align-items:center;padding:0 16px 6px}
+.sortRow{display:flex;justify-content:flex-start;align-items:center;padding:0 16px 6px}
 .sortRow span{font-size:12px;color:var(--muted)}
-#sortBtn{background:none;border:none;color:var(--green);font-weight:700;font-size:13px;font-family:inherit;text-decoration:underline}
 #list{padding:6px 16px;display:flex;flex-direction:column;gap:14px}
 .bk{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(23,37,46,.06)}
-.bk .ph{height:180px;background:linear-gradient(135deg,#DDE7E2,#C4D4CC);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.bk .ph{height:180px;background:linear-gradient(135deg,#DCE3EE,#C3CFE2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .bk .ph img{width:100%;height:100%;object-fit:cover}
-.bk .ph .noimg{font-family:"Shippori Mincho",serif;font-size:44px;color:#8FA69B;font-weight:800}
+.bk .ph .noimg{font-family:"Shippori Mincho",serif;font-size:44px;color:#8B9BB5;font-weight:800}
 .badge{position:absolute;top:10px;left:10px;background:rgba(23,37,46,.85);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px}
 .badge.done{background:#8A2F2F}
-.badge.talk{background:#8A6A1E}
 .bk .info{padding:12px 14px 14px}
-.stamp{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1.5px solid var(--green);color:var(--green);border-radius:5px;font-family:"Shippori Mincho",serif;font-weight:800;font-size:13px;margin-right:7px;vertical-align:-4px}
+.stamp{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1.5px solid var(--ai);color:var(--ai);border-radius:5px;font-family:"Shippori Mincho",serif;font-weight:800;font-size:13px;margin-right:7px;vertical-align:-4px}
 .bk h2{display:inline;font-size:15px;font-weight:700;line-height:1.5}
-.price{font-family:"Shippori Mincho",serif;color:var(--gold);font-weight:800;font-size:24px;margin-top:5px;letter-spacing:.02em}
-.price small{font-size:13px;margin-left:1px}
-.meta{font-size:12px;color:var(--muted);margin-top:2px}
+.swap{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--paper);border-radius:10px;padding:8px 10px}
+.swap .side{flex:1;font-size:12px;line-height:1.5}
+.swap .side b{display:block;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.1em}
+.swap .arw{font-family:"Shippori Mincho",serif;font-size:18px;font-weight:800;color:var(--aka);flex:none}
+.meta{font-size:12px;color:var(--muted);margin-top:6px}
 .empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:13px}
 .modal{position:fixed;inset:0;background:rgba(23,37,46,.55);z-index:100;display:none;align-items:flex-end}
 .modal.open{display:flex}
@@ -60,23 +62,25 @@ header{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding
 .closeX{background:none;border:none;font-size:24px;color:var(--muted);font-family:inherit;padding:4px 8px}
 label{display:block;font-size:12px;font-weight:700;margin:14px 0 4px;color:var(--ink)}
 label i{font-style:normal;color:#B04A3A;font-size:11px;margin-left:4px}
-input[type=text],input[type=number],textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;font-size:16px;font-family:inherit;color:var(--ink)}
-textarea{min-height:110px;resize:vertical}
-.kindRow{display:flex;gap:8px}
-.kindRow button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font-size:14px;font-weight:700;font-family:inherit;color:var(--ink)}
-.kindRow button.on{border-color:var(--green);background:var(--green);color:#fff}
+input[type=text],textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;font-size:16px;font-family:inherit;color:var(--ink)}
+textarea{min-height:100px;resize:vertical}
+.kindRow{display:flex;gap:8px;flex-wrap:wrap}
+.kindRow button{flex:1;min-width:70px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink)}
+.kindRow button.on{border-color:var(--ai);background:var(--ai);color:#fff}
 .photoRow{display:flex;gap:8px;margin-top:6px}
 .phSlot{width:76px;height:76px;border:1.5px dashed var(--line);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);overflow:hidden;position:relative}
 .phSlot img{width:100%;height:100%;object-fit:cover}
-.submit{width:100%;margin-top:22px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:800;font-family:inherit}
+.submit{width:100%;margin-top:22px;background:var(--ai);color:#fff;border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:800;font-family:inherit}
 .submit:disabled{opacity:.5}
 .note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
 .dPhotos{display:flex;overflow-x:auto;gap:8px;border-radius:12px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
 .dPhotos img{width:100%;flex:none;height:220px;object-fit:cover;border-radius:12px;scroll-snap-align:center}
-.dPrice{font-family:"Shippori Mincho",serif;color:var(--gold);font-weight:800;font-size:30px;margin:10px 0 2px}
-.dPrice small{font-size:15px}
-.dTitle{font-size:17px;font-weight:800;line-height:1.5}
-.dTable{width:100%;margin:14px 0;border-top:1px solid var(--line);font-size:13px}
+.dTitle{font-size:17px;font-weight:800;line-height:1.5;margin-top:10px}
+.dSwap{display:flex;align-items:center;gap:10px;margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.dSwap .side{flex:1;font-size:14px;line-height:1.5}
+.dSwap .side b{display:block;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.1em}
+.dSwap .arw{font-family:"Shippori Mincho",serif;font-size:24px;font-weight:800;color:var(--aka);flex:none}
+.dTable{width:100%;margin:8px 0 14px;border-top:1px solid var(--line);font-size:13px}
 .dTable tr{border-bottom:1px solid var(--line)}
 .dTable th{text-align:left;color:var(--muted);font-weight:600;padding:9px 0;width:82px;vertical-align:top}
 .dTable td{padding:9px 0}
@@ -100,62 +104,59 @@ details.admin summary{font-size:12px;color:var(--muted);font-weight:700}
 <body>
 
 <header>
-  <div class="logo">不動産なう<small>FUDOUSAN NOW</small></div>
-  <button id="postBtn" onclick="openPost()">＋ 掲載する</button>
+  <div class="logo">物々交換なう<small>BUTSUBUTSU NOW</small></div>
+  <button id="postBtn" onclick="openPost()">＋ 出品する</button>
 </header>
 
 <div class="lead">
-  <h1>売主と買主が直接つながる。<br><em>仲介手数料0円</em>の個人売買。</h1>
-  <p>土地・戸建・マンションを無料で掲載できます。</p>
+  <h1>お金を使わずに、<br><em>いらない物と欲しい物を交換</em>。</h1>
+  <p>手数料0円。写真を載せて交換相手を待つだけです。</p>
 </div>
+
+<a class="crossLink" href="fudousan.html">🏠 <b>不動産の個人売買</b>はこちら → 仲介手数料0円「不動産なう」</a>
 
 <div class="filters" id="filters">
   <button class="chip on" data-k="">すべて</button>
-  <button class="chip" data-k="土地">土地</button>
-  <button class="chip" data-k="戸建">戸建</button>
-  <button class="chip" data-k="マンション">マンション</button>
+  <button class="chip" data-k="家電">家電</button>
+  <button class="chip" data-k="家具">家具</button>
+  <button class="chip" data-k="ホビー">ホビー</button>
+  <button class="chip" data-k="ファッション">ファッション</button>
   <button class="chip" data-k="その他">その他</button>
 </div>
-<div class="sortRow">
-  <span id="count"></span>
-  <button id="sortBtn" onclick="toggleSort()">価格が安い順 ⇅</button>
-</div>
+<div class="sortRow"><span id="count"></span></div>
 
 <div id="list"><div class="empty">読み込み中…</div></div>
 
 <div class="modal" id="postModal">
   <div class="sheet">
-    <div class="sheetTop"><b>物件を掲載する</b><button class="closeX" onclick="closePost()">✕</button></div>
-    <label>種別<i>必須</i></label>
+    <div class="sheetTop"><b>交換に出す</b><button class="closeX" onclick="closePost()">✕</button></div>
+    <label>カテゴリ<i>必須</i></label>
     <div class="kindRow" id="kindRow">
-      <button class="on" data-k="土地">土地</button>
-      <button data-k="戸建">戸建</button>
-      <button data-k="マンション">マンション</button>
+      <button class="on" data-k="家電">家電</button>
+      <button data-k="家具">家具</button>
+      <button data-k="ホビー">ホビー</button>
+      <button data-k="ファッション">ファッション</button>
       <button data-k="その他">その他</button>
     </div>
-    <label>タイトル<i>必須</i></label>
-    <input type="text" id="fTitle" maxlength="40" placeholder="例：那珂川市 南向きの土地 60坪">
-    <label>価格（万円）<i>必須</i></label>
-    <input type="number" id="fPrice" inputmode="numeric" placeholder="例：1980">
-    <label>所在地（市区町村まで）</label>
-    <input type="text" id="fArea" maxlength="30" placeholder="例：福岡県那珂川市">
-    <label>面積</label>
-    <input type="text" id="fTsubo" maxlength="30" placeholder="例：60坪 / 198㎡">
-    <label>築年（建物の場合）</label>
-    <input type="text" id="fChiku" maxlength="20" placeholder="例：築15年">
-    <label>物件の説明</label>
-    <textarea id="fBody" maxlength="1000" placeholder="間取り、日当たり、駅からの距離、売却理由など"></textarea>
+    <label>出すもの<i>必須</i></label>
+    <input type="text" id="fTitle" maxlength="40" placeholder="例：ドラム式洗濯機（2022年製・動作良好）">
+    <label>欲しいもの<i>必須</i></label>
+    <input type="text" id="fWant" maxlength="40" placeholder="例：冷蔵庫 / ゲーム機 / なんでも相談OK">
+    <label>受け渡しエリア</label>
+    <input type="text" id="fArea" maxlength="30" placeholder="例：福岡県那珂川市（手渡し希望）">
+    <label>説明</label>
+    <textarea id="fBody" maxlength="1000" placeholder="状態、使用年数、傷の有無、受け渡し方法など"></textarea>
     <label>連絡先（電話番号）<i>必須</i></label>
-    <input type="text" id="fContact" inputmode="tel" maxlength="30" placeholder="例：050-1724-3179">
+    <input type="text" id="fContact" inputmode="tel" maxlength="30" placeholder="例：090-0000-0000">
     <label>写真（3枚まで）</label>
     <div class="photoRow" id="photoRow">
       <div class="phSlot" onclick="pickPhoto()">＋</div>
     </div>
     <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="onPhotos(this)">
     <label>削除キー<i>必須</i></label>
-    <input type="text" id="fKey" maxlength="20" placeholder="削除・成約時に使う暗証（忘れずに）">
-    <button class="submit" id="submitBtn" onclick="submitBukken()">この内容で掲載する</button>
-    <p class="note">※ ご自身が所有する物件のみ掲載できます。掲載・成約に手数料はかかりません。売買契約や登記はご自身の責任で行ってください（司法書士への依頼を推奨）。</p>
+    <input type="text" id="fKey" maxlength="20" placeholder="削除・交換済みにする時の暗証（忘れずに）">
+    <button class="submit" id="submitBtn" onclick="submitKokan()">この内容で出品する</button>
+    <p class="note">※ 現金のやり取りを伴う出品はできません。受け渡しトラブル防止のため、日中の人が多い場所での手渡しをおすすめします。</p>
   </div>
 </div>
 
@@ -170,23 +171,15 @@ const SB_URL = "https://kjfmcpwstubgezebmstt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
 const HEAD = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY };
 
-let allData = [], curKind = "", sortCheap = false, photoFiles = [];
+let allData = [], curKind = "", photoFiles = [];
 
 function esc(s){ return String(s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.style.display="block"; setTimeout(()=>t.style.display="none",2200); }
-function fmtPrice(p){
-  p = Number(p)||0;
-  if(p >= 10000){
-    const oku = Math.floor(p/10000), man = p%10000;
-    return oku + "億" + (man ? man.toLocaleString() : "") + "<small>万円</small>";
-  }
-  return p.toLocaleString() + "<small>万円</small>";
-}
-function kindStamp(k){ return {"土地":"土","戸建":"戸","マンション":"マ","その他":"他"}[k] || "他"; }
+function catStamp(k){ return {"家電":"電","家具":"具","ホビー":"趣","ファッション":"服","その他":"他"}[k] || "他"; }
 
 async function loadList(){
   try{
-    const r = await fetch(SB_URL + "/rest/v1/bukken?select=id,created_at,kind,title,price,area,tsubo,chiku,body,contact,photos,status&order=created_at.desc&limit=200", { headers: HEAD });
+    const r = await fetch(SB_URL + "/rest/v1/kokan?select=id,created_at,category,title,want,area,body,contact,photos,status&order=created_at.desc&limit=200", { headers: HEAD });
     allData = await r.json();
     if(!Array.isArray(allData)) allData = [];
     render();
@@ -195,25 +188,27 @@ async function loadList(){
   }
 }
 function render(){
-  let d = allData.filter(b => !curKind || b.kind === curKind);
-  if(sortCheap) d = [...d].sort((a,b)=>a.price-b.price);
-  document.getElementById("count").textContent = d.length + "件の物件";
+  const d = allData.filter(b => !curKind || b.category === curKind);
+  document.getElementById("count").textContent = d.length + "件の出品";
   const el = document.getElementById("list");
-  if(!d.length){ el.innerHTML = '<div class="empty">まだ物件がありません。<br>最初の物件を掲載してみましょう。</div>'; return; }
+  if(!d.length){ el.innerHTML = '<div class="empty">まだ出品がありません。<br>最初の1品を出してみましょう。</div>'; return; }
   el.innerHTML = d.map(b => {
     const ph = (b.photos && b.photos[0])
       ? '<img src="' + esc(b.photos[0]) + '" alt="" loading="lazy">'
-      : '<span class="noimg serif">' + kindStamp(b.kind) + '</span>';
-    let badge = "";
-    if(b.status === "成約済み") badge = '<span class="badge done">成約済み</span>';
-    else if(b.status === "商談中") badge = '<span class="badge talk">商談中</span>';
-    else badge = '<span class="badge">募集中</span>';
+      : '<span class="noimg serif">' + catStamp(b.category) + '</span>';
+    const badge = (b.status === "交換済み")
+      ? '<span class="badge done">交換済み</span>'
+      : '<span class="badge">募集中</span>';
     return '<div class="bk" onclick="openDetail(' + b.id + ')">' +
       '<div class="ph">' + ph + badge + '</div>' +
       '<div class="info">' +
-        '<span class="stamp">' + kindStamp(b.kind) + '</span><h2>' + esc(b.title) + '</h2>' +
-        '<div class="price">' + fmtPrice(b.price) + '</div>' +
-        '<div class="meta">' + esc(b.area||"") + (b.tsubo ? "｜" + esc(b.tsubo) : "") + (b.chiku ? "｜" + esc(b.chiku) : "") + '</div>' +
+        '<span class="stamp">' + catStamp(b.category) + '</span><h2>' + esc(b.title) + '</h2>' +
+        '<div class="swap">' +
+          '<div class="side"><b>出すもの</b>' + esc(b.title) + '</div>' +
+          '<span class="arw">⇄</span>' +
+          '<div class="side"><b>欲しいもの</b>' + esc(b.want) + '</div>' +
+        '</div>' +
+        (b.area ? '<div class="meta">📍 ' + esc(b.area) + '</div>' : "") +
       '</div></div>';
   }).join("");
 }
@@ -222,37 +217,34 @@ document.getElementById("filters").addEventListener("click", e => {
   document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
   btn.classList.add("on"); curKind = btn.dataset.k; render();
 });
-function toggleSort(){
-  sortCheap = !sortCheap;
-  document.getElementById("sortBtn").textContent = sortCheap ? "新着順 ⇅" : "価格が安い順 ⇅";
-  render();
-}
 
 function openDetail(id){
   const b = allData.find(x=>x.id===id); if(!b) return;
   const phs = (b.photos && b.photos.length)
-    ? '<div class="dPhotos">' + b.photos.map(p=>'<img src="'+esc(p)+'" alt="物件写真">').join("") + '</div>'
+    ? '<div class="dPhotos">' + b.photos.map(p=>'<img src="'+esc(p)+'" alt="出品写真">').join("") + '</div>'
     : "";
   const tel = String(b.contact||"").replace(/[^0-9+]/g,"");
   document.getElementById("detailSheet").innerHTML =
-    '<div class="sheetTop"><b>物件詳細</b><button class="closeX" onclick="closeDetail()">✕</button></div>' +
+    '<div class="sheetTop"><b>出品詳細</b><button class="closeX" onclick="closeDetail()">✕</button></div>' +
     phs +
-    '<div class="dPrice">' + fmtPrice(b.price) + '</div>' +
-    '<div class="dTitle"><span class="stamp">' + kindStamp(b.kind) + '</span>' + esc(b.title) + '</div>' +
+    '<div class="dTitle"><span class="stamp">' + catStamp(b.category) + '</span>' + esc(b.title) + '</div>' +
+    '<div class="dSwap">' +
+      '<div class="side"><b>出すもの</b>' + esc(b.title) + '</div>' +
+      '<span class="arw">⇄</span>' +
+      '<div class="side"><b>欲しいもの</b>' + esc(b.want) + '</div>' +
+    '</div>' +
     '<table class="dTable">' +
       '<tr><th>状態</th><td>' + esc(b.status||"募集中") + '</td></tr>' +
-      (b.area ? '<tr><th>所在地</th><td>' + esc(b.area) + '</td></tr>' : "") +
-      (b.tsubo ? '<tr><th>面積</th><td>' + esc(b.tsubo) + '</td></tr>' : "") +
-      (b.chiku ? '<tr><th>築年</th><td>' + esc(b.chiku) + '</td></tr>' : "") +
-      '<tr><th>掲載日</th><td>' + new Date(b.created_at).toLocaleDateString("ja-JP") + '</td></tr>' +
+      (b.area ? '<tr><th>エリア</th><td>' + esc(b.area) + '</td></tr>' : "") +
+      '<tr><th>出品日</th><td>' + new Date(b.created_at).toLocaleDateString("ja-JP") + '</td></tr>' +
     '</table>' +
     (b.body ? '<div class="dBody">' + esc(b.body) + '</div>' : "") +
-    (tel ? '<a class="telBtn" href="tel:' + tel + '">📞 売主に電話する</a>' : "") +
+    (tel ? '<a class="telBtn" href="tel:' + tel + '">📞 出品者に電話する</a>' : "") +
     '<button class="copyBtn" onclick="copyContact(\'' + esc(b.contact) + '\')">連絡先をコピー：' + esc(b.contact) + '</button>' +
-    '<details class="admin"><summary>掲載者メニュー（削除キーが必要）</summary>' +
+    '<details class="admin"><summary>出品者メニュー（削除キーが必要）</summary>' +
       '<div class="adminRow"><input type="text" id="adminKey" placeholder="削除キー">' +
-      '<button class="btnDone" onclick="setStatus(' + b.id + ')">成約済みに</button>' +
-      '<button class="btnDel" onclick="delBukken(' + b.id + ')">削除</button></div>' +
+      '<button class="btnDone" onclick="setStatus(' + b.id + ')">交換済みに</button>' +
+      '<button class="btnDel" onclick="delKokan(' + b.id + ')">削除</button></div>' +
     '</details>';
   document.getElementById("detailModal").classList.add("open");
 }
@@ -269,15 +261,15 @@ async function rpc(name, body){
 async function setStatus(id){
   const key = document.getElementById("adminKey").value.trim();
   if(!key) return toast("削除キーを入力してください");
-  const ok = await rpc("bukken_status", { p_id:id, p_key:key, p_status:"成約済み" });
-  if(ok===true){ toast("成約済みにしました"); closeDetail(); loadList(); }
+  const ok = await rpc("kokan_status", { p_id:id, p_key:key, p_status:"交換済み" });
+  if(ok===true){ toast("交換済みにしました"); closeDetail(); loadList(); }
   else toast("削除キーが違います");
 }
-async function delBukken(id){
+async function delKokan(id){
   const key = document.getElementById("adminKey").value.trim();
   if(!key) return toast("削除キーを入力してください");
-  if(!confirm("この物件を削除しますか？")) return;
-  const ok = await rpc("bukken_delete", { p_id:id, p_key:key });
+  if(!confirm("この出品を削除しますか？")) return;
+  const ok = await rpc("kokan_delete", { p_id:id, p_key:key });
   if(ok===true){ toast("削除しました"); closeDetail(); loadList(); }
   else toast("削除キーが違います");
 }
@@ -317,47 +309,45 @@ function compress(file){
     img.src = URL.createObjectURL(file);
   });
 }
-async function submitBukken(){
-  const kind = document.querySelector("#kindRow button.on").dataset.k;
+async function submitKokan(){
+  const category = document.querySelector("#kindRow button.on").dataset.k;
   const title = document.getElementById("fTitle").value.trim();
-  const price = parseInt(document.getElementById("fPrice").value, 10);
+  const want = document.getElementById("fWant").value.trim();
   const contact = document.getElementById("fContact").value.trim();
   const key = document.getElementById("fKey").value.trim();
-  if(!title || !price || !contact || !key) return toast("必須項目を入力してください");
+  if(!title || !want || !contact || !key) return toast("必須項目を入力してください");
   const btn = document.getElementById("submitBtn");
-  btn.disabled = true; btn.textContent = "掲載中…";
+  btn.disabled = true; btn.textContent = "出品中…";
   try{
     const urls = [];
     for(let i = 0; i < photoFiles.length; i++){
       const blob = await compress(photoFiles[i]);
       const name = Date.now() + "_" + i + ".jpg";
-      const up = await fetch(SB_URL + "/storage/v1/object/bukken/" + name, {
+      const up = await fetch(SB_URL + "/storage/v1/object/kokan/" + name, {
         method:"POST", headers:{...HEAD,"Content-Type":"image/jpeg"}, body: blob
       });
-      if(up.ok) urls.push(SB_URL + "/storage/v1/object/public/bukken/" + name);
+      if(up.ok) urls.push(SB_URL + "/storage/v1/object/public/kokan/" + name);
     }
-    const r = await fetch(SB_URL + "/rest/v1/bukken", {
+    const r = await fetch(SB_URL + "/rest/v1/kokan", {
       method:"POST",
       headers:{...HEAD,"Content-Type":"application/json","Prefer":"return=minimal"},
       body: JSON.stringify({
-        kind, title, price, contact, delete_key:key,
+        category, title, want, contact, delete_key:key,
         area: document.getElementById("fArea").value.trim(),
-        tsubo: document.getElementById("fTsubo").value.trim(),
-        chiku: document.getElementById("fChiku").value.trim(),
         body: document.getElementById("fBody").value.trim(),
         photos: urls
       })
     });
     if(!r.ok) throw 0;
-    toast("掲載しました");
+    toast("出品しました");
     photoFiles = [];
-    ["fTitle","fPrice","fArea","fTsubo","fChiku","fBody","fContact","fKey"].forEach(id=>document.getElementById(id).value="");
+    ["fTitle","fWant","fArea","fBody","fContact","fKey"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("photoRow").innerHTML = '<div class="phSlot" onclick="pickPhoto()">＋</div>';
     closePost(); loadList();
   }catch(e){
-    toast("掲載に失敗しました。もう一度お試しください");
+    toast("出品に失敗しました。もう一度お試しください");
   }
-  btn.disabled = false; btn.textContent = "この内容で掲載する";
+  btn.disabled = false; btn.textContent = "この内容で出品する";
 }
 
 document.getElementById("postModal").addEventListener("click", e => { if(e.target.id==="postModal") closePost(); });
