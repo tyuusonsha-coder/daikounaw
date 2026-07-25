@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>物々交換なう｜お金を使わない交換掲示板</title>
+<meta name="description" content="物々交換なうは、いらない物と欲しい物を直接交換できる無料掲示板。家電・家具・ホビーなどを手数料なしで交換できます。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17252E;
+  --paper:#F6F2E9;
+  --card:#FFFFFF;
+  --ai:#2B4C7E;
+  --ai-dark:#1F3A63;
+  --aka:#A8552F;
+  --line:#E3DCCB;
+  --muted:#6E7A82;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--paper);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;font-size:15px;line-height:1.7;padding-bottom:90px}
+.serif{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif}
+header{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:"Shippori Mincho",serif;font-weight:800;font-size:21px;letter-spacing:.06em}
+.logo small{font-size:10px;font-weight:600;display:block;letter-spacing:.24em;color:#9FB6D9;margin-top:1px}
+#postBtn{background:var(--ai);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:14px;font-weight:700;font-family:inherit}
+#postBtn:active{background:var(--ai-dark)}
+.lead{padding:18px 16px 4px}
+.lead h1{font-family:"Shippori Mincho",serif;font-size:17px;font-weight:800;line-height:1.5}
+.lead h1 em{font-style:normal;color:var(--ai);border-bottom:3px solid var(--aka)}
+.lead p{font-size:12px;color:var(--muted);margin-top:4px}
+.crossLink{display:block;margin:12px 16px 0;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none}
+.crossLink b{color:#8A6A1E}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:6px 15px;font-size:13px;font-weight:700;font-family:inherit}
+.chip.on{background:var(--ink);color:#fff}
+.sortRow{display:flex;justify-content:flex-start;align-items:center;padding:0 16px 6px}
+.sortRow span{font-size:12px;color:var(--muted)}
+#list{padding:6px 16px;display:flex;flex-direction:column;gap:14px}
+.bk{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(23,37,46,.06)}
+.bk .ph{height:180px;background:linear-gradient(135deg,#DCE3EE,#C3CFE2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.bk .ph img{width:100%;height:100%;object-fit:cover}
+.bk .ph .noimg{font-family:"Shippori Mincho",serif;font-size:44px;color:#8B9BB5;font-weight:800}
+.badge{position:absolute;top:10px;left:10px;background:rgba(23,37,46,.85);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px}
+.badge.done{background:#8A2F2F}
+.bk .info{padding:12px 14px 14px}
+.stamp{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1.5px solid var(--ai);color:var(--ai);border-radius:5px;font-family:"Shippori Mincho",serif;font-weight:800;font-size:13px;margin-right:7px;vertical-align:-4px}
+.bk h2{display:inline;font-size:15px;font-weight:700;line-height:1.5}
+.swap{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--paper);border-radius:10px;padding:8px 10px}
+.swap .side{flex:1;font-size:12px;line-height:1.5}
+.swap .side b{display:block;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.1em}
+.swap .arw{font-family:"Shippori Mincho",serif;font-size:18px;font-weight:800;color:var(--aka);flex:none}
+.meta{font-size:12px;color:var(--muted);margin-top:6px}
+.empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:13px}
+.modal{position:fixed;inset:0;background:rgba(23,37,46,.55);z-index:100;display:none;align-items:flex-end}
+.modal.open{display:flex}
+.sheet{background:var(--paper);width:100%;max-height:92vh;border-radius:18px 18px 0 0;overflow-y:auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 24px)}
+.sheetTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheetTop b{font-family:"Shippori Mincho",serif;font-size:17px}
+.closeX{background:none;border:none;font-size:24px;color:var(--muted);font-family:inherit;padding:4px 8px}
+label{display:block;font-size:12px;font-weight:700;margin:14px 0 4px;color:var(--ink)}
+label i{font-style:normal;color:#B04A3A;font-size:11px;margin-left:4px}
+input[type=text],textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;font-size:16px;font-family:inherit;color:var(--ink)}
+textarea{min-height:100px;resize:vertical}
+.kindRow{display:flex;gap:8px;flex-wrap:wrap}
+.kindRow button{flex:1;min-width:70px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font-size:13px;font-weight:700;font-family:inherit;color:var(--ink)}
+.kindRow button.on{border-color:var(--ai);background:var(--ai);color:#fff}
+.photoRow{display:flex;gap:8px;margin-top:6px}
+.phSlot{width:76px;height:76px;border:1.5px dashed var(--line);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);overflow:hidden;position:relative}
+.phSlot img{width:100%;height:100%;object-fit:cover}
+.submit{width:100%;margin-top:22px;background:var(--ai);color:#fff;border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:800;font-family:inherit}
+.submit:disabled{opacity:.5}
+.note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.dPhotos{display:flex;overflow-x:auto;gap:8px;border-radius:12px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.dPhotos img{width:100%;flex:none;height:220px;object-fit:cover;border-radius:12px;scroll-snap-align:center}
+.dTitle{font-size:17px;font-weight:800;line-height:1.5;margin-top:10px}
+.dSwap{display:flex;align-items:center;gap:10px;margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.dSwap .side{flex:1;font-size:14px;line-height:1.5}
+.dSwap .side b{display:block;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.1em}
+.dSwap .arw{font-family:"Shippori Mincho",serif;font-size:24px;font-weight:800;color:var(--aka);flex:none}
+.dTable{width:100%;margin:8px 0 14px;border-top:1px solid var(--line);font-size:13px}
+.dTable tr{border-bottom:1px solid var(--line)}
+.dTable th{text-align:left;color:var(--muted);font-weight:600;padding:9px 0;width:82px;vertical-align:top}
+.dTable td{padding:9px 0}
+.dBody{font-size:14px;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.telBtn{display:block;text-align:center;background:var(--ink);color:#fff;border-radius:12px;padding:15px 0;font-size:16px;font-weight:800;text-decoration:none;margin-bottom:8px}
+.copyBtn{display:block;width:100%;text-align:center;background:#fff;border:1.5px solid var(--ink);color:var(--ink);border-radius:12px;padding:13px 0;font-size:14px;font-weight:700;font-family:inherit}
+details.admin{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+details.admin summary{font-size:12px;color:var(--muted);font-weight:700}
+.adminRow{display:flex;gap:8px;margin-top:10px}
+.adminRow input{flex:1}
+.adminRow button{border:none;border-radius:10px;padding:0 14px;font-size:13px;font-weight:700;font-family:inherit;color:#fff}
+.btnDone{background:#8A6A1E}
+.btnDel{background:#8A2F2F}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:200;display:none;white-space:nowrap}
+@media (prefers-reduced-motion: no-preference){
+  .bk{transition:transform .12s}
+  .bk:active{transform:scale(.985)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">物々交換なう<small>BUTSUBUTSU NOW</small></div>
+  <button id="postBtn" onclick="openPost()">＋ 出品する</button>
+</header>
+
+<div class="lead">
+  <h1>お金を使わずに、<br><em>いらない物と欲しい物を交換</em>。</h1>
+  <p>手数料0円。写真を載せて交換相手を待つだけです。</p>
+</div>
+
+<a class="crossLink" href="fudousan.html">🏠 <b>不動産の個人売買</b>はこちら → 仲介手数料0円「不動産なう」</a>
+
+<div class="filters" id="filters">
+  <button class="chip on" data-k="">すべて</button>
+  <button class="chip" data-k="家電">家電</button>
+  <button class="chip" data-k="家具">家具</button>
+  <button class="chip" data-k="ホビー">ホビー</button>
+  <button class="chip" data-k="ファッション">ファッション</button>
+  <button class="chip" data-k="その他">その他</button>
+</div>
+<div class="sortRow"><span id="count"></span></div>
+
+<div id="list"><div class="empty">読み込み中…</div></div>
+
+<div class="modal" id="postModal">
+  <div class="sheet">
+    <div class="sheetTop"><b>交換に出す</b><button class="closeX" onclick="closePost()">✕</button></div>
+    <label>カテゴリ<i>必須</i></label>
+    <div class="kindRow" id="kindRow">
+      <button class="on" data-k="家電">家電</button>
+      <button data-k="家具">家具</button>
+      <button data-k="ホビー">ホビー</button>
+      <button data-k="ファッション">ファッション</button>
+      <button data-k="その他">その他</button>
+    </div>
+    <label>出すもの<i>必須</i></label>
+    <input type="text" id="fTitle" maxlength="40" placeholder="例：ドラム式洗濯機（2022年製・動作良好）">
+    <label>欲しいもの<i>必須</i></label>
+    <input type="text" id="fWant" maxlength="40" placeholder="例：冷蔵庫 / ゲーム機 / なんでも相談OK">
+    <label>受け渡しエリア</label>
+    <input type="text" id="fArea" maxlength="30" placeholder="例：福岡県那珂川市（手渡し希望）">
+    <label>説明</label>
+    <textarea id="fBody" maxlength="1000" placeholder="状態、使用年数、傷の有無、受け渡し方法など"></textarea>
+    <label>連絡先（電話番号）<i>必須</i></label>
+    <input type="text" id="fContact" inputmode="tel" maxlength="30" placeholder="例：090-0000-0000">
+    <label>写真（3枚まで）</label>
+    <div class="photoRow" id="photoRow">
+      <div class="phSlot" onclick="pickPhoto()">＋</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="onPhotos(this)">
+    <label>削除キー<i>必須</i></label>
+    <input type="text" id="fKey" maxlength="20" placeholder="削除・交換済みにする時の暗証（忘れずに）">
+    <button class="submit" id="submitBtn" onclick="submitKokan()">この内容で出品する</button>
+    <p class="note">※ 現金のやり取りを伴う出品はできません。受け渡しトラブル防止のため、日中の人が多い場所での手渡しをおすすめします。</p>
+  </div>
+</div>
+
+<div class="modal" id="detailModal">
+  <div class="sheet" id="detailSheet"></div>
+</div>
+
+<div id="toast"></div>
+
