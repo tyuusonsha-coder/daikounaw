@@ -82,6 +82,7 @@ var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSe
 var role=lsGet("dn_role");
 var scr="home",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
 var news=[];
+var newsOpen=false,newsTxt="";
 var bbsName="";try{bbsName=localStorage.getItem("dn_name")||""}catch(e){}
 var regOpen=false,km="";
 
@@ -105,11 +106,32 @@ var r=await sbGet("replies","order=created_at.asc");
 posts=Array.isArray(p)?p:[];
 replies={};
 if(Array.isArray(r))r.forEach(function(x){if(!replies[x.post_id])replies[x.post_id]=[];replies[x.post_id].push(x)});
-if(silent&&(composing||replyId!=null||regOpen||scr==="company"))return;
+if(silent&&(composing||newsOpen||replyId!=null||regOpen||scr==="company"))return;
 render();
 }
 async function loadCo(){companies=await sbGet("companies","order=featured.desc,created_at.asc");if(!Array.isArray(companies))companies=[];render();}
-async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=5");if(!Array.isArray(news))news=[];render();}
+async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=30");if(!Array.isArray(news))news=[];render();}
+function toggleNews(){newsOpen=!newsOpen;render();}
+function newsWrite(){
+var e=document.getElementById("ntxt");
+var body=e?e.value.trim():"";
+var nm=document.getElementById("nname");
+bbsName=nm?nm.value.trim():"";
+try{localStorage.setItem("dn_name",bbsName)}catch(x){}
+if(!body){alert("本文を入力してください");return;}
+newsTxt=body;
+submitNews((bbsName?"【"+bbsName+"】":"【名無し】")+"\n"+body);
+}
+async function nTry(d){try{var r=await fetch(SB+"news",{method:"POST",headers:H,body:JSON.stringify(d)});return r.status>=200&&r.status<300}catch(x){return false}}
+async function submitNews(body){
+var nid="n"+Date.now()+Math.random().toString(36).slice(2,5);
+var ok=await nTry({body:body,created_at:Date.now()});
+if(!ok)ok=await nTry({body:body});
+if(!ok)ok=await nTry({id:nid,body:body,created_at:Date.now()});
+if(!ok)ok=await nTry({id:nid,body:body});
+if(!ok){alert("投稿できませんでした。少し時間をおいて、もう一度お試しください。");return;}
+newsTxt="";newsOpen=false;loadNews();
+}
 
 function pickRole(r){role=r;lsSet("dn_role",r);render();}
 function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
@@ -256,14 +278,24 @@ o+='<div style="display:flex;gap:8px;padding:0 16px">';
 o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #33333e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#ddd;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
 });
 o+='</div>';
-if(news.length){
 o+='<div style="margin:14px 16px 0;background:#0c0c10;border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:14px 16px">';
-o+='<div style="font-size:12px;color:#00e5ff;font-weight:800;margin-bottom:6px">\ud83d\udce2 \u304a\u77e5\u3089\u305b</div>';
+o+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">';
+o+='<div style="font-size:12px;color:#00e5ff;font-weight:800">\ud83d\udce2 \u304a\u77e5\u3089\u305b\u30fb\u4f1d\u8a00\u677f</div>';
+o+='<div onclick="toggleNews()" style="cursor:pointer;font-size:11px;font-weight:800;color:'+(newsOpen?"#888":"#041018")+';background:'+(newsOpen?"#16161c":"#00e5ff")+';border-radius:999px;padding:6px 13px;white-space:nowrap">'+(newsOpen?"閉じる":"✏️ 書き込む")+'</div>';
+o+='</div>';
+if(newsOpen){
+o+='<div style="background:#08080b;border:1px solid #24242e;border-radius:12px;padding:10px;margin-bottom:10px">';
+o+='<input id="nname" value="'+h(bbsName)+'" placeholder="お名前（未入力なら名無し）" style="width:100%;background:#0c0c10;border:1px solid #33333e;border-radius:8px;color:#eee;padding:10px;font-size:13px;box-sizing:border-box">';
+o+='<textarea id="ntxt" placeholder="お知らせ・ひとこと（例：本日22時から空車です）" oninput="newsTxt=this.value" style="width:100%;height:84px;margin-top:8px;background:#0c0c10;border:1px solid #33333e;border-radius:8px;color:#eee;padding:10px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit">'+h(newsTxt)+'</textarea>';
+o+='<div onclick="newsWrite()" style="cursor:pointer;text-align:center;margin-top:8px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:900;border-radius:10px;padding:12px;font-size:14px">投稿する</div>';
+o+='<div style="font-size:10px;color:#666;margin-top:7px;line-height:1.5">どなたでも投稿できます。電話番号などの個人情報、誹謗中傷はご遠慮ください。</div>';
+o+='</div>';
+}
+if(!news.length){o+='<div style="font-size:12px;color:#666;padding:4px 0">まだ投稿はありません。最初のひとことをどうぞ。</div>';}
 news.forEach(function(n,i){
 o+='<div style="padding:8px 0'+(i<news.length-1?';border-bottom:1px solid #1c1c24':'')+'"><span style="font-size:11px;color:#888;font-weight:700">'+when(n.created_at)+'</span><div style="font-size:13px;color:#ddd;line-height:1.6;margin-top:2px;white-space:pre-wrap">'+h(n.body)+'</div></div>';
 });
 o+='</div>';
-}
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">';
 o+='<img src="driver.jpg" alt="運転スタッフ" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid #00e5ff;flex:0 0 auto">';
 o+='<div><div style="font-size:11px;color:#00e5ff;font-weight:800">運転するスタッフ</div><div style="font-size:15px;font-weight:900;margin:2px 0">あなたの車を、安全に。</div><div style="font-size:12px;color:#888;line-height:1.6">深夜も笑顔で、安全運転でお送りします。</div></div>';
