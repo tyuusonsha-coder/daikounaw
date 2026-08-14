@@ -86,7 +86,9 @@ var bbsName="";try{bbsName=localStorage.getItem("dn_name")||""}catch(e){}
 var regOpen=false,km="";
 
 function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function ago(ts){var s=Math.floor((Date.now()-ts)/1000);return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function tms(v){if(v==null)return 0;var n=Number(v);if(!isNaN(n)&&n>1000000000)return n;var d=new Date(v).getTime();return isNaN(d)?0:d}
+function ago(v){var t=tms(v);if(!t)return "";var s=Math.floor((Date.now()-t)/1000);if(s<0)s=0;return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function when(v){var a=ago(v),f=fmtDT(v);return f?(a?a+"（"+f+"）":f):""}
 function yen(n){return "¥"+Number(n).toLocaleString()}
 function fmtDate(ts){var d=new Date(Number(ts));return d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)}
 function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
@@ -110,7 +112,7 @@ async function loadCo(){companies=await sbGet("companies","order=featured.desc,c
 async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=5");if(!Array.isArray(news))news=[];render();}
 
 function pickRole(r){role=r;lsSet("dn_role",r);render();}
-function fmtDT(ts){var d=new Date(Number(ts));return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function bbsWrite(){
 bbsName=document.getElementById("bname").value.trim();
 try{localStorage.setItem("dn_name",bbsName)}catch(e){}
@@ -210,11 +212,11 @@ sorted.forEach(function(p){
 var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
 var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
 o+='<div class="post">';
-o+='<div style="font-size:12px;color:#777;margin-bottom:6px;line-height:1.5"><span style="color:#00e5ff;font-weight:900">No.'+noMap[p.id]+'</span>　<b style="color:'+(isC?"#4A90FF":"#FF6B00")+'">'+h(p.name||"名無しさん")+'</b>【'+(isC?"🍺お客":"🚘運転手")+'】'+(hot?' <span class="hot">🔥炎上</span>':'')+(isMe?' <span style="color:#444">あなた</span>':'')+'<span style="float:right;color:#444">'+fmtDT(p.created_at)+'</span></div>';
+o+='<div style="font-size:12px;color:#777;margin-bottom:6px;line-height:1.5"><span style="color:#00e5ff;font-weight:900">No.'+noMap[p.id]+'</span>　<b style="color:'+(isC?"#4A90FF":"#FF6B00")+'">'+h(p.name||"名無しさん")+'</b>【'+(isC?"🍺お客":"🚘運転手")+'】'+(hot?' <span class="hot">🔥炎上</span>':'')+(isMe?' <span style="color:#444">あなた</span>':'')+'<span style="float:right;color:#666">'+when(p.created_at)+'</span></div>';
 o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
 if(reps.length){
 o+='<div style="margin-bottom:8px;margin-left:4px;border-left:2px solid #24242e;padding-left:10px">';
-reps.forEach(function(r,ri){o+='<div style="margin-bottom:5px;font-size:12px;color:#888;line-height:1.6"><span style="color:#555">└'+(ri+1)+'</span> <b style="color:'+(r.role==="customer"?"#4A90FF":"#FF6B00")+'">'+h(r.name||"名無しさん")+'</b>：<span style="color:#aaa">'+h(r.text)+'</span></div>'});
+reps.forEach(function(r,ri){o+='<div style="margin-bottom:5px;font-size:12px;color:#888;line-height:1.6"><span style="color:#555">└'+(ri+1)+'</span> <b style="color:'+(r.role==="customer"?"#4A90FF":"#FF6B00")+'">'+h(r.name||"名無しさん")+'</b>：<span style="color:#aaa">'+h(r.text)+'</span> <span style="color:#555;font-size:11px">'+when(r.created_at)+'</span></div>'});
 o+='</div>';
 }
 o+='<div class="rxn">';
@@ -258,7 +260,7 @@ if(news.length){
 o+='<div style="margin:14px 16px 0;background:#0c0c10;border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:14px 16px">';
 o+='<div style="font-size:12px;color:#00e5ff;font-weight:800;margin-bottom:6px">\ud83d\udce2 \u304a\u77e5\u3089\u305b</div>';
 news.forEach(function(n,i){
-o+='<div style="padding:8px 0'+(i<news.length-1?';border-bottom:1px solid #1c1c24':'')+'"><span style="font-size:11px;color:#888;font-weight:700">'+fmtDate(n.created_at)+'</span><div style="font-size:13px;color:#ddd;line-height:1.6;margin-top:2px;white-space:pre-wrap">'+h(n.body)+'</div></div>';
+o+='<div style="padding:8px 0'+(i<news.length-1?';border-bottom:1px solid #1c1c24':'')+'"><span style="font-size:11px;color:#888;font-weight:700">'+when(n.created_at)+'</span><div style="font-size:13px;color:#ddd;line-height:1.6;margin-top:2px;white-space:pre-wrap">'+h(n.body)+'</div></div>';
 });
 o+='</div>';
 }
