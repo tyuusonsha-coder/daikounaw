@@ -1,1 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>代行なう運転代行｜ご案内</title>
+<meta name="description" content="代行なう運転代行のご案内。Googleクチコミ、アプリでのご予約、LINE友だち追加はこちらから。">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://daikounaw.com/link.html">
+<style>
+  :root{
+    --night:#0F1626;
+    --surface:#1A2438;
+    --surface-lift:#22304A;
+    --lamp:#E0A54B;
+    --lamp-deep:#B37F2E;
+    --paper:#F2EFE8;
+    --muted:#8791A3;
+    --line-green:#06C755;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{
+    background:var(--night);
+    color:var(--paper);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+    padding:0 20px 48px;
+  }
+  .glow{
+    position:fixed; top:0; left:0; right:0; height:180px;
+    background:radial-gradient(60% 100% at 50% 0%, rgba(224,165,75,.18), transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+  .wrap{ max-width:440px; margin:0 auto; position:relative; z-index:1; }
+
+  header{ padding:52px 0 34px; text-align:center; }
+  .eyebrow{
+    font-size:11px; letter-spacing:.22em; color:var(--lamp);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:27px; font-weight:600; letter-spacing:.06em;
+  }
+  .thanks{
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:14px; color:var(--muted); margin-top:12px; letter-spacing:.04em;
+  }
+  .rule{
+    width:44px; height:2px; background:var(--lamp);
+    margin:26px auto 0; border-radius:2px;
+  }
+
+  .lead{
+    font-size:13px; color:var(--muted);
+    text-align:center; margin:30px 0 14px;
+  }
+
+  a.item{
+    display:flex; align-items:center; gap:14px;
+    background:var(--surface);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:14px;
+    padding:17px 18px;
+    margin-bottom:11px;
+    text-decoration:none; color:var(--paper);
+    transition:background .18s ease, transform .18s ease;
+  }
+  a.item:hover, a.item:focus-visible{
+    background:var(--surface-lift); transform:translateY(-1px);
+  }
+  a.item:focus-visible{ outline:2px solid var(--lamp); outline-offset:3px; }
+
+  .icon{
+    width:42px; height:42px; flex:0 0 42px;
+    border-radius:11px;
+    display:grid; place-items:center;
+    font-size:19px;
+    background:rgba(255,255,255,.06);
+  }
+  .txt{ flex:1; min-width:0; }
+  .ttl{ font-size:15px; font-weight:700; letter-spacing:.01em; }
+  .sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .arrow{ color:var(--muted); font-size:15px; flex:0 0 auto; }
+
+  /* 主役：クチコミ */
+  a.primary{
+    background:linear-gradient(135deg, var(--lamp) 0%, var(--lamp-deep) 100%);
+    border:none; color:#16202F;
+    padding:21px 18px;
+    box-shadow:0 8px 26px rgba(224,165,75,.22);
+  }
+  a.primary:hover, a.primary:focus-visible{
+    background:linear-gradient(135deg,#EBB25C 0%,#C08B34 100%);
+  }
+  a.primary .icon{ background:rgba(0,0,0,.13); }
+  a.primary .ttl{ font-size:16.5px; }
+  a.primary .sub{ color:rgba(22,32,47,.72); }
+  a.primary .arrow{ color:rgba(22,32,47,.6); }
+
+  a.line .icon{ background:rgba(6,199,85,.16); }
+
+  .divider{
+    display:flex; align-items:center; gap:12px;
+    margin:30px 0 16px; color:var(--muted); font-size:11px; letter-spacing:.14em;
+  }
+  .divider::before, .divider::after{
+    content:""; flex:1; height:1px; background:rgba(255,255,255,.1);
+  }
+
+  .callbar{
+    margin-top:28px;
+    background:var(--surface);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+  }
+  .callbar a{
+    font-size:23px; font-weight:700; color:var(--lamp);
+    text-decoration:none; letter-spacing:.03em;
+  }
+  .callbar .hours{ font-size:11.5px; color:var(--muted); margin-top:7px; }
+
+  footer{
+    text-align:center; margin-top:34px;
+    font-size:10.5px; color:var(--muted); line-height:1.8;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    a.item{ transition:none; }
+    a.item:hover{ transform:none; }
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">DAIKOU NOW</div>
+    <h1>代行なう運転代行</h1>
+    <p class="thanks">本日はご利用ありがとうございました</p>
+    <div class="rule"></div>
+  </header>
+
+  <p class="lead">よろしければ、ひとことご評価をお願いします</p>
+
+  <a class="item primary" href="https://g.page/r/CbYS4NQFzrSJEAE/review">
+    <span class="icon">★</span>
+    <span class="txt">
+      <span class="ttl">Googleでクチコミを書く</span>
+      <span class="sub">30秒ほどで終わります</span>
+    </span>
+    <span class="arrow">›</span>
+  </a>
+
+  <div class="divider">次回のご予約</div>
+
+  <a class="item" href="https://daikounaw.com">
+    <span class="icon">📱</span>
+    <span class="txt">
+      <span class="ttl">代行なうアプリ</span>
+      <span class="sub">スマホから配車を呼べます</span>
+    </span>
+    <span class="arrow">›</span>
+  </a>
+
+  <a class="item line" href="https://line.me/R/ti/p/@kuikkusutsa">
+    <span class="icon">💬</span>
+    <span class="txt">
+      <span class="ttl">LINEで友だち追加</span>
+      <span class="sub">トークからそのままご予約</span>
+    </span>
+    <span class="arrow">›</span>
+  </a>
+
+  <a class="item" href="https://dnud.jp">
+    <span class="icon">🚗</span>
+    <span class="txt">
+      <span class="ttl">料金・対応エリアを見る</span>
+      <span class="sub">1km 400円／福岡・那珂川・春日ほか</span>
+    </span>
+    <span class="arrow">›</span>
+  </a>
+
+  <div class="callbar">
+    <a href="tel:05017243179">050-1724-3179</a>
+    <div class="hours">21:00〜翌6:00／木曜・日曜定休</div>
+  </div>
+
+  <div class="divider">運営会社</div>
+
+  <a class="item" href="https://tyuusonsha.jp">
+    <span class="icon">尊</span>
+    <span class="txt">
+      <span class="ttl">合同会社中尊社</span>
+      <span class="sub">芸能・タレント事業のご案内</span>
+    </span>
+    <span class="arrow">›</span>
+  </a>
+
+  <footer>
+    合同会社中尊社／福岡県那珂川市<br>
+    福岡県公安委員会認定 第901131号
+  </footer>
+
+</div>
+</body>
+</html>
 
