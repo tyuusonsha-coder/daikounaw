@@ -102,6 +102,10 @@ async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});re
 async function sbPatch(t,id,d){try{await fetch(SB+t+"?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(d)})}catch(e){}}
 
 function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
+function tms(v){if(v==null)return 0;var n=Number(v);if(!isNaN(n)&&n>1000000000)return n;var d=new Date(v).getTime();return isNaN(d)?0:d}
+function ago(v){var t=tms(v);if(!t)return "";var s=Math.floor((Date.now()-t)/1000);if(s<0)s=0;return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function when(v){var a=ago(v),f=fmtDT(v);return f?(a?a+"（"+f+"）":f):""}
 var actx=null;
 function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
 function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=988;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.4,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);o.start(t);o.stop(t+0.42);})(i*0.5);}}catch(e){}}
@@ -140,6 +144,7 @@ function pendCard(o){
   return "<div class='card'>"+
     "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
     "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
+    "<div class='meta'>🕐 "+when(o.created_at)+" 受付</div>"+
     "<div class='actions'><button class='btn b-accept' onclick=\"accept('"+o.id+"')\">この注文を受ける</button></div>"+
     "</div>";
 }
@@ -155,6 +160,7 @@ function mineCard(o){
     "<span class='stbadge "+badge[0]+"'>"+badge[1]+"</span>"+
     "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
     "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
+    "<div class='meta'>🕐 受付 "+when(o.created_at)+" ／ 更新 "+when(o.updated_at||o.created_at)+"</div>"+
     "<div class='actions'>"+act+" "+tel+" "+rcpt+"</div>"+
     "</div>";
 }
