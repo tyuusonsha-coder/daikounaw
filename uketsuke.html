@@ -133,5 +133,31 @@ load();
 load();
 setInterval(load,5000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden)load();});
+</script><script>
+/* 誤タップ防止パッチ */
+(function () {
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button,a') : null;
+    if (!b) return;
+    var t = (b.textContent || '').replace(/\s+/g, '');
+    if (t.indexOf('完了にする') >= 0) {
+      if (!confirm('この案件を完了にしますか？')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+  setInterval(function () {
+    var list = document.querySelectorAll('button,a');
+    for (var i = 0; i < list.length; i++) {
+      var b = list[i];
+      if ((b.textContent || '').indexOf('領収書') >= 0) {
+        b.style.marginTop = '20px';
+        b.style.opacity = '0.55';
+      }
+    }
+  }, 1000);
+})();
 </script>
+
 </body></html>
