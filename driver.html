@@ -32,6 +32,9 @@
   .b-ghost{background:transparent;color:var(--sub);border:1px solid var(--line)}
   .actions{margin-top:8px}
   .b-rcpt{display:flex;width:100%;margin-top:20px;opacity:.5}
+  .b-nav{background:#2a6df4;color:#fff}
+  .b-undo{background:transparent;color:var(--red);border:1px solid var(--red);font-size:13px}
+  .card.donec{opacity:.75}
   .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px}
   .setup{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center}
   .setup input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--txt);font-size:16px;margin:12px 0;text-align:center;font-family:inherit}
@@ -86,6 +89,9 @@
 
     <div class="sec">新着の注文（受付中）</div>
     <div id="pendingList"></div>
+
+    <div class="sec">最近の完了（取り消せます）</div>
+    <div id="doneList"></div>
   </div>
 
 </div>
@@ -136,6 +142,11 @@ async function refresh(){
   var pl=document.getElementById("pendingList");
   if(!pend||pend.length===0){pl.innerHTML="<div class='empty'>新着の注文はありません</div>"}
   else{pl.innerHTML=pend.map(pendCard).join("")}
+  // 最近の完了（取り消し用）
+  var dn=await sbGet("orders","driver=eq."+encodeURIComponent(DNAME)+"&status=eq.done&order=updated_at.desc&limit=5");
+  var dl=document.getElementById("doneList");
+  if(!dn||dn.length===0){dl.innerHTML="<div class='empty'>完了した案件はありません</div>"}
+  else{dn.forEach(function(o){ordMap[o.id]=o});dl.innerHTML=dn.map(doneCard).join("")}
   var pn=pend?pend.length:0;
   if(lastPendN!==null && pn>lastPendN){ beep(2); }
   lastPendN=pn;
@@ -155,6 +166,7 @@ function mineCard(o){
   if(o.status==="accepted")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','departed')\">🚗 出発する</button>";
   else if(o.status==="departed")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','arriving')\">📍 もうすぐ到着</button>";
   else if(o.status==="arriving")act="<button class='btn b-done' onclick=\"confirmDone('"+o.id+"')\">🏁 完了にする</button>";
+  var nav = "<a class='btn b-nav' target='_blank' rel='noopener' href='https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(o.pickup||"")+"'>🧭 ナビ</a>";
   var tel = o.cphone ? "<a class='btn b-tel' href='tel:"+esc(o.cphone)+"'>📞 お客に電話</a>" : "";
   var rcpt = "<button class='btn b-ghost b-rcpt' onclick=\"showReceipt('"+o.id+"')\">📄 領収書</button>";
   return "<div class='card mine'>"+
@@ -162,8 +174,24 @@ function mineCard(o){
     "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
     "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
     "<div class='meta'>🕐 受付 "+when(o.created_at)+" ／ 更新 "+when(o.updated_at||o.created_at)+"</div>"+
-    "<div class='actions'>"+act+" "+tel+" "+rcpt+"</div>"+
+    "<div class='actions'>"+act+" "+nav+" "+tel+" "+rcpt+"</div>"+
     "</div>";
+}
+function doneCard(o){
+  return "<div class='card donec'>"+
+    "<span class='stbadge s-accepted'>完了</span>"+
+    "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
+    "<div class='meta'>"+esc(o.cname||"")+" 様 ・ 約"+o.km+"km ・ <span class='price'>"+yen(o.price)+"</span></div>"+
+    "<div class='meta'>🏁 完了 "+when(o.updated_at||o.created_at)+"</div>"+
+    "<div class='actions'><button class='btn b-ghost' onclick=\"showReceipt('"+o.id+"')\">📄 領収書</button> "+
+    "<button class='btn b-undo' onclick=\"undoDone('"+o.id+"')\">↩︎ 完了を取り消す</button></div>"+
+    "</div>";
+}
+async function undoDone(id){
+  if(!confirm("この案件の完了を取り消して、担当中に戻しますか？"))return;
+  await sbPatch("orders",id,{status:"arriving",updated_at:new Date().toISOString()});
+  var o=ordMap[id];if(o)o.status="arriving";
+  refresh();
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>\"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 
