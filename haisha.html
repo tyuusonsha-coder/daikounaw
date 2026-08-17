@@ -135,12 +135,12 @@ function calcPrice(d){return d<=10?4000:d*PER_KM;}
 
 var km=document.getElementById("km");
 function updPrice(){
-  var d=parseInt(km.value,10);
-  document.getElementById("kmv").textContent=d+"km";
-  var p=calcPrice(d);
+    var d=parseInt(km.value,10);
+    document.getElementById("kmv").textContent=d+"km";
+    var p=calcPrice(d);
+    document.getElementById("price").textContent=yen(p);
     document.getElementById("bd").textContent = d<=10 ? "10km以下 一律 "+yen(4000) : "¥"+PER_KM+" × "+d+"km = "+yen(p);
 
-  document.getElementById("bd").textContent = "¥"+PER_KM+" × "+d+"km = "+yen(p);
 }
 km.addEventListener("input",updPrice);
 updPrice();
