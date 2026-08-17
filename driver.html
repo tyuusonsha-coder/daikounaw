@@ -31,13 +31,14 @@
   .b-tel{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan)}
   .b-ghost{background:transparent;color:var(--sub);border:1px solid var(--line)}
   .actions{margin-top:8px}
+  .b-rcpt{display:flex;width:100%;margin-top:20px;opacity:.5}
   .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px}
   .setup{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center}
   .setup input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--txt);font-size:16px;margin:12px 0;text-align:center;font-family:inherit}
   .setup input:focus{outline:none;border-color:var(--cyan)}
   .dot-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;animation:bl 1.2s infinite}
   @keyframes bl{50%{opacity:.3}}
-  .rcv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+  .rcv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
   .rcv-card{background:#fff;color:#111;border-radius:14px;padding:24px 22px;width:100%;max-width:380px}
   .rcv-card h2{text-align:center;font-size:18px;margin-bottom:4px}
   .rcv-card .rsub{text-align:center;font-size:11px;color:#666;margin-bottom:16px}
@@ -153,9 +154,9 @@ function mineCard(o){
   var act="";
   if(o.status==="accepted")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','departed')\">🚗 出発する</button>";
   else if(o.status==="departed")act="<button class='btn b-step' onclick=\"setStatus('"+o.id+"','arriving')\">📍 もうすぐ到着</button>";
-  else if(o.status==="arriving")act="<button class='btn b-done' onclick=\"setStatus('"+o.id+"','done')\">🏁 完了にする</button>";
+  else if(o.status==="arriving")act="<button class='btn b-done' onclick=\"confirmDone('"+o.id+"')\">🏁 完了にする</button>";
   var tel = o.cphone ? "<a class='btn b-tel' href='tel:"+esc(o.cphone)+"'>📞 お客に電話</a>" : "";
-  var rcpt = "<button class='btn b-ghost' onclick=\"showReceipt('"+o.id+"')\">📄 領収書</button>";
+  var rcpt = "<button class='btn b-ghost b-rcpt' onclick=\"showReceipt('"+o.id+"')\">📄 領収書</button>";
   return "<div class='card mine'>"+
     "<span class='stbadge "+badge[0]+"'>"+badge[1]+"</span>"+
     "<div class='route'><b>"+esc(o.pickup)+"</b> → <b>"+esc(o.dropoff)+"</b></div>"+
@@ -169,6 +170,9 @@ function esc(s){return String(s==null?"":s).replace(/[&<>\"']/g,function(c){retu
 async function accept(id){
   await sbPatch("orders",id,{status:"accepted",driver:DNAME,updated_at:new Date().toISOString()});
   refresh();
+}
+function confirmDone(id){
+  if(confirm("この案件を完了にして領収書を出しますか？")){setStatus(id,"done");}
 }
 async function setStatus(id,st){
   var o=ordMap[id];
