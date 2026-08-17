@@ -33,6 +33,9 @@
   .actions{margin-top:8px}
   .b-rcpt{display:flex;width:100%;margin-top:20px;opacity:.5}
   .b-nav{background:#2a6df4;color:#fff}
+  .b-bell{background:transparent;color:var(--amber);border:1px solid var(--amber);font-size:12px;padding:7px 12px;margin:0}
+  .bellrow{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .bellnote{font-size:11px;color:var(--sub)}
   .b-undo{background:transparent;color:var(--red);border:1px solid var(--red);font-size:13px}
   .card.donec{opacity:.75}
   .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px}
@@ -79,6 +82,10 @@
       <div class="me"><span id="meName"></span> <span onclick="changeName()" style="cursor:pointer;opacity:.6">⚙</span></div>
     </div>
     <div style="font-size:12px;color:var(--sub)"><span class="dot-live"></span>自動更新中（4秒ごと）</div>
+    <div class="bellrow">
+      <button class="btn b-bell" onclick="bellTest()">🔔 音テスト</button>
+      <span class="bellnote" id="wlState">画面スリープ防止：オフ</span>
+    </div>
 
     <div class="sec">担当中の案件</div>
     <div id="dmapWrap" class="hidden">
@@ -117,6 +124,26 @@ var actx=null;
 function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
 function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=988;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.4,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);o.start(t);o.stop(t+0.42);})(i*0.5);}}catch(e){}}
 document.addEventListener("click",unlockAudio);
+document.addEventListener("touchstart",unlockAudio);
+var wl=null;
+async function keepAwake(){
+  try{
+    if("wakeLock" in navigator && !wl){
+      wl=await navigator.wakeLock.request("screen");
+      document.getElementById("wlState").textContent="画面スリープ防止：オン";
+      wl.addEventListener("release",function(){wl=null;var e=document.getElementById("wlState");if(e)e.textContent="画面スリープ防止：オフ";});
+    }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)keepAwake();});
+function bellTest(){
+  unlockAudio();
+  keepAwake();
+  setTimeout(function(){beep(2);},120);
+  setTimeout(function(){
+    if(!actx||actx.state!=="running"){alert("音を出せませんでした。本体横の消音スイッチと音量を確認してください。");}
+  },900);
+}
 var DNAME=localStorage.getItem("dn_driver")||"";
 var timer=null;
 var lastPendN=null;
@@ -148,7 +175,7 @@ async function refresh(){
   if(!dn||dn.length===0){dl.innerHTML="<div class='empty'>完了した案件はありません</div>"}
   else{dn.forEach(function(o){ordMap[o.id]=o});dl.innerHTML=dn.map(doneCard).join("")}
   var pn=pend?pend.length:0;
-  if(lastPendN!==null && pn>lastPendN){ beep(2); }
+  if(lastPendN!==null && pn>lastPendN){ beep(3); }
   lastPendN=pn;
 }
 
