@@ -130,7 +130,8 @@ document.addEventListener("click",unlockAudio);
 
 var PER_KM=400;
 function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
-function calcPrice(d){return d*PER_KM;}
+function calcPrice(d){return d<=10?4000:d*PER_KM;}
+
 
 var km=document.getElementById("km");
 function updPrice(){
