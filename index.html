@@ -33,6 +33,11 @@ body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFo
 .nav button{flex:1;padding:13px 0 16px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:#444;font-family:inherit}
 .nav button.on{color:#FF6B00}
 .nav button .ico{font-size:26px;line-height:1}
+#ctabar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);width:100%;max-width:480px;display:flex;gap:8px;padding:0 12px;z-index:98;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+#ctabar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+#ctabar a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 0;border-radius:999px;text-decoration:none;font-weight:900;font-size:16px;white-space:nowrap}
+.cta-tel{background:linear-gradient(135deg,#ff4d4d,#c81e1e);color:#fff;box-shadow:0 8px 26px rgba(255,77,77,.45)}
+.cta-go{background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;box-shadow:0 8px 26px rgba(0,229,255,.45)}
 .vs{padding:14px 16px 10px;background:linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609);border-bottom:1px solid rgba(170,85,255,.2)}
 .vs .row{display:flex;align-items:center;margin-bottom:6px}
 .vs .side{flex:1;text-align:center}.vs .num{font-size:30px;font-weight:900}.vs .lbl{font-size:12px;font-weight:900}
@@ -196,7 +201,7 @@ else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),
 function render(){
 var app=document.getElementById("app");if(!app)return;
 var out='<div class="hdr"><div class="logo" onclick="scr=\'home\';render()"><img src="logo.png" alt="代行なう" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:7px">代行<span>なう</span></div><div style="font-size:10px;color:#888">福岡の運転代行</div></div>';
-out+='<div style="flex:1;overflow-y:auto;padding-bottom:160px">';
+out+='<div id="scrollbox" style="flex:1;overflow-y:auto;padding-bottom:150px">';
 if(scr==="battle")out+=renderBattle();
 else if(scr==="company")out+=renderCompany();
 else out+=renderHome();
@@ -342,6 +347,11 @@ o+='<p style="margin-bottom:10px">代行なう運転代行は、福岡市を中�
 o+='<p style="margin-bottom:10px">料金は初乗り不要のわかりやすい設定で、1kmあたり400円、高速道路料金は無料です。営業時間は21時から翌6時まで（金・土曜は翌7時まで）、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
 o+='<p>博多区・中央区の繁華街はもちろん、福岡市近郊の幅広いエリアに対応しております。深夜の運転代行をお探しの方は、ぜひ代行なう運転代行をご利用ください。</p>';
 o+='</div>';
+o+='<div style="padding:0 16px 6px;font-size:11px;color:#666;font-weight:800">中尊社の他のサービス</div>';
+o+='<div style="margin:0 16px 26px;display:flex;gap:8px">';
+o+='<a href="fudousan.html" style="flex:1;text-align:center;background:#205A45;color:#fff;text-decoration:none;border-radius:12px;padding:12px 4px;font-size:12px;font-weight:800;line-height:1.4">🏠 不動産なう<br><span style="font-size:10px;font-weight:400;opacity:.85">仲介手数料0円の個人売買</span></a>';
+o+='<a href="kokan.html" style="flex:1;text-align:center;background:#2B4C7E;color:#fff;text-decoration:none;border-radius:12px;padding:12px 4px;font-size:12px;font-weight:800;line-height:1.4">⇄ 物々交換なう<br><span style="font-size:10px;font-weight:400;opacity:.85">お金を使わない交換掲示板</span></a>';
+o+='</div>';
 return o;
 }
 
@@ -431,10 +441,24 @@ setInterval(function(){loadPosts(true)},15000);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}
 </script>
 
-<a href="haisha.html" style="position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:9999;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:800;padding:14px 26px;border-radius:999px;box-shadow:0 8px 30px rgba(0,229,255,.5);text-decoration:none;font-size:16px;white-space:nowrap;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">🚖 今すぐ配車を呼ぶ</a> <a href="tel:05017243179" style="position:fixed;left:50%;bottom:140px;transform:translateX(-50%);z-index:9999;display:inline-flex;align-items:center;background:linear-gradient(135deg,#ff4d4d,#c81e1e);color:#fff;font-weight:800;padding:14px 26px;border-radius:999px;box-shadow:0 8px 30px rgba(255,77,77,.5);text-decoration:none;font-size:16px;white-space:nowrap;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">📞 電話で今すぐ呼ぶ</a>
-  <a href="fudousan.html" style="flex:1;text-align:center;background:#205A45;color:#fff;text-decoration:none;border-radius:10px;padding:12px 4px;font-size:12px;font-weight:bold;line-height:1.4">🏠 不動産なう<br><span style="font-size:10px;font-weight:normal">仲介手数料0円の個人売買</span></a>
-  <a href="kokan.html" style="flex:1;text-align:center;background:#2B4C7E;color:#fff;text-decoration:none;border-radius:10px;padding:12px 4px;font-size:12px;font-weight:bold;line-height:1.4">⇄ 物々交換なう<br><span style="font-size:10px;font-weight:normal">お金を使わない交換掲示板</span></a>
+<div id="ctabar">
+<a href="tel:05017243179" class="cta-tel">📞 電話</a>
+<a href="haisha.html" class="cta-go">🚖 今すぐ配車</a>
 </div>
 
+<script>
+(function(){
+var bar=document.getElementById("ctabar");
+function upd(){
+var box=document.getElementById("scrollbox");
+var top=box?box.scrollTop:0;
+var show=(window.scr!=="home")||top>300;
+if(show){bar.classList.add("show");}else{bar.classList.remove("show");}
+}
+document.addEventListener("scroll",upd,true);
+setInterval(upd,600);
+upd();
+})();
+</script>
 
 </body></html>
