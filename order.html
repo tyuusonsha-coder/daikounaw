@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>運転代行を呼ぶ｜代行なう</title>
+<style>
+:root{
+  --bg:#0B1220;
+  --surface:#142338;
+  --surface-2:#1B2E48;
+  --line:#22385A;
+  --text:#E8EEF7;
+  --muted:#8FA3BF;
+  --amber:#FFB020;
+  --green:#2ECC71;
+  --red:#FF5A5A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-feature-settings:"palt";
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.bar{
+  border-bottom:1px solid var(--line);
+  padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+}
+.bar h1{font-size:19px;font-weight:800;margin:0;letter-spacing:.02em}
+.bar p{font-size:12px;color:var(--muted);margin:4px 0 0;font-weight:600}
+
+.wrap{padding:18px 16px 60px;max-width:520px;margin:0 auto}
+
+.field{margin-bottom:18px}
+.field label{
+  display:block;font-size:13px;font-weight:800;
+  color:var(--muted);margin-bottom:8px;letter-spacing:.04em;
+}
+.field label i{color:var(--amber);font-style:normal;margin-left:5px}
+input{
+  width:100%;background:var(--surface);color:var(--text);
+  border:1px solid var(--line);border-radius:13px;
+  padding:17px 15px;font-size:17px;font-family:inherit;font-weight:600;
+}
+input:focus{outline:none;border-color:var(--amber)}
+input::placeholder{color:#59708F}
+
+.gps{
+  width:100%;margin-top:9px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:11px;
+  color:var(--text);font-family:inherit;font-size:14px;font-weight:700;
+  padding:13px;cursor:pointer;
+}
+.gps.done{border-color:var(--green);color:var(--green)}
+
+.note{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:15px;margin-bottom:22px;
+  font-size:13px;line-height:1.75;color:var(--muted);font-weight:600;
+}
+.note b{color:var(--text);font-size:15px}
+.note .ex{
+  display:inline-block;margin:8px 0 4px;color:var(--amber);
+  font-size:12px;font-weight:800;letter-spacing:.02em;line-height:1.7;
+}
+
+.send{
+  width:100%;border:0;border-radius:14px;
+  background:var(--amber);color:#241400;
+  font-family:inherit;font-size:19px;font-weight:800;letter-spacing:.04em;
+  padding:20px;cursor:pointer;transition:.12s;
+}
+.send:active{transform:scale(.98)}
+.send:disabled{background:var(--surface-2);color:var(--muted);transform:none}
+
+.err{color:var(--red);font-size:13px;font-weight:700;margin-top:12px;text-align:center}
+
+/* 受付状況 */
+.status{padding:50px 24px;text-align:center}
+.ring{
+  width:64px;height:64px;margin:0 auto 26px;border-radius:50%;
+  border:3px solid var(--line);border-top-color:var(--amber);
+  animation:spin 1.2s linear infinite;
+}
+.ring.stop{animation:none;border-color:var(--green)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status h2{font-size:22px;font-weight:800;margin:0 0 10px}
+.status p{font-size:14px;color:var(--muted);line-height:1.8;margin:0;font-weight:600}
+.recap{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:16px;margin:26px 0 0;text-align:left;
+}
+.recap div{display:flex;gap:12px;font-size:14px;font-weight:700;padding:7px 0}
+.recap span{color:var(--muted);flex:none;width:44px;font-size:12px;font-weight:800}
+.tel{
+  display:block;margin-top:20px;text-decoration:none;
+  background:var(--green);color:#06210F;border-radius:14px;
+  padding:19px;font-size:18px;font-weight:800;letter-spacing:.03em;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>運転代行を呼ぶ</h1>
+  <p>代行なう｜中洲・天神・博多エリア</p>
+</div>
+
+<div id="app"></div>
+
+<script>
+var SB = "https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H = {"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+
+var lat = null, lng = null, orderId = null, sending = false;
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+
+function formView(){
+  $('app').innerHTML =
+    '<div class="wrap">' +
+      '<div class="note"><b>料金</b><br>3kmまで1,800円。以降1kmごとに250円。<br>' +
+        '<span class="ex">3km 1,800円／5km 2,300円／10km 3,550円／15km 4,800円</span><br>' +
+        '到着時に走行距離を確認してご精算します。</div>' +
+      '<div class="field"><label>今いる場所<i>必須</i></label>' +
+        '<input id="pickup" placeholder="例：中洲3丁目 〇〇ビル前" autocomplete="off">' +
+        '<button class="gps" id="gps">現在地を送信する</button></div>' +
+      '<div class="field"><label>行き先<i>必須</i></label>' +
+        '<input id="dropoff" placeholder="例：南区大橋2丁目" autocomplete="off"></div>' +
+      '<div class="field"><label>電話番号<i>必須</i></label>' +
+        '<input id="cphone" type="tel" inputmode="tel" placeholder="09012345678" autocomplete="tel"></div>' +
+      '<div class="field"><label>お名前</label>' +
+        '<input id="cname" placeholder="例：田中" autocomplete="name"></div>' +
+      '<button class="send" id="send">この内容で代行を呼ぶ</button>' +
+      '<div class="err" id="err"></div>' +
+    '</div>';
+
+  $('gps').onclick = function(){
+    var b = $('gps');
+    b.textContent = '現在地を取得しています…';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      lat = pos.coords.latitude; lng = pos.coords.longitude;
+      b.className = 'gps done';
+      b.textContent = '現在地を送信しました';
+    }, function(){
+      b.textContent = '現在地を取得できませんでした';
+    }, {enableHighAccuracy:true, timeout:10000});
+  };
+  $('send').onclick = submit;
+}
+
+async function submit(){
+  if (sending) return;
+  var pickup = $('pickup').value.trim();
+  var dropoff = $('dropoff').value.trim();
+  var cphone = $('cphone').value.trim();
+  var cname = $('cname').value.trim();
+  if (!pickup && !lat){ $('err').textContent = '今いる場所を入力するか、現在地を送信してください'; return; }
+  if (!dropoff){ $('err').textContent = '行き先を入力してください'; return; }
+  if (cphone.replace(/[^0-9]/g,'').length < 10){ $('err').textContent = '電話番号を正しく入力してください'; return; }
+
+  sending = true;
+  $('send').disabled = true;
+  $('send').textContent = '送信しています…';
+  $('err').textContent = '';
+
+  var body = {
+    cname: cname || 'お客様',
+    cphone: cphone,
+    pickup: pickup || '現在地（GPS）',
+    dropoff: dropoff,
+    status: 'open',
+    source: 'board',
+    pickup_lat: lat,
+    pickup_lng: lng,
+    expires_at: new Date(Date.now() + 30*60000).toISOString()
+  };
+  try {
+    var r = await fetch(SB + 'orders', {method:'POST', headers:H, body:JSON.stringify(body)});
+    var d = await r.json();
+    if (r.ok && d && d[0]){
+      orderId = d[0].id;
+      statusView(d[0]);
+      poll();
+    } else {
+      throw new Error('failed');
+    }
+  } catch(e){
+    sending = false;
+    $('send').disabled = false;
+    $('send').textContent = 'この内容で代行を呼ぶ';
+    $('err').textContent = '送信できませんでした。電話（050-1724-3179）でも受け付けています';
+  }
+}
+
+function statusView(o, co){
+  var accepted = o.status && o.status !== 'open';
+  $('app').innerHTML =
+    '<div class="status">' +
+      '<div class="ring' + (accepted ? ' stop' : '') + '"></div>' +
+      '<h2>' + (accepted ? 'まもなく到着します' : '運転代行を探しています') + '</h2>' +
+      '<p>' + (accepted
+        ? esc(co && co.name ? co.name : '担当の代行') + 'が向かっています。<br>この画面は開いたままお待ちください。'
+        : '近くの運転代行に依頼を送りました。<br>決まり次第この画面が変わります。') + '</p>' +
+      '<div class="recap">' +
+        '<div><span>出発</span>' + esc(o.pickup) + '</div>' +
+        '<div><span>行き先</span>' + esc(o.dropoff) + '</div>' +
+      '</div>' +
+      (accepted && co && co.phone
+        ? '<a class="tel" href="tel:' + esc(co.phone) + '">担当に電話する</a>'
+        : '<a class="tel" href="tel:050-1724-3179">代行なうに電話する</a>') +
+    '</div>';
+}
+
+async function poll(){
+  if (!orderId) return;
+  try {
+    var r = await fetch(SB + 'orders?id=eq.' + orderId + '&select=*', {headers:H});
+    var d = await r.json();
+    if (d && d[0]){
+      var o = d[0], co = null;
+      if (o.company_id){
+        var r2 = await fetch(SB + 'companies?id=eq.' + o.company_id + '&select=name,phone', {headers:H});
+        var d2 = await r2.json();
+        if (d2 && d2[0]) co = d2[0];
+      }
+      statusView(o, co);
+    }
+  } catch(e){}
+  setTimeout(poll, 6000);
+}
+
+formView();
+</script>
+</body>
+</html>
