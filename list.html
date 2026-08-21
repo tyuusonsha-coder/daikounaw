@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>福岡の運転代行一覧｜代行なう</title>
+<meta name="description" content="中洲・天神・博多エリアの運転代行業者を、空車状況と料金で比較できる一覧です。">
+<style>
+:root{
+  --bg:#0B1220; --surface:#142338; --surface-2:#1B2E48; --line:#22385A;
+  --text:#E8EEF7; --muted:#8FA3BF; --amber:#FFB020; --green:#2ECC71; --red:#FF5A5A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-feature-settings:"palt"; padding-bottom:env(safe-area-inset-bottom);
+}
+.bar{
+  border-bottom:1px solid var(--line);
+  padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+}
+.bar h1{font-size:19px;font-weight:800;margin:0}
+.bar p{font-size:12px;color:var(--muted);margin:4px 0 0;font-weight:600}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{
+  flex:1;background:none;border:0;border-bottom:2px solid transparent;
+  color:var(--muted);font-family:inherit;font-size:14px;font-weight:800;
+  padding:15px 8px;cursor:pointer;
+}
+.tabs button.on{color:var(--amber);border-bottom-color:var(--amber)}
+
+.list{padding:14px 12px 40px;display:flex;flex-direction:column;gap:14px}
+.co{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.head{
+  background:var(--surface-2);padding:14px 15px;display:flex;align-items:flex-start;gap:10px;
+  border-bottom:1px solid var(--line);
+}
+.head .nm{font-size:17px;font-weight:800;line-height:1.35}
+.head .sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
+.badge{
+  flex:none;font-size:10px;font-weight:800;padding:5px 8px;border-radius:6px;
+  background:rgba(255,176,32,.15);color:var(--amber);border:1px solid rgba(255,176,32,.35);
+}
+.free{
+  margin-left:auto;flex:none;text-align:right;font-size:13px;font-weight:800;line-height:1.4;
+}
+.free.yes{color:var(--green)} .free.no{color:var(--muted)}
+.free span{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-top:2px}
+.body{padding:14px 15px 15px}
+.areas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}
+.areas span{
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--muted);
+}
+.rowline{display:flex;gap:10px;font-size:13px;font-weight:700;padding:8px 0;border-top:1px solid var(--line);line-height:1.6}
+.rowline b{flex:none;width:52px;color:var(--muted);font-size:11px;font-weight:800;padding-top:2px}
+.stars{color:var(--amber);font-size:13px;font-weight:800}
+.stars i{color:var(--muted);font-style:normal;font-weight:700;font-size:12px;margin-left:6px}
+.pays{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.pays span{font-size:11px;font-weight:700;padding:4px 8px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.acts{display:flex;gap:8px;margin-top:14px}
+.acts a{
+  flex:1;border-radius:12px;text-decoration:none;text-align:center;
+  font-size:15px;font-weight:800;padding:15px;display:block;
+}
+.acts .call{background:var(--green);color:#06210F}
+.acts .app{background:var(--amber);color:#241400}
+.empty{padding:70px 24px;text-align:center;color:var(--muted);font-size:14px;font-weight:700}
+.note{padding:0 16px 40px;font-size:11px;color:var(--muted);line-height:1.8;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>福岡の運転代行一覧</h1>
+  <p>中洲・天神・博多エリア｜代行なう</p>
+</div>
+<div class="tabs">
+  <button class="on" id="tRec">おすすめ順</button>
+  <button id="tFast">すぐくる順</button>
+</div>
+
+<div id="app"></div>
+<div class="note">空車状況は各業者が更新した時刻を表示しています。料金は目安のため、実際の請求額は走行距離により変動します。</div>
+
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK};
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+var cos=[], mode='rec';
+
+function ago(iso){
+  if (!iso) return '未更新';
+  var m=Math.floor((Date.now()-new Date(iso).getTime())/60000);
+  if (m<1) return '0分前更新';
+  if (m<60) return m+'分前更新';
+  var h=Math.floor(m/60);
+  return h<24 ? h+'時間前更新' : '24時間以上前';
+}
+function starStr(avg,cnt){
+  if (!cnt) return '<span class="stars">評価はまだありません</span>';
+  var n=Math.round(avg);
+  return '<span class="stars">'+'★'.repeat(n)+'☆'.repeat(5-n)+
+    ' '+Number(avg).toFixed(1)+'<i>'+cnt+'件</i></span>';
+}
+
+function render(){
+  var arr=cos.slice();
+  if (mode==='fast'){
+    arr.sort(function(a,b){
+      var af=(a.is_open?1:0)*10+(a.free_cars||0), bf=(b.is_open?1:0)*10+(b.free_cars||0);
+      if (bf!==af) return bf-af;
+      return new Date(b.status_updated_at||0)-new Date(a.status_updated_at||0);
+    });
+  } else {
+    arr.sort(function(a,b){
+      if ((b.sort_weight||0)!==(a.sort_weight||0)) return (b.sort_weight||0)-(a.sort_weight||0);
+      return (b.rating_avg||0)-(a.rating_avg||0);
+    });
+  }
+  if (!arr.length){ $('app').innerHTML='<div class="empty">業者情報を読み込めませんでした</div>'; return; }
+
+  $('app').innerHTML='<div class="list">'+arr.map(function(c){
+    var open=!!c.is_open, free=c.free_cars||0;
+    return '<div class="co">'+
+      '<div class="head">'+
+        (c.certified!==false?'<div class="badge">認定</div>':'')+
+        '<div><div class="nm">'+esc(c.name)+'</div>'+
+          '<div class="sub">福岡市・春日市・那珂川市</div></div>'+
+        '<div class="free '+(open&&free>0?'yes':'no')+'">'+
+          (open&&free>0?'空車'+free+'台':(open?'受付中':'受付停止中'))+
+          '<span>'+ago(c.status_updated_at)+'</span></div>'+
+      '</div>'+
+      '<div class="body">'+
+        (c.areas&&c.areas.length
+          ? '<div class="areas">'+c.areas.map(function(a){return '<span>'+esc(a)+'</span>';}).join('')+'</div>'
+          : '')+
+        '<div class="rowline"><b>営業</b><span>'+esc(c.hours||'お問い合わせください')+'</span></div>'+
+        '<div class="rowline"><b>料金</b><span>'+esc(c.price_note||'お問い合わせください')+'</span></div>'+
+        '<div class="rowline"><b>評価</b>'+starStr(c.rating_avg,c.rating_count)+'</div>'+
+        (c.pay_methods&&c.pay_methods.length
+          ? '<div class="pays">'+c.pay_methods.map(function(p){return '<span>'+esc(p)+'</span>';}).join('')+'</div>'
+          : '')+
+        '<div class="acts">'+
+          (c.phone?'<a class="call" href="tel:'+esc(c.phone)+'">電話をかける</a>':'')+
+          (c.id==='daikounaw'?'<a class="app" href="yobu.html">アプリで呼ぶ</a>':'')+
+        '</div>'+
+      '</div></div>';
+  }).join('')+'</div>';
+}
+
+$('tRec').onclick=function(){ mode='rec'; this.className='on'; $('tFast').className=''; render(); };
+$('tFast').onclick=function(){ mode='fast'; this.className='on'; $('tRec').className=''; render(); };
+
+(async function(){
+  try{
+    var r=await fetch(SB+'companies?select=*',{headers:H});
+    cos=await r.json(); render();
+  }catch(e){ $('app').innerHTML='<div class="empty">業者情報を読み込めませんでした</div>'; }
+})();
+setInterval(async function(){
+  try{ var r=await fetch(SB+'companies?select=*',{headers:H}); cos=await r.json(); render(); }catch(e){}
+}, 30000);
+</script>
+</body>
+</html>
