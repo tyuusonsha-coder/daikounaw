@@ -128,9 +128,10 @@ function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkit
 function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=880;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.35);o.start(t);o.stop(t+0.37);})(i*0.45);}}catch(e){}}
 document.addEventListener("click",unlockAudio);
 
-var PER_KM=400;
+var BASE_FARE=1900;
+var PER_KM=450;
 function yen(n){return "¥"+Number(n).toLocaleString("ja-JP")}
-function calcPrice(d){return d<=10?4000:d*PER_KM;}
+function calcPrice(d){return BASE_FARE+Math.ceil(d)*PER_KM;}
 
 
 var km=document.getElementById("km");
@@ -139,7 +140,7 @@ function updPrice(){
     document.getElementById("kmv").textContent=d+"km";
     var p=calcPrice(d);
     document.getElementById("price").textContent=yen(p);
-    document.getElementById("bd").textContent = d<=10 ? "10km以下 一律 "+yen(4000) : "¥"+PER_KM+" × "+d+"km = "+yen(p);
+    document.getElementById("bd").textContent = "初乗り"+yen(BASE_FARE)+" ＋ ¥"+PER_KM+" × "+Math.ceil(d)+"km";
 
 }
 km.addEventListener("input",updPrice);

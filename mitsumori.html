@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>料金の目安｜代行なう運転代行(福岡市)</title>
-<meta name="description" content="福岡市の運転代行「代行なう」の料金目安。初乗り無し、追加料金は1kmごとに400円。距離を入力するだけで概算金額がすぐわかります。">
+<meta name="description" content="福岡市の運転代行「代行なう」の料金目安。初乗り1,900円、以降1kmごとに450円。距離を入力するだけで概算金額がすぐわかります。">
 <link rel="canonical" href="https://daikounaw.com/mitsumori.html">
 <style>
   :root{
@@ -87,9 +87,9 @@
 
       <div class="price">
         <div class="cap">料金の目安</div>
-        <div class="amt" id="price">¥400</div>
+        <div class="amt" id="price">¥2,350</div>
       </div>
-      <div class="breakdown" id="bd">¥400 × 距離</div>
+      <div class="breakdown" id="bd">初乗り¥1,900 ＋ ¥450 × 距離</div>
 
       <div class="note">
         ⚠ あくまで目安です。実際の距離・経路、高速代や待機などで料金が変わる場合があります。正確な料金は配車時にお伝えします。
@@ -103,7 +103,8 @@
   </div>
 
 <script>
-  var PER_KM = 400;    // 1kmあたり
+  var BASE_FARE = 1900;
+  var PER_KM = 450;    // 1kmあたり
 
   var km = document.getElementById('km');
   var kmv = document.getElementById('kmv');
@@ -115,9 +116,9 @@
   function calc(){
     var d = parseInt(km.value, 10);
     kmv.innerHTML = d + '<small>km</small>';
-    var total = d * PER_KM;
+    var total = BASE_FARE + Math.ceil(d) * PER_KM;
     price.textContent = yen(total);
-    bd.textContent = '¥' + PER_KM + ' × ' + d + 'km = ' + yen(total);
+    bd.textContent = '初乗り' + yen(BASE_FARE) + ' ＋ ¥' + PER_KM + ' × ' + Math.ceil(d) + 'km';
   }
   km.addEventListener('input', calc);
   calc();
