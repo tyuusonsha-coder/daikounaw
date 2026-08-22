@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>運転代行を呼ぶ｜代行なう</title>
+<title>運転代行を呼ぶ｜代行なうアプリ</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
@@ -259,7 +259,8 @@ function viewForm(){
       '<div class="pt b"><span class="tag">到着</span><span class="txt">'+esc(bName)+'</span></div>' +
     '</div>' +
     '<div class="fare"><div class="yen">'+yen(price)+'<small>円</small></div>' +
-      '<div class="d">約'+dist.toFixed(1)+'km の概算料金<br>初乗り1,900円／1kmごと450円</div></div>' +
+      '<div class="d">約'+dist.toFixed(1)+'km の概算料金<br>初乗り1,900円／1kmごと450円' +
+        (prefId && prefId!=='daikounaw' ? '<br>※料金は業者により異なります' : '') + '</div></div>' +
     (prefName ? '<div class="pref">'+esc(prefName)+' を指名しています<span>90秒間この業者が優先して受注します</span></div>' : '') +
     '<input id="cphone" type="tel" inputmode="tel" placeholder="電話番号（必須）" autocomplete="tel">' +
     '<input id="cname" placeholder="お名前" autocomplete="name">' +

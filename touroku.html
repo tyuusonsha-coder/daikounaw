@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>運転代行業者の掲載申込｜代行なうアプリ</title>
+<meta name="description" content="代行なうアプリへの掲載は無料です。空車アピールと配車依頼の受注ができます。">
+<meta name="theme-color" content="#0B1220">
+<style>
+:root{
+  --bg:#0B1220; --surface:#142338; --surface-2:#1B2E48; --line:#22385A;
+  --text:#E8EEF7; --muted:#8FA3BF; --amber:#FFB020; --green:#2ECC71; --red:#FF5A5A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-feature-settings:"palt"; padding-bottom:env(safe-area-inset-bottom);
+}
+.bar{border-bottom:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top)) 18px 16px}
+.bar h1{font-size:19px;font-weight:800;margin:0}
+.bar p{font-size:12px;color:var(--muted);margin:5px 0 0;font-weight:700}
+.wrap{padding:20px 16px 56px;max-width:560px;margin:0 auto}
+
+.pts{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 16px;margin-bottom:24px}
+.pt{display:flex;gap:12px;padding:14px 0;align-items:flex-start}
+.pt + .pt{border-top:1px solid var(--line)}
+.pt .n{flex:none;width:20px;font-size:10.5px;font-weight:800;color:var(--amber);letter-spacing:.1em;padding-top:3px}
+.pt .t{font-size:14.5px;font-weight:800;line-height:1.5}
+.pt .d{font-size:12px;color:var(--muted);font-weight:600;line-height:1.7;margin-top:3px}
+
+label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0 7px;letter-spacing:.04em}
+label i{color:var(--amber);font-style:normal;margin-left:5px}
+input,textarea{
+  width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);
+  border-radius:12px;padding:15px;font-size:16px;font-family:inherit;font-weight:600;margin-bottom:16px;
+}
+textarea{min-height:88px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{outline:none;border-color:var(--amber)}
+input::placeholder,textarea::placeholder{color:#59708F}
+
+.btn{width:100%;border:0;border-radius:14px;background:var(--amber);color:#241400;
+  font-family:inherit;font-size:17px;font-weight:800;padding:18px;cursor:pointer}
+.btn:disabled{background:var(--surface-2);color:var(--muted)}
+.err{color:var(--red);font-size:13px;font-weight:700;margin-top:12px;text-align:center}
+.legal{margin-top:18px;font-size:11px;color:var(--muted);opacity:.65;line-height:1.85;font-weight:600}
+.done{padding:70px 24px;text-align:center}
+.done h2{font-size:20px;font-weight:800;margin:0 0 12px}
+.done p{font-size:14px;color:var(--muted);font-weight:700;line-height:1.9;margin:0}
+.back{display:inline-block;margin-top:26px;color:var(--muted);font-size:13px;font-weight:800;text-decoration:none;
+  border:1px solid var(--line);border-radius:12px;padding:13px 22px}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1>運転代行業者の掲載申込</h1>
+  <p>代行なうアプリ｜掲載・受注ともに無料です</p>
+</div>
+
+<div class="wrap" id="app">
+  <div class="pts">
+    <div class="pt"><div class="n">01</div><div>
+      <div class="t">掲載も受注も無料</div>
+      <div class="d">月額費用や送客手数料はいただきません。まずは掲載枠を持つところから始められます。</div></div></div>
+    <div class="pt"><div class="n">02</div><div>
+      <div class="t">空車アピールで上位表示</div>
+      <div class="d">台数を選んでボタンを押すと15分間「すぐ来る順」の先頭に出ます。手が空いた時だけ押せば十分です。</div></div></div>
+    <div class="pt"><div class="n">03</div><div>
+      <div class="t">配車依頼を早い者勝ちで受注</div>
+      <div class="d">お客様の依頼が掲示板に流れます。取れる時だけ取る形なので、無理な稼働は発生しません。</div></div></div>
+  </div>
+
+  <label>会社名・屋号<i>必須</i></label>
+  <input id="name" placeholder="例：〇〇運転代行">
+
+  <label>ご担当者名</label>
+  <input id="rep" placeholder="例：田中">
+
+  <label>電話番号<i>必須</i></label>
+  <input id="phone" type="tel" inputmode="tel" placeholder="09012345678">
+
+  <label>メールアドレス</label>
+  <input id="email" type="email" inputmode="email" placeholder="info@example.com">
+
+  <label>対応エリア</label>
+  <input id="areas" placeholder="例：中洲、天神、博多駅、大橋">
+
+  <label>営業時間・定休日</label>
+  <input id="hours" placeholder="例：20:00〜翌3:00 木曜定休">
+
+  <label>料金体系</label>
+  <input id="price" placeholder="例：初乗り2kmまで1,800円 以降1kmごと250円">
+
+  <label>ご質問・ご要望</label>
+  <textarea id="note" placeholder="ご不明な点があればお書きください"></textarea>
+
+  <button class="btn" id="go">この内容で申し込む</button>
+  <div class="err" id="err"></div>
+  <div class="legal">お預かりした情報は掲載準備のご連絡にのみ使用します。ご記入後、担当より営業時間内にご連絡いたします。<br>
+    運営：合同会社中尊社（福岡県那珂川市）</div>
+</div>
+
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+var $=function(id){return document.getElementById(id);};
+
+$('go').onclick=async function(){
+  var name=$('name').value.trim(), phone=$('phone').value.trim();
+  if (!name){ $('err').textContent='会社名・屋号を入力してください'; return; }
+  if (phone.replace(/[^0-9]/g,'').length<10){ $('err').textContent='電話番号を正しく入力してください'; return; }
+  this.disabled=true; this.textContent='送信しています…'; $('err').textContent='';
+  try{
+    var r=await fetch(SB+'company_applications',{method:'POST',headers:H,body:JSON.stringify({
+      name:name, rep:$('rep').value.trim(), phone:phone, email:$('email').value.trim(),
+      areas:$('areas').value.trim(), hours:$('hours').value.trim(),
+      price_note:$('price').value.trim(), note:$('note').value.trim()
+    })});
+    if (!r.ok) throw new Error();
+    $('app').innerHTML='<div class="done"><h2>お申し込みを受け付けました</h2>'+
+      '<p>担当より折り返しご連絡いたします。<br>お急ぎの場合は 050-1724-3179 までお電話ください。</p>'+
+      '<a class="back" href="app.html">トップに戻る</a></div>';
+  }catch(e){
+    this.disabled=false; this.textContent='この内容で申し込む';
+    $('err').textContent='送信できませんでした。050-1724-3179 でも受け付けています';
+  }
+};
+</script>
+</body>
+</html>
