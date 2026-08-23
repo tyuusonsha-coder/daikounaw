@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>代行なう運転代行｜福岡市・春日市・那珂川市の運転代行</title>
-<meta name="description" content="福岡市・春日市・那珂川市の運転代行なら代行なう運転代行。中洲・天神・博多エリア対応。3kmまで1,800円、以降1kmごと250円。地図から呼べます。">
+<title>代行なう｜福岡市・春日市・那珂川市の運転代行</title>
+<meta name="description" content="福岡市・春日市・那珂川市の運転代行なら代行なう。中洲・天神・博多エリア対応。初乗り1,900円、以降1kmごと450円。地図から呼べます。">
 <meta name="theme-color" content="#0B1220">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta property="og:site_name" content="代行なう運転代行">
-<meta property="og:title" content="代行なう運転代行｜福岡市・春日市・那珂川市">
-<meta property="og:description" content="中洲・天神・博多の運転代行。3kmまで1,800円、以降1kmごと250円。">
+<meta property="og:site_name" content="代行なう">
+<meta property="og:title" content="代行なう｜福岡市・春日市・那珂川市">
+<meta property="og:description" content="中洲・天神・博多の運転代行。初乗り1,900円、以降1kmごと450円。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://dnud.jp/">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -123,7 +123,7 @@ body{
 </head>
 <body>
 
-<h1 class="sr">代行なう運転代行｜福岡市・春日市・那珂川市・大野城市の運転代行。中洲・天神・博多エリア対応</h1>
+<h1 class="sr">代行なう｜福岡市・春日市・那珂川市・大野城市の運転代行。中洲・天神・博多エリア対応</h1>
 
 <div id="map"></div>
 
@@ -143,7 +143,7 @@ body{
   <div class="hd">
     <div class="l">
       <div class="t" id="hT">お迎えにあがります</div>
-      <div class="s" id="hS">代行なう運転代行</div>
+      <div class="s" id="hS">代行なう</div>
     </div>
     <div class="r" id="hR"></div>
   </div>
@@ -228,7 +228,7 @@ async function load(){
 
     $('hT').innerHTML = live ? '<em>すぐ行けます</em>'
       : (c.is_open ? 'お迎えにあがります' : '本日の受付は終了しました');
-    $('hS').textContent = c.hours ? '営業 '+c.hours : '代行なう運転代行';
+    $('hS').textContent = c.hours ? '営業 '+c.hours : '代行なう';
 
     if (c.rating_count){
       $('hR').innerHTML='<b>★'+Number(c.rating_avg).toFixed(1)+'</b><span>'+c.rating_count+'件の評価</span>';

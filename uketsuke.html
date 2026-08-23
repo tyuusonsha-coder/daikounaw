@@ -82,7 +82,7 @@ var el=document.getElementById("open"),html="";
 open.forEach(function(o){
 html+='<div class="card hot"><span class="badge s-new">受付中</span>'
 +'<div class="route">'+h(o.pickup)+' → '+h(o.dropoff)+'</div>'
-+'<div class="meta">約'+h(o.km)+'km ・ <span class="price">'+yen(o.price)+'</span>（1km400円換算）</div>'
++'<div class="meta">約'+h(o.km)+'km ・ <span class="price">'+yen(o.price)+'</span>（初乗り1,900円＋1kmごと450円）</div>'
 +'<div class="meta">🕐 '+when(o.created_at)+' 受付</div>'
 +(CO&&PH?'<button class="btn b-take" onclick="take(\''+o.id+'\')">⚡ この依頼を受注する</button>':'<div class="meta">↑会社名を登録すると受注できます</div>')
 +'</div>';

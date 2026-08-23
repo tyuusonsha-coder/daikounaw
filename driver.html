@@ -316,7 +316,7 @@ function showReceipt(id){
   var dt=new Date(o.created_at);
   var ds=dt.getFullYear()+"年"+(dt.getMonth()+1)+"月"+dt.getDate()+"日";
   document.getElementById("rcvBody").innerHTML=
-    "<h2>領収書</h2><div class='rsub'>代行なう運転代行</div>"+
+    "<h2>領収書</h2><div class='rsub'>代行なう</div>"+
     "<table>"+
     "<tr><td>発行日</td><td>"+ds+"</td></tr>"+
     "<tr><td>お名前</td><td>"+esc(o.cname||"")+" 様</td></tr>"+
@@ -325,7 +325,7 @@ function showReceipt(id){
     "</table>"+
     "<div class='ramt'>"+yen(o.price)+"</div>"+
     "<table><tr><td>但し</td><td>運転代行料金として</td></tr></table>"+
-    "<div class='stamp'>合同会社中尊社 ／ 代行なう運転代行<br>TEL 050-1724-3179</div>";
+    "<div class='stamp'>合同会社中尊社 ／ 代行なう<br>TEL 050-1724-3179</div>";
   document.getElementById("receiptOverlay").classList.remove("hidden");
 }
 function closeReceipt(){document.getElementById("receiptOverlay").classList.add("hidden")}
