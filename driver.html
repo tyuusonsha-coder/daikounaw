@@ -60,70 +60,12 @@
   .gpson{color:var(--green)}.gpsoff{color:var(--red)}
   .leaflet-container{background:#0a0f1c}
   .hidden{display:none}
+  #alertStopBtn{display:none;position:fixed;left:0;right:0;bottom:0;z-index:10000;width:100%;padding:26px 0 calc(26px + env(safe-area-inset-bottom));border:none;background:#d32f2f;color:#fff;font-size:26px;font-weight:800;letter-spacing:4px;font-family:inherit;cursor:pointer}
+  #alertStopBtn:active{background:#a52020}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
-<!-- 受注アラート停止ボタン -->
-<button id="alertStopBtn" onclick="stopLoudAlert()"
-  style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:9999;
-         width:100%;padding:28px 0;border:none;background:#d32f2f;color:#fff;
-         font-size:28px;font-weight:bold;letter-spacing:4px;">
-  ■ 停止
-</button>
-
-<script>
-let _ac, _alertTimer, _autoStopTimer, _alertNodes = [];
-
-function _initAudio(){
-  if(!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
-  if(_ac.state === 'suspended') _ac.resume();
-}
-document.addEventListener('touchstart', _initAudio);
-document.addEventListener('click', _initAudio);
-
-function _beep(){
-  var s = _ac.currentTime;
-  var osc = _ac.createOscillator();
-  var g = _ac.createGain();
-  osc.type = 'square';
-  osc.frequency.value = 2200;
-  g.gain.setValueAtTime(0, s);
-  g.gain.linearRampToValueAtTime(1.0, s + 0.02);
-  g.gain.setValueAtTime(1.0, s + 0.22);
-  g.gain.linearRampToValueAtTime(0, s + 0.26);
-  osc.connect(g); g.connect(_ac.destination);
-  osc.start(s); osc.stop(s + 0.3);
-  _alertNodes.push(osc);
-  osc.onended = function(){
-    var i = _alertNodes.indexOf(osc);
-    if(i > -1) _alertNodes.splice(i, 1);
-  };
-}
-
-// 受注時に呼ぶ。引数は自動停止までの秒数(省略時60秒)
-function playLoudAlert(maxSeconds){
-  maxSeconds = maxSeconds || 60;
-  _initAudio();
-  stopLoudAlert();
-  _beep();
-  _alertTimer = setInterval(_beep, 500);
-  _autoStopTimer = setTimeout(stopLoudAlert, maxSeconds * 1000);
-  var b = document.getElementById('alertStopBtn');
-  if(b) b.style.display = 'block';
-  if(navigator.vibrate) navigator.vibrate([400,200,400,200,400,200,400]);
-}
-
-function stopLoudAlert(){
-  clearInterval(_alertTimer); _alertTimer = null;
-  clearTimeout(_autoStopTimer); _autoStopTimer = null;
-  _alertNodes.forEach(function(o){ try{ o.stop(); }catch(e){} });
-  _alertNodes = [];
-  if(navigator.vibrate) navigator.vibrate(0);
-  var b = document.getElementById('alertStopBtn');
-  if(b) b.style.display = 'none';
-}
-</script>
 <body>
 <div class="wrap">
 
@@ -180,11 +122,54 @@ function tms(v){if(v==null)return 0;var n=Number(v);if(!isNaN(n)&&n>1000000000)r
 function ago(v){var t=tms(v);if(!t)return "";var s=Math.floor((Date.now()-t)/1000);if(s<0)s=0;return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
 function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function when(v){var a=ago(v),f=fmtDT(v);return f?(a?a+"（"+f+"）":f):""}
-var actx=null;
+
+/* ===== 受注アラート（大音量・停止ボタン・自動停止） ===== */
+var actx=null,_alertTimer=null,_autoStopTimer=null,_alertNodes=[];
 function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
-function beep(times){try{if(!actx)return;var n=times||1;for(var i=0;i<n;i++){(function(d){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type="sine";o.frequency.value=988;var t=actx.currentTime+d;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.4,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);o.start(t);o.stop(t+0.42);})(i*0.5);}}catch(e){}}
 document.addEventListener("click",unlockAudio);
 document.addEventListener("touchstart",unlockAudio);
+
+function _beep(){
+  try{
+    if(!actx)return;
+    var s=actx.currentTime;
+    var osc=actx.createOscillator(),g=actx.createGain();
+    osc.type="square";
+    osc.frequency.value=2200;
+    g.gain.setValueAtTime(0,s);
+    g.gain.linearRampToValueAtTime(1.0,s+0.02);
+    g.gain.setValueAtTime(1.0,s+0.22);
+    g.gain.linearRampToValueAtTime(0,s+0.26);
+    osc.connect(g);g.connect(actx.destination);
+    osc.start(s);osc.stop(s+0.3);
+    _alertNodes.push(osc);
+    osc.onended=function(){var i=_alertNodes.indexOf(osc);if(i>-1)_alertNodes.splice(i,1);};
+  }catch(e){}
+}
+
+// 受注時に呼ぶ。引数は自動停止までの秒数（省略時60秒）
+function playLoudAlert(maxSeconds){
+  maxSeconds=maxSeconds||60;
+  unlockAudio();
+  stopLoudAlert();
+  _beep();
+  _alertTimer=setInterval(_beep,500);
+  _autoStopTimer=setTimeout(stopLoudAlert,maxSeconds*1000);
+  var b=document.getElementById("alertStopBtn");
+  if(b)b.style.display="block";
+  try{if(navigator.vibrate)navigator.vibrate([400,200,400,200,400,200,400]);}catch(e){}
+}
+
+function stopLoudAlert(){
+  clearInterval(_alertTimer);_alertTimer=null;
+  clearTimeout(_autoStopTimer);_autoStopTimer=null;
+  _alertNodes.forEach(function(o){try{o.stop();}catch(e){}});
+  _alertNodes=[];
+  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+  var b=document.getElementById("alertStopBtn");
+  if(b)b.style.display="none";
+}
+
 var wl=null;
 async function keepAwake(){
   try{
@@ -199,11 +184,12 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)keep
 function bellTest(){
   unlockAudio();
   keepAwake();
-  setTimeout(function(){beep(2);},120);
+  setTimeout(function(){playLoudAlert(5);},120);
   setTimeout(function(){
     if(!actx||actx.state!=="running"){alert("音を出せませんでした。本体横の消音スイッチと音量を確認してください。");}
   },900);
 }
+
 var DNAME=localStorage.getItem("dn_driver")||"";
 var timer=null;
 var lastPendN=null;
@@ -235,7 +221,7 @@ async function refresh(){
   if(!dn||dn.length===0){dl.innerHTML="<div class='empty'>完了した案件はありません</div>"}
   else{dn.forEach(function(o){ordMap[o.id]=o});dl.innerHTML=dn.map(doneCard).join("")}
   var pn=pend?pend.length:0;
-  if(lastPendN!==null && pn>lastPendN){ beep(3); }
+  if(lastPendN!==null && pn>lastPendN){ playLoudAlert(60); }
   lastPendN=pn;
 }
 
@@ -283,6 +269,7 @@ async function undoDone(id){
 function esc(s){return String(s==null?"":s).replace(/[&<>\"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 
 async function accept(id){
+  stopLoudAlert();
   await sbPatch("orders",id,{status:"accepted",driver:DNAME,updated_at:new Date().toISOString()});
   refresh();
 }
@@ -349,5 +336,9 @@ function updateMapForMine(mine){
 
 boot();
 </script>
+
+<!-- 受注アラート停止ボタン -->
+<button id="alertStopBtn" onclick="stopLoudAlert()">■ 停止</button>
+
 </body>
 </html>
