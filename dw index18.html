@@ -1,0 +1,467 @@
+
+<!DOCTYPE html><html lang="ja"><head>
+<p style="margin:20px 0">
+  <a href="app.html">地図から代行を呼ぶ（新機能）</a>
+</p>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#060609"/>
+<title>代行なう/福岡の運転代行</title>
+<meta name="description" content="福岡市の運転代行なら代行なう運転代行。初乗り1,900円、以降1kmごと450円の明朗会計。福岡市・那珂川市・春日市・大野城市に対応。営業21時〜翌6時、金土は翌7時まで（木・日定休）。ご依頼は050-1724-3179。"/>
+<link rel="canonical" href="https://daikounaw.com/"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"代行なう","alternateName":"代行なうアプリ","url":"https://daikounaw.com/"}</script>
+<link rel="icon" type="image/png" href="/icon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="代行なう"/>
+<meta property="og:image" content="https://daikounaw.com/icon.png"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://daikounaw.com/"/>
+<meta property="og:site_name" content="代行なう"/>
+<meta property="og:title" content="代行なう/福岡の運転代行"/>
+<meta property="og:description" content="福岡市の運転代行なら代行なう運転代行。初乗り1,900円、以降1kmごと450円。ご依頼は050-1724-3179。"/>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://daikounaw.com/#business","name":"代行なう運転代行","alternateName":"代行なう","sameAs":["https://daikonavi.com/fukuoka/c001964/","https://dnud.jp/","https://tyuusonsha.jp/","https://share.google/mAe4VgEGy8dEHTJmN"],"image":"https://daikounaw.com/icon.png","url":"https://daikounaw.com/","telephone":"050-1724-3179","priceRange":"¥¥","address":{"@type":"PostalAddress","addressRegion":"福岡県","addressLocality":"福岡市","addressCountry":"JP"},"areaServed":["福岡市","那珂川市","春日市","大野城市","太宰府市"],"openingHours":["Mo,Tu,We 21:00-06:00","Fr,Sa 21:00-07:00"],"description":"福岡市の運転代行。初乗り1,900円、以降1kmごと450円。"}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:#0e0e13;padding:8px 16px;border-bottom:1px solid #1c1c24;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:900;font-size:18px;cursor:pointer}.logo span{color:#FF6B00}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,9,.97);border-top:1px solid #1c1c24;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:13px 0 16px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:#444;font-family:inherit}
+.nav button.on{color:#FF6B00}
+.nav button .ico{font-size:26px;line-height:1}
+#ctabar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);width:100%;max-width:480px;display:flex;gap:8px;padding:0 12px;z-index:98;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+#ctabar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+#ctabar a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 0;border-radius:999px;text-decoration:none;font-weight:900;font-size:16px;white-space:nowrap}
+.cta-tel{background:linear-gradient(135deg,#ff4d4d,#c81e1e);color:#fff;box-shadow:0 8px 26px rgba(255,77,77,.45)}
+.cta-go{background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;box-shadow:0 8px 26px rgba(0,229,255,.45)}
+.vs{padding:14px 16px 10px;background:linear-gradient(160deg,rgba(170,85,255,.12),rgba(255,107,0,.08),#060609);border-bottom:1px solid rgba(170,85,255,.2)}
+.vs .row{display:flex;align-items:center;margin-bottom:6px}
+.vs .side{flex:1;text-align:center}.vs .num{font-size:30px;font-weight:900}.vs .lbl{font-size:12px;font-weight:900}
+.vs .mid{font-size:28px;font-weight:900;color:#AA55FF;padding:0 10px}
+.blue{color:#4A90FF}.org{color:#FF6B00}
+.filters{display:flex;border-bottom:1px solid #1c1c24;position:sticky;top:46px;z-index:40;background:#0e0e13}
+.filters button{flex:1;padding:9px 0;border:none;border-bottom:2px solid transparent;background:transparent;color:#444;font-size:12px;cursor:pointer;font-family:inherit}
+.filters button.on{color:#efefef;border-bottom-color:#FF6B00;font-weight:700}
+.post{padding:14px 16px;border-bottom:1px solid #1c1c24}
+.post .av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.av-c{background:linear-gradient(135deg,#2979FF,#1565C0)}.av-d{background:linear-gradient(135deg,#FF6B00,#FF3D00)}
+.tag{font-size:12px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.tag-c{background:rgba(74,144,255,.08);color:#4A90FF;border:1px solid rgba(74,144,255,.2)}
+.tag-d{background:rgba(255,107,0,.08);color:#FF6B00;border:1px solid rgba(255,107,0,.2)}
+.hot{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:700;background:rgba(255,71,87,.08);color:#FF4757;border:1px solid rgba(255,71,87,.2);display:inline-block;margin-left:6px}
+.rxn{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.rxn button{display:flex;align-items:center;gap:3px;padding:4px 10px;background:transparent;border:1px solid #24242e;border-radius:20px;font-size:12px;color:#444;cursor:pointer;font-family:inherit}
+.rxn button.on{border-color:rgba(255,107,0,.3);color:#FF6B00;font-weight:700;background:rgba(255,107,0,.06)}
+.fab{position:fixed;bottom:72px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FF6B00,#FF3D00);border:none;color:#000;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);z-index:90;display:flex;align-items:center;justify-content:center}
+.card{margin:8px 16px;background:#0c0c10;border-radius:16px;padding:14px;border:1px solid #24242e}
+.card.feat{border-color:rgba(255,107,0,.3);background:linear-gradient(135deg,rgba(255,107,0,.08),#0c0c10)}
+.btn-call{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:linear-gradient(135deg,#00D26A,#00a050);color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.btn-line{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;background:#06C755;color:#fff;border-radius:12px;font-weight:900;font-size:13px;text-decoration:none}
+.empty{text-align:center;padding:50px 20px;color:#444}
+.compose{padding:12px 16px;border-bottom:1px solid #1c1c24;background:#131318}
+.compose textarea{width:100%;background:#0c0c10;border:1px solid #24242e;border-radius:14px;padding:12px 14px;color:#efefef;font-size:15px;outline:none;resize:none;font-family:inherit}
+.compose .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
+.compose .acts button{padding:8px 18px;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+input[type=text],input[type=number],input[type=tel],select{width:100%;background:#131318;border:1px solid #24242e;border-radius:12px;padding:10px 14px;color:#efefef;font-size:14px;outline:none;font-family:inherit;margin-bottom:8px}
+.reply-box{display:flex;gap:6px;margin-top:8px}
+.reply-box input{flex:1;background:#0c0c10;border:1px solid #24242e;border-radius:10px;padding:8px 12px;color:#efefef;font-size:13px;outline:none;font-family:inherit}
+.reply-box button{padding:8px 14px;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+.reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
+.reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
+</style>
+</head><body>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">代行なう｜福岡市・那珂川市・春日市・大野城市の運転代行</h1>
+<div id="app"></div>
+<script>
+var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+var uid=lsGet("dn_uid");if(!uid){uid=Math.random().toString(36).slice(2,10);lsSet("dn_uid",uid);}
+var role=lsGet("dn_role");
+var scr="home",posts=[],replies={},companies=[],filter="new",composing=false,compTxt="",replyId=null,replyTxt="";
+var news=[];
+var newsOpen=false,newsTxt="";
+var bbsName="";try{bbsName=localStorage.getItem("dn_name")||""}catch(e){}
+var regOpen=false,km="";
+
+function h(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function tms(v){if(v==null)return 0;var n=Number(v);if(!isNaN(n)&&n>1000000000)return n;var d=new Date(v).getTime();return isNaN(d)?0:d}
+function ago(v){var t=tms(v);if(!t)return "";var s=Math.floor((Date.now()-t)/1000);if(s<0)s=0;return s<60?"たった今":s<3600?Math.floor(s/60)+"分前":s<86400?Math.floor(s/3600)+"時間前":Math.floor(s/86400)+"日前"}
+function when(v){var a=ago(v),f=fmtDT(v);return f?(a?a+"（"+f+"）":f):""}
+function yen(n){return "¥"+Number(n).toLocaleString()}
+function fmtDate(ts){var d=new Date(Number(ts));return d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)}
+function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
+function val(id){var e=document.getElementById(id);return e?e.value:""}
+
+async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
+async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
+async function sbPatch(t,id,d){try{await fetch(SB+t+"?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(d)})}catch(e){}}
+async function sbDel(t,id){try{await fetch(SB+t+"?id=eq."+id,{method:"DELETE",headers:H})}catch(e){}}
+
+async function loadPosts(silent){
+var p=await sbGet("posts","order=created_at.desc");
+var r=await sbGet("replies","order=created_at.asc");
+posts=Array.isArray(p)?p:[];
+replies={};
+if(Array.isArray(r))r.forEach(function(x){if(!replies[x.post_id])replies[x.post_id]=[];replies[x.post_id].push(x)});
+if(silent&&(composing||newsOpen||replyId!=null||regOpen||scr==="company"))return;
+render();
+}
+async function loadCo(){companies=await sbGet("companies","order=featured.desc,created_at.asc");if(!Array.isArray(companies))companies=[];render();}
+async function loadNews(){news=await sbGet("news","order=created_at.desc&limit=30");if(!Array.isArray(news))news=[];render();}
+function toggleNews(){newsOpen=!newsOpen;render();}
+function newsWrite(){
+var e=document.getElementById("ntxt");
+var body=e?e.value.trim():"";
+var nm=document.getElementById("nname");
+bbsName=nm?nm.value.trim():"";
+try{localStorage.setItem("dn_name",bbsName)}catch(x){}
+if(!body){alert("本文を入力してください");return;}
+newsTxt=body;
+submitNews((bbsName?"【"+bbsName+"】":"【名無し】")+"\n"+body);
+}
+async function nTry(d){try{var r=await fetch(SB+"news",{method:"POST",headers:H,body:JSON.stringify(d)});return r.status>=200&&r.status<300}catch(x){return false}}
+async function submitNews(body){
+var nid="n"+Date.now()+Math.random().toString(36).slice(2,5);
+var ok=await nTry({body:body,created_at:Date.now()});
+if(!ok)ok=await nTry({body:body});
+if(!ok)ok=await nTry({id:nid,body:body,created_at:Date.now()});
+if(!ok)ok=await nTry({id:nid,body:body});
+if(!ok){alert("投稿できませんでした。少し時間をおいて、もう一度お試しください。");return;}
+newsTxt="";newsOpen=false;loadNews();
+}
+
+function pickRole(r){role=r;lsSet("dn_role",r);render();}
+function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function bbsWrite(){
+bbsName=document.getElementById("bname").value.trim();
+try{localStorage.setItem("dn_name",bbsName)}catch(e){}
+role=document.getElementById("brole").value;lsSet("dn_role",role);
+compTxt=document.getElementById("ctxt").value;
+if(!compTxt.trim()){alert("本文を入力してください");return;}
+submitPost();
+}
+
+async function submitPost(){
+if(!compTxt.trim())return;
+await sbPost("posts",{id:"p"+Date.now()+Math.random().toString(36).slice(2,5),role:role,uid:uid,name:bbsName,text:compTxt.trim(),reactions:{},reacted_by:{},created_at:Date.now()});
+compTxt="";composing=false;loadPosts();
+}
+async function doReact(pid,key){
+var p=posts.find(function(x){return x.id===pid});if(!p)return;
+var rb=Object.assign({},p.reacted_by||{});var rs=Object.assign({},p.reactions||{});
+var prev=rb[uid];
+if(prev===key){delete rb[uid];rs[key]=Math.max(0,(rs[key]||1)-1)}
+else{if(prev)rs[prev]=Math.max(0,(rs[prev]||1)-1);rb[uid]=key;rs[key]=(rs[key]||0)+1}
+await sbPatch("posts",pid,{reactions:rs,reacted_by:rb});loadPosts();
+}
+async function doReply(pid){
+if(!replyTxt.trim())return;
+await sbPost("replies",{id:"r"+Date.now()+Math.random().toString(36).slice(2,5),post_id:pid,role:role,uid:uid,name:bbsName,text:replyTxt.trim(),created_at:Date.now()});
+replyTxt="";replyId=null;loadPosts();
+}
+async function delPost(pid){await sbDel("posts",pid);loadPosts();}
+
+async function submitCompany(){
+var name=val("r_name").trim();
+var pref=val("r_pref").trim();
+var phone=val("r_phone").trim();
+var base=parseInt(val("r_base"),10);
+var perkm=parseInt(val("r_km"),10);
+if(!name||!pref||!phone||isNaN(base)||isNaN(perkm)){alert("店名・都道府県・初乗り・1km・電話番号は必須です");return;}
+var d={
+id:"c"+Date.now()+Math.random().toString(36).slice(2,5),
+name:name,pref:pref,area:val("r_area").trim(),hours:val("r_hours").trim(),
+base_fare:base,per_km:perkm,phone:phone,line:val("r_line").trim(),
+campaign:val("r_campaign").trim(),featured:false,created_at:Date.now()
+};
+var res=await sbPost("companies",d);
+if(Array.isArray(res)&&res.length){
+alert("登録しました！一覧に掲載されました。");
+regOpen=false;loadCo();
+}else{
+alert("登録に失敗しました。通信状況を確認して、もう一度お試しください。");
+}
+}
+
+function share(p){
+var rc=p.role==="customer"?"🍺お客":"🚘運転手";
+var t=rc+"「"+p.text.slice(0,60)+"」\n\n⚔️ お客 vs 運転手 バトル中！\n#代行なう\nhttps://daikounaw.com";
+if(navigator.share)navigator.share({text:t}).catch(function(){});
+else window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t),"_blank");
+}
+
+function render(){
+var app=document.getElementById("app");if(!app)return;
+var out='<div class="hdr"><div class="logo" onclick="scr=\'home\';render()"><img src="logo.png" alt="代行なう" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:7px">代行<span>なう</span></div><div style="font-size:10px;color:#888">福岡の運転代行</div></div>';
+out+='<div id="scrollbox" style="flex:1;overflow-y:auto;padding-bottom:150px">';
+if(scr==="battle")out+=renderBattle();
+else if(scr==="company")out+=renderCompany();
+else out+=renderHome();
+out+='</div>';
+out+='<div class="nav">';
+out+='<button class="'+(scr==="home"?"on":"")+'" onclick="scr=\'home\';render()"><span class="ico">🏠</span>ホーム</button>';
+out+='<button class="'+(scr==="battle"?"on":"")+'" onclick="scr=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
+out+='<button onclick="location.href=\'pachi.html\'" style="color:#ffd23f"><span class="ico">🎰</span>パチンコ</button>';
+out+='<button onclick="location.href=\'disri.html\'"><span class="ico">☎️</span><span style="background:linear-gradient(90deg,#ff5cc8,#ffd54a,#00ffe0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">テレクラ</span></button>';
+out+='</div>';
+app.innerHTML=out;
+}
+
+function renderBattle(){
+var o='<div style="padding:14px 16px 4px"><div style="font-size:16px;font-weight:900">⚔️ お客 vs 運転手 掲示板</div><div style="font-size:11px;color:#888;margin-top:3px">匿名OK・名前は省略可｜全'+posts.length+'件</div></div>';
+o+='<div class="compose" style="display:block">';
+o+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+o+='<input id="bname" placeholder="名前（省略可）" value="'+h(bbsName)+'" style="flex:1;min-width:0;background:#131318;border:1px solid #24242e;border-radius:10px;color:#efefef;padding:10px;font-size:14px;font-family:inherit;-webkit-appearance:none">';
+o+='<select id="brole" style="background:#131318;border:1px solid #24242e;border-radius:10px;color:#efefef;padding:10px;font-size:14px;font-family:inherit">';
+o+='<option value="customer"'+(role!=="driver"?" selected":"")+'>🍺 お客</option><option value="driver"'+(role==="driver"?" selected":"")+'>🚘 運転手</option>';
+o+='</select></div>';
+o+='<textarea rows="3" id="ctxt" placeholder="本文を入力…">'+h(compTxt)+'</textarea>';
+o+='<div class="acts"><button onclick="bbsWrite()" style="background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;flex:1">✏️ 書き込む</button></div></div>';
+o+='<div class="filters">';
+["new:🆕 新着","hot:🔥 注目","customer:🍺 お客","driver:🚘 運転手"].forEach(function(f){var p=f.split(":");o+='<button class="'+(filter===p[0]?"on":"")+'" onclick="filter=\''+p[0]+'\';render()">'+p[1]+'</button>'});
+o+='</div>';
+var byTime=posts.slice().sort(function(a,b){return a.created_at-b.created_at});
+var noMap={};byTime.forEach(function(p,i){noMap[p.id]=i+1});
+var sorted=posts.slice().sort(function(a,b){return b.created_at-a.created_at});
+if(filter==="hot")sorted.sort(function(a,b){return totalR(b)-totalR(a)});
+else if(filter==="customer")sorted=sorted.filter(function(p){return p.role==="customer"});
+else if(filter==="driver")sorted=sorted.filter(function(p){return p.role==="driver"});
+if(!sorted.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">⚔️</div><div style="font-size:16px;font-weight:900;margin-bottom:6px">まだ書き込みがありません</div><div>最初の1件を書き込もう✏️</div></div>';
+sorted.forEach(function(p){
+var isC=p.role==="customer";var isMe=p.uid===uid;var hot=totalR(p)>=3;
+var reps=replies[p.id]||[];var myR=(p.reacted_by||{})[uid];
+o+='<div class="post">';
+o+='<div style="font-size:12px;color:#777;margin-bottom:6px;line-height:1.5"><span style="color:#00e5ff;font-weight:900">No.'+noMap[p.id]+'</span>　<b style="color:'+(isC?"#4A90FF":"#FF6B00")+'">'+h(p.name||"名無しさん")+'</b>【'+(isC?"🍺お客":"🚘運転手")+'】'+(hot?' <span class="hot">🔥炎上</span>':'')+(isMe?' <span style="color:#444">あなた</span>':'')+'<span style="float:right;color:#666">'+when(p.created_at)+'</span></div>';
+o+='<div style="font-size:15px;color:#ddd;line-height:1.75;margin-bottom:8px;word-break:break-word">'+h(p.text)+'</div>';
+if(reps.length){
+o+='<div style="margin-bottom:8px;margin-left:4px;border-left:2px solid #24242e;padding-left:10px">';
+reps.forEach(function(r,ri){o+='<div style="margin-bottom:5px;font-size:12px;color:#888;line-height:1.6"><span style="color:#555">└'+(ri+1)+'</span> <b style="color:'+(r.role==="customer"?"#4A90FF":"#FF6B00")+'">'+h(r.name||"名無しさん")+'</b>：<span style="color:#aaa">'+h(r.text)+'</span> <span style="color:#555;font-size:11px">'+when(r.created_at)+'</span></div>'});
+o+='</div>';
+}
+o+='<div class="rxn">';
+[["fire","🔥"],["agree","💪"],["funny","😂"],["heart","❤️"]].forEach(function(rx){
+var cnt=(p.reactions||{})[rx[0]]||0;var on=myR===rx[0];
+o+='<button class="'+(on?"on":"")+'" onclick="doReact(\''+p.id+'\',\''+rx[0]+'\')">'+rx[1]+(cnt>0?'<span>'+cnt+'</span>':'')+'</button>';
+});
+o+='<button onclick="replyId=replyId===\''+p.id+'\'?null:\''+p.id+'\';replyTxt=\'\';render()">💬 レス'+(reps.length>0?' '+reps.length:'')+'</button>';
+o+='<button onclick="share(posts.find(function(x){return x.id===\''+p.id+'\'}))">📤</button>';
+if(isMe)o+='<button onclick="delPost(\''+p.id+'\')" style="margin-left:auto">🗑</button>';
+o+='</div>';
+if(replyId===p.id)o+='<div class="reply-box"><input id="rtxt" placeholder="No.'+noMap[p.id]+'にレス…" onkeydown="if(event.key===\'Enter\'){replyTxt=this.value;doReply(\''+p.id+'\')}"><button onclick="replyTxt=document.getElementById(\'rtxt\').value;doReply(\''+p.id+'\')" style="background:#FF6B00;color:#000">送信</button></div>';
+o+='</div>';
+});
+return o;
+}
+
+function renderHome(){
+var cN=posts.filter(function(p){return p.role==="customer"}).length;
+var dN=posts.filter(function(p){return p.role==="driver"}).length;
+var o='';
+o+='<div style="padding:30px 20px 22px;text-align:center;background:radial-gradient(120% 70% at 50% 0%,rgba(0,229,255,.10),transparent 60%)">';
+o+='<div style="font-size:11px;letter-spacing:.22em;color:#00e5ff;font-weight:800">FUKUOKA 運転代行</div>';
+o+='<div style="font-size:27px;font-weight:900;line-height:1.3;margin:8px 0">深夜の帰り道、<br>すぐ呼べる。</div>';
+o+='<div style="font-size:13px;color:#888">あなたの車で、安全におうちまで。</div>';
+o+='<div style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12px;color:#3ddc84;background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.3);border-radius:999px;padding:6px 15px"><span style="width:8px;height:8px;border-radius:50%;background:#3ddc84;display:inline-block;animation:none"></span>今夜も稼働中・最短10分でお迎え</div>';
+o+='</div>';o+='<div style="padding:0 16px 10px"><a href="tel:05017243179" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#ff4d4d,#c81e1e);color:#fff;font-weight:900;font-size:19px;padding:20px;border-radius:18px;text-decoration:none;box-shadow:0 10px 34px rgba(255,77,77,.4)">📞 電話で今すぐ呼ぶ</a></div>';
+o+='<div style="padding:0 16px"><a href="https://dnud.jp/yobu?co=daikounaw" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:900;font-size:19px;padding:20px;border-radius:18px;text-decoration:none;box-shadow:0 10px 34px rgba(0,229,255,.4)">🚖 今すぐ配車を呼ぶ</a></div>';
+o+='<div style="padding:10px 16px 0"><a href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#06c755;color:#fff;font-weight:800;font-size:15px;padding:14px;border-radius:14px;text-decoration:none">💬 LINE登録で初回 ¥500 OFF</a></div>';
+o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;justify-content:space-around;text-align:center">';
+o+='<div><div style="font-size:11px;color:#888">料金</div><div style="font-size:19px;font-weight:900;color:#00e5ff">¥1,900<span style="font-size:12px;font-weight:700">＋¥450/km</span></div></div>';
+o+='<div style="width:1px;background:#24242e"></div>';
+o+='<div><div style="font-size:11px;color:#888">営業</div><div style="font-size:14px;font-weight:900;margin-top:3px">21:00〜翌6:00<br>金土〜翌7:00</div></div>';
+o+='</div>';
+o+='<div style="display:flex;gap:8px;padding:0 16px">';
+[["✅","明朗料金"],["📍","福岡密着"],["🌙","深夜専門"]].forEach(function(b){
+o+='<div style="flex:1;text-align:center;background:#0c0c10;border:1px solid #33333e;border-radius:12px;padding:10px 4px"><div style="font-size:20px">'+b[0]+'</div><div style="font-size:11px;color:#ddd;font-weight:700;margin-top:3px">'+b[1]+'</div></div>';
+});
+o+='</div>';
+o+='<div style="margin:14px 16px 0;background:#0c0c10;border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:14px 16px">';
+o+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">';
+o+='<div style="font-size:12px;color:#00e5ff;font-weight:800">\ud83d\udce2 \u304a\u77e5\u3089\u305b\u30fb\u4f1d\u8a00\u677f</div>';
+o+='<div onclick="toggleNews()" style="cursor:pointer;font-size:11px;font-weight:800;color:'+(newsOpen?"#888":"#041018")+';background:'+(newsOpen?"#16161c":"#00e5ff")+';border-radius:999px;padding:6px 13px;white-space:nowrap">'+(newsOpen?"閉じる":"✏️ 書き込む")+'</div>';
+o+='</div>';
+if(newsOpen){
+o+='<div style="background:#08080b;border:1px solid #24242e;border-radius:12px;padding:10px;margin-bottom:10px">';
+o+='<input id="nname" value="'+h(bbsName)+'" placeholder="お名前（未入力なら名無し）" style="width:100%;background:#0c0c10;border:1px solid #33333e;border-radius:8px;color:#eee;padding:10px;font-size:13px;box-sizing:border-box">';
+o+='<textarea id="ntxt" placeholder="お知らせ・ひとこと（例：本日22時から空車です）" oninput="newsTxt=this.value" style="width:100%;height:84px;margin-top:8px;background:#0c0c10;border:1px solid #33333e;border-radius:8px;color:#eee;padding:10px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit">'+h(newsTxt)+'</textarea>';
+o+='<div onclick="newsWrite()" style="cursor:pointer;text-align:center;margin-top:8px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:900;border-radius:10px;padding:12px;font-size:14px">投稿する</div>';
+o+='<div style="font-size:10px;color:#666;margin-top:7px;line-height:1.5">どなたでも投稿できます。電話番号などの個人情報、誹謗中傷はご遠慮ください。</div>';
+o+='</div>';
+}
+if(!news.length){o+='<div style="font-size:12px;color:#666;padding:4px 0">まだ投稿はありません。最初のひとことをどうぞ。</div>';}
+news.forEach(function(n,i){
+o+='<div style="padding:8px 0'+(i<news.length-1?';border-bottom:1px solid #1c1c24':'')+'"><span style="font-size:11px;color:#888;font-weight:700">'+when(n.created_at)+'</span><div style="font-size:13px;color:#ddd;line-height:1.6;margin-top:2px;white-space:pre-wrap">'+h(n.body)+'</div></div>';
+});
+o+='</div>';
+o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">';
+o+='<img src="driver.jpg" alt="運転スタッフ" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid #00e5ff;flex:0 0 auto">';
+o+='<div><div style="font-size:11px;color:#00e5ff;font-weight:800">運転するスタッフ</div><div style="font-size:15px;font-weight:900;margin:2px 0">あなたの車を、安全に。</div><div style="font-size:12px;color:#888;line-height:1.6">深夜も笑顔で、安全運転でお送りします。</div></div>';
+o+='</div>';
+o+='<div style="padding:2px 16px 0"><a href="https://dnud.jp/" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,rgba(0,229,255,.10),#0c0c10);border:1px solid rgba(0,229,255,.35);border-radius:16px;padding:15px 16px;text-decoration:none"><div><div style="font-size:14px;font-weight:900;color:#eaf2ff">代行なう運転代行 公式サイト</div><div style="font-size:11px;color:#888;margin-top:2px">料金・約款・よくある質問はこちら</div></div><span style="font-size:18px;color:#00e5ff">›</span></a></div>';
+o+='<div style="padding:8px 16px 0"><a href="https://tyuusonsha.jp/" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,rgba(255,200,97,.10),#0c0c10);border:1px solid rgba(255,200,97,.35);border-radius:16px;padding:15px 16px;text-decoration:none"><div><div style="font-size:14px;font-weight:900;color:#f6e6c8">運営会社 合同会社中尊社</div><div style="font-size:11px;color:#888;margin-top:2px">会社概要・事業内容はこちら</div></div><span style="font-size:18px;color:#ffc861">›</span></a></div>';
+o+='<div style="display:flex;gap:8px;padding:12px 16px 0">';
+o+='<div onclick="location.href=\'pachi.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(255,210,63,.16),#0c0c10);border:1px solid rgba(255,210,63,.4);border-radius:14px;padding:14px"><div style="font-size:22px">🎰</div><div style="font-size:13px;font-weight:900;color:#ffd23f;margin-top:4px">パチンコで割引GET</div><div style="font-size:10px;color:#888;margin-top:2px">遊んでクーポン</div></div>';
+o+='<div onclick="scr=\'battle\';render()" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(170,85,255,.16),#0c0c10);border:1px solid rgba(170,85,255,.4);border-radius:14px;padding:14px"><div style="font-size:22px">⚔️</div><div style="font-size:13px;font-weight:900;color:#b9a6ff;margin-top:4px">お客 vs 運転手</div><div style="font-size:10px;color:#888;margin-top:2px">バトル '+(cN+dN)+'件</div></div>';
+o+='</div>';
+var recent=posts.slice(0,3);
+if(recent.length){
+o+='<div style="padding:16px 16px 0"><div style="font-size:12px;color:#888;font-weight:800;margin-bottom:8px">⚔️ 最近のバトル</div>';
+recent.forEach(function(p){var isC=p.role==="customer";
+o+='<div onclick="scr=\'battle\';render()" style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #1c1c24;cursor:pointer"><span class="tag '+(isC?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 6px;white-space:nowrap">'+(isC?"🍺お客":"🚘運転手")+'</span><span style="font-size:13px;color:#ddd;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(p.text)+'</span></div>';
+});
+o+='</div>';
+}
+if(companies.length){
+o+='<div style="padding:18px 16px 0"><div style="font-size:12px;color:#888;font-weight:800;margin-bottom:8px">📋 登録代行業者</div>';
+companies.slice(0,5).forEach(function(co){
+o+='<div class="card'+(co.featured?" feat":"")+'" style="margin:8px 0">';
+if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">⭐ 公式</span>';
+o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
+o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+'</div>';
+o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">'+((co.base_fare>0)?'初乗り'+yen(co.base_fare)+' · ':'')+'1km'+yen(co.per_km)+'</div>';
+if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
+o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
+if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
+o+='</div></div>';
+});
+if(companies.length>5)o+='<div style="text-align:center;padding:6px"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#00e5ff;cursor:pointer">すべての業者を見る ›</span></div>';
+o+='</div>';
+}
+o+='<div style="margin:22px 16px 0;border-top:1px solid #1c1c24;padding-top:18px"><div style="font-size:11px;letter-spacing:.15em;color:#555;font-weight:800;text-align:center">FOR PARTNERS</div><div style="font-size:13px;color:#888;font-weight:700;text-align:center;margin-top:4px">運転代行を、はじめる・広げる</div></div>';
+o+='<div style="padding:14px 16px 0"><div style="display:flex;gap:8px">';
+o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(0,229,255,.12),#0c0c10);border:1px solid rgba(0,229,255,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🚖</div><div style="font-size:13px;font-weight:900;margin-top:5px">ドライバー募集</div><div style="font-size:10px;color:#3ddc84;font-weight:700;margin-top:2px">日額¥5,000保証・純利50%</div></div>';
+o+='<div onclick="location.href=\'fc.html\'" style="flex:1;cursor:pointer;background:linear-gradient(135deg,rgba(255,107,0,.12),#0c0c10);border:1px solid rgba(255,107,0,.35);border-radius:14px;padding:15px;text-align:center"><div style="font-size:24px">🏢</div><div style="font-size:13px;font-weight:900;margin-top:5px">FCオーナー募集</div><div style="font-size:10px;color:#ffb648;font-weight:700;margin-top:2px">純利益50%・低資金開業</div></div>';
+o+='</div></div>';
+o+='<div style="padding:18px 16px 10px;text-align:center"><span onclick="scr=\'company\';loadCo()" style="font-size:12px;color:#888;text-decoration:underline;cursor:pointer">業者の料金を比較・無料登録はこちら ›</span><br><a href="uketsuke.html" style="font-size:12px;color:#3ddc84;text-decoration:underline">🚖 受注ボード（登録業者様用）›</a></div>';
+o+='<div style="margin:8px 16px 24px;padding:18px;background:#0a0a0e;border:1px solid #1c1c24;border-radius:16px;line-height:1.9;font-size:12px;color:#9a9aa6">';
+o+='<div style="font-size:14px;font-weight:900;color:#cfcfe0;margin-bottom:10px">福岡の運転代行なら「代行なう運転代行」</div>';
+o+='<p style="margin-bottom:10px">代行なう運転代行は、福岡市を中心に、那珂川市・春日市・大野城市・太宰府市エリアで運転代行サービスを提供しております。飲み会やお食事でお酒を飲まれた際、お車を安全にご自宅までお送りいたします。タクシーと違い、翌朝もご自身のお車をそのままお使いいただけるのが運転代行の大きなメリットです。</p>';
+o+='<p style="margin-bottom:10px">料金は初乗り不要のわかりやすい設定で、1kmあたり400円、高速道路料金は無料です。営業時間は21時から翌6時まで（金・土曜は翌7時まで）、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
+o+='<p>博多区・中央区の繁華街はもちろん、福岡市近郊の幅広いエリアに対応しております。深夜の運転代行をお探しの方は、ぜひ代行なう運転代行をご利用ください。</p>';
+o+='</div>';
+o+='<div style="padding:0 16px 6px;font-size:11px;color:#666;font-weight:800">中尊社の他のサービス</div>';
+o+='<div style="margin:0 16px 26px;display:flex;gap:8px">';
+o+='<a href="fudousan.html" style="flex:1;text-align:center;background:#205A45;color:#fff;text-decoration:none;border-radius:12px;padding:12px 4px;font-size:12px;font-weight:800;line-height:1.4">🏠 不動産なう<br><span style="font-size:10px;font-weight:400;opacity:.85">仲介手数料0円の個人売買</span></a>';
+o+='<a href="kokan.html" style="flex:1;text-align:center;background:#2B4C7E;color:#fff;text-decoration:none;border-radius:12px;padding:12px 4px;font-size:12px;font-weight:800;line-height:1.4">⇄ 物々交換なう<br><span style="font-size:10px;font-weight:400;opacity:.85">お金を使わない交換掲示板</span></a>';
+o+='</div>';
+return o;
+}
+
+function renderCompany(){
+var o='<div style="padding:10px 16px 0"><span onclick="scr=\'home\';render()" style="font-size:13px;color:#888;cursor:pointer">← ホーム</span></div>';
+o+='<div style="margin:12px 16px 0;display:flex;gap:10px">';
+o+='<div onclick="location.href=\'fc.html\'" style="flex:1;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;background:linear-gradient(135deg,rgba(139,107,255,.22),rgba(90,63,255,.05));border:1px solid rgba(139,107,255,.45)">';
+o+='<div style="font-size:24px">🏢</div>';
+o+='<div style="font-size:13px;font-weight:900;color:#b9a6ff;margin-top:4px">FCオーナー募集</div>';
+o+='<div style="font-size:10px;color:#888;margin-top:2px">独立・開業したい方へ</div>';
+o+='</div>';
+o+='<div onclick="location.href=\'saiyo.html\'" style="flex:1;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;background:linear-gradient(135deg,rgba(255,107,0,.22),rgba(255,61,0,.05));border:1px solid rgba(255,107,0,.45)">';
+o+='<div style="font-size:24px">🚖</div>';
+o+='<div style="font-size:13px;font-weight:900;color:#FF8C2B;margin-top:4px">ドライバー募集</div>';
+o+='<div style="font-size:10px;color:#888;margin-top:2px">夜だけ・副業OK</div>';
+o+='</div>';
+o+='</div>';
+o+='<div style="padding:14px 16px;border-bottom:1px solid #1c1c24">';
+o+='<div style="display:flex;align-items:center;justify-content:space-between">';
+o+='<div style="font-size:18px;font-weight:900">🚘 代行業者</div>';
+o+='<button onclick="regOpen=!regOpen;render()" style="padding:7px 13px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;'+(regOpen?'background:#131318;color:#888;border:1px solid #24242e':'background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none')+'">'+(regOpen?'✕ 閉じる':'＋ 無料登録')+'</button>';
+o+='</div>';
+if(!regOpen){
+o+='<div style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="number" id="kmin" placeholder="距離km" style="flex:1;text-align:center;margin-bottom:0" value="'+km+'"><button onclick="km=document.getElementById(\'kmin\').value;render()" style="padding:10px 16px;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">比較</button></div>';
+}
+o+='</div>';
+
+if(regOpen){
+o+='<div class="card feat" style="margin-top:12px">';
+o+='<div style="font-size:16px;font-weight:900;margin-bottom:2px">🎉 代行業者 無料登録</div>';
+o+='<div style="font-size:11px;color:#888;margin-bottom:14px">登録は無料です。入力して登録すると、下の一覧と料金比較に掲載されます。</div>';
+o+='<span class="reg-label">店名・会社名 <span style="color:#FF6B00">必須</span></span><input type="text" id="r_name" placeholder="例：代行なう運転代行">';
+o+='<span class="reg-label">都道府県 <span style="color:#FF6B00">必須</span></span><input type="text" id="r_pref" placeholder="例：福岡県">';
+o+='<span class="reg-label">エリア</span><input type="text" id="r_area" placeholder="例：福岡市南区・春日市・大野城市">';
+o+='<span class="reg-label">営業時間</span><input type="text" id="r_hours" placeholder="例：21:00〜翌6:00">';
+o+='<div style="display:flex;gap:8px"><div style="flex:1"><span class="reg-label">初乗り料金(円) <span style="color:#FF6B00">必須</span></span><input type="number" id="r_base" placeholder="2000"></div><div style="flex:1"><span class="reg-label">1kmあたり(円) <span style="color:#FF6B00">必須</span></span><input type="number" id="r_km" placeholder="500"></div></div>';
+o+='<span class="reg-label">電話番号 <span style="color:#FF6B00">必須</span></span><input type="tel" id="r_phone" placeholder="例：09012345678">';
+o+='<span class="reg-label">LINE URL（任意）</span><input type="text" id="r_line" placeholder="https://lin.ee/xxxx">';
+o+='<span class="reg-label">キャンペーン（任意）</span><input type="text" id="r_campaign" placeholder="例：初乗り無料（4km以上）">';
+o+='<button class="reg-submit" onclick="submitCompany()">この内容で無料登録する</button>';
+o+='</div>';
+return o;
+}
+
+var recent=posts.slice(0,3);
+if(recent.length){
+o+='<div style="padding:12px 16px 4px">';
+o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:13px;color:#FF6B00;font-weight:800">⚔️ 最近のバトル</div><button onclick="scr=\'battle\';render()" style="background:none;border:1px solid #24242e;border-radius:8px;padding:3px 10px;color:#888;font-size:11px;cursor:pointer;font-family:inherit">すべて見る ›</button></div>';
+recent.forEach(function(p){var isC=p.role==="customer";
+o+='<div onclick="scr=\'battle\';render()" style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #1c1c24;cursor:pointer"><span class="tag '+(isC?"tag-c":"tag-d")+'" style="font-size:10px;padding:1px 6px;white-space:nowrap">'+(isC?"🍺お客":"🚘運転手")+'</span><span style="font-size:13px;color:#ddd;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(p.text)+'</span><span style="font-size:10px;color:#444;white-space:nowrap">'+ago(p.created_at)+'</span></div>';
+});
+o+='</div>';
+}
+
+var kmN=parseFloat(km);
+if(kmN>0){
+var sorted=companies.slice().sort(function(a,b){return(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)});
+o+='<div style="padding:10px 16px"><div style="font-size:13px;color:#FF6B00;font-weight:800;margin-bottom:8px">📊 '+kmN+'km 料金ランキング</div>';
+sorted.forEach(function(co,i){
+var fare=co.base_fare+Math.ceil(kmN)*co.per_km;
+var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1c1c24"><span style="width:22px;text-align:center;font-weight:900;color:'+(i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":"#444")+'">'+medal+'</span><div style="flex:1"><span style="font-size:13px;font-weight:700">'+h(co.name)+'</span></div><span style="font-size:18px;font-weight:900;color:#FF6B00">'+yen(fare)+'</span></div>';
+});
+o+='</div>';
+}else{
+if(!companies.length)o+='<div class="empty"><div style="font-size:50px;margin-bottom:10px">🚘</div><div style="font-size:15px;font-weight:900;margin-bottom:6px">まだ登録業者がいません</div><div>「＋無料登録」から最初の登録をどうぞ</div></div>';
+companies.forEach(function(co){
+o+='<div class="card'+(co.featured?" feat":"")+'">';
+if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">⭐ 公式</span>';
+o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
+o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+' · '+h(co.hours||"")+'</div>';
+o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">'+((co.base_fare>0)?'初乗り'+yen(co.base_fare)+' · ':'')+'1km'+yen(co.per_km)+'</div>';
+if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
+o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
+if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
+o+='</div></div>';
+});
+}
+return o;
+}
+
+try{render();}catch(e){}
+loadCo();
+loadNews();
+loadPosts();
+setInterval(function(){loadPosts(true)},15000);
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}
+</script>
+
+<div id="ctabar">
+<a href="tel:05017243179" class="cta-tel">📞 電話</a>
+<a href="https://dnud.jp/yobu?co=daikounaw" class="cta-go">🚖 今すぐ配車</a>
+</div>
+
+<script>
+(function(){
+var bar=document.getElementById("ctabar");
+function upd(){
+var box=document.getElementById("scrollbox");
+var top=box?box.scrollTop:0;
+var show=(window.scr!=="home")||top>300;
+if(show){bar.classList.add("show");}else{bar.classList.remove("show");}
+}
+document.addEventListener("scroll",upd,true);
+setInterval(upd,600);
+upd();
+})();
+</script>
+
+</body></html>
