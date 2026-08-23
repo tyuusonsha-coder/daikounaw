@@ -153,7 +153,7 @@ function toast(m){ var t=$('toast'); t.textContent=m; t.className='toast show';
   clearTimeout(t._t); t._t=setTimeout(function(){t.className='toast';},3600); }
 function yen(n){ return Number(n).toLocaleString('ja-JP'); }
 
-/* 料金：3kmまで1,800円、以降1kmごと250円 */
+/* 料金：初乗り1,900円、以降1kmごと450円 */
 function fare(km){
   return 1900 + Math.ceil(km) * 450;
 }

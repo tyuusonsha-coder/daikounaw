@@ -1,7 +1,7 @@
 {
-  "name": "代行なう運転代行",
+  "name": "代行なう",
   "short_name": "代行なう",
-  "description": "福岡の運転代行。1kmごとに400円のみ。",
+  "description": "福岡の運転代行。初乗り1,900円、以降1kmごとに450円。",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
