@@ -123,27 +123,56 @@ function ago(v){var t=tms(v);if(!t)return "";var s=Math.floor((Date.now()-t)/100
 function fmtDT(v){var t=tms(v);if(!t)return "";var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function when(v){var a=ago(v),f=fmtDT(v);return f?(a?a+"（"+f+"）":f):""}
 
-/* ===== 受注アラート（大音量・停止ボタン・自動停止） ===== */
-var actx=null,_alertTimer=null,_autoStopTimer=null,_alertNodes=[];
-function unlockAudio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){}}
+/* ===== 受注アラート（ベルチャイム・停止ボタン・自動停止） ===== */
+var actx=null,_bus=null,_alertTimer=null,_autoStopTimer=null,_alertNodes=[];
+function unlockAudio(){
+  try{
+    if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(!_bus){
+      // マスター → コンプレッサー → 出力。歪ませずに音圧だけ稼ぐ
+      _bus=actx.createGain();
+      _bus.gain.value=0.9;
+      var comp=actx.createDynamicsCompressor();
+      comp.threshold.value=-18;
+      comp.knee.value=12;
+      comp.ratio.value=8;
+      comp.attack.value=0.003;
+      comp.release.value=0.25;
+      _bus.connect(comp);comp.connect(actx.destination);
+    }
+    if(actx.state==="suspended")actx.resume();
+  }catch(e){}
+}
 document.addEventListener("click",unlockAudio);
 document.addEventListener("touchstart",unlockAudio);
 
-function _beep(){
-  try{
-    if(!actx)return;
-    var s=actx.currentTime;
+// 鐘の一打（基音＋倍音を重ねて余韻を残す）
+function _tone(freq,at,dur,vol){
+  var partials=[[1,1.0],[2,0.42],[3,0.20],[4.18,0.10],[5.4,0.05]];
+  for(var i=0;i<partials.length;i++){
+    var p=partials[i];
     var osc=actx.createOscillator(),g=actx.createGain();
-    osc.type="square";
-    osc.frequency.value=2200;
-    g.gain.setValueAtTime(0,s);
-    g.gain.linearRampToValueAtTime(1.0,s+0.02);
-    g.gain.setValueAtTime(1.0,s+0.22);
-    g.gain.linearRampToValueAtTime(0,s+0.26);
-    osc.connect(g);g.connect(actx.destination);
-    osc.start(s);osc.stop(s+0.3);
+    osc.type="sine";
+    osc.frequency.value=freq*p[0];
+    var v=vol*p[1];
+    g.gain.setValueAtTime(0.0001,at);
+    g.gain.exponentialRampToValueAtTime(v,at+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,at+dur*(1-i*0.13));
+    osc.connect(g);g.connect(_bus);
+    osc.start(at);osc.stop(at+dur+0.05);
     _alertNodes.push(osc);
-    osc.onended=function(){var i=_alertNodes.indexOf(osc);if(i>-1)_alertNodes.splice(i,1);};
+    (function(o){o.onended=function(){var k=_alertNodes.indexOf(o);if(k>-1)_alertNodes.splice(k,1);};})(osc);
+  }
+}
+
+// 三音チャイム（ド→ソ→ド）
+function _chime(){
+  try{
+    if(!actx||!_bus)return;
+    var s=actx.currentTime+0.02;
+    _tone(1046.50,s,       1.9,0.55); // C6
+    _tone(1567.98,s+0.20,  1.9,0.50); // G6
+    _tone(2093.00,s+0.40,  2.3,0.46); // C7
   }catch(e){}
 }
 
@@ -152,12 +181,12 @@ function playLoudAlert(maxSeconds){
   maxSeconds=maxSeconds||60;
   unlockAudio();
   stopLoudAlert();
-  _beep();
-  _alertTimer=setInterval(_beep,500);
+  _chime();
+  _alertTimer=setInterval(_chime,2600);
   _autoStopTimer=setTimeout(stopLoudAlert,maxSeconds*1000);
   var b=document.getElementById("alertStopBtn");
   if(b)b.style.display="block";
-  try{if(navigator.vibrate)navigator.vibrate([400,200,400,200,400,200,400]);}catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate([180,140,180,140,180]);}catch(e){}
 }
 
 function stopLoudAlert(){
@@ -184,7 +213,7 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)keep
 function bellTest(){
   unlockAudio();
   keepAwake();
-  setTimeout(function(){playLoudAlert(5);},120);
+  setTimeout(function(){playLoudAlert(6);},120);
   setTimeout(function(){
     if(!actx||actx.state!=="running"){alert("音を出せませんでした。本体横の消音スイッチと音量を確認してください。");}
   },900);
