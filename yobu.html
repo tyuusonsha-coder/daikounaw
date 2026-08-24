@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>運転代行を呼ぶ｜代行なうアプリ</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17580686224"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17580686224');
+
+  /* 電話番号がタップされたときにコンバージョンを送信 */
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document) {
+      if (t.tagName === 'A' && (t.getAttribute('href')||'').indexOf('tel:') === 0) {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-17580686224/SImfCIiF4-YcEJD3j79B',
+          'value': 1900.0,
+          'currency': 'JPY'
+        });
+        return;
+      }
+      t = t.parentNode;
+    }
+  }, true);
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
