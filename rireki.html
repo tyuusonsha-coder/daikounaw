@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ご利用履歴｜代行なう</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17580686224"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17580686224');
+
+  /* 電話番号がタップされたときにコンバージョンを送信 */
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document) {
+      if (t.tagName === 'A' && (t.getAttribute('href')||'').indexOf('tel:') === 0) {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-17580686224/SImfCIiF4-YcEJD3j79B',
+          'value': 1900.0,
+          'currency': 'JPY'
+        });
+        return;
+      }
+      t = t.parentNode;
+    }
+  }, true);
+</script>
+
 <style>
 :root{
   --bg:#0B1220; --surface:#142338; --surface-2:#1B2E48; --line:#22385A;
@@ -48,6 +74,11 @@ input::placeholder{color:#59708F}
 .stars button{background:none;border:0;font-size:30px;line-height:1;padding:0;color:var(--line);cursor:pointer}
 .stars button.on{color:var(--amber)}
 .empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:14px;font-weight:700;line-height:1.8}
+.tel{
+  display:block;margin-top:18px;text-align:center;text-decoration:none;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--green);
+  border-radius:13px;padding:15px;font-size:15px;font-weight:800;
+}
 .toast{
   position:fixed;left:12px;right:12px;bottom:calc(18px + env(safe-area-inset-bottom));
   background:var(--surface-2);border:1px solid var(--green);color:var(--green);
@@ -68,6 +99,7 @@ input::placeholder{color:#59708F}
   <input id="ph" type="tel" inputmode="tel" placeholder="ご利用時の電話番号" autocomplete="tel">
   <button class="btn amber" id="go">履歴を表示する</button>
   <div id="app"></div>
+  <a class="tel" href="tel:05017243179">お問い合わせ　050-1724-3179</a>
 </div>
 <div class="toast" id="toast"></div>
 

@@ -12,7 +12,33 @@
 <meta property="og:title" content="代行なうアプリ｜福岡の運転代行を地図から呼ぶ">
 <meta property="og:description" content="地図から呼べる運転代行。空車がひと目でわかります。">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://daikounaw.com/">
+<meta property="og:url" content="https://daikounaw.com/app">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17580686224"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17580686224');
+
+  /* 電話番号がタップされたときにコンバージョンを送信 */
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document) {
+      if (t.tagName === 'A' && (t.getAttribute('href')||'').indexOf('tel:') === 0) {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-17580686224/SImfCIiF4-YcEJD3j79B',
+          'value': 1900.0,
+          'currency': 'JPY'
+        });
+        return;
+      }
+      t = t.parentNode;
+    }
+  }, true);
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
@@ -52,6 +78,7 @@ body{
   font-size:11.5px;font-weight:800;color:var(--muted);text-decoration:none;
   background:rgba(20,35,56,.86);border:1px solid var(--line);border-radius:999px;padding:8px 12px;
 }
+.top .menu a.tel{color:#241400;background:var(--amber);border-color:var(--amber)}
 
 /* 中央ピン */
 #cross{position:absolute;left:50%;top:calc(50% - 90px);z-index:390;
@@ -125,6 +152,11 @@ body{
 }
 .go:active{transform:scale(.985)}
 .go small{display:block;font-size:11px;font-weight:700;opacity:.62;margin-top:4px}
+.callrow{
+  display:block;margin:9px 16px 0;text-decoration:none;text-align:center;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--green);
+  border-radius:14px;padding:15px;font-size:15px;font-weight:800;
+}
 .foot{padding:11px 16px 0;font-size:10.5px;color:var(--muted);opacity:.6;
   font-weight:600;line-height:1.7;text-align:center}
 .foot a{color:var(--muted)}
@@ -142,7 +174,7 @@ body{
   <div class="pill" id="pill"><i></i><span id="pillTxt">読み込み中</span></div>
   <div class="menu">
     <a href="sagasu.html">探す</a>
-    <a href="rireki.html">履歴</a>
+    <a class="tel" href="tel:05017243179">電話</a>
   </div>
 </div>
 
@@ -162,8 +194,10 @@ body{
   </div>
   <div class="rail" id="rail"></div>
   <a class="go" id="go" href="yobu.html">この場所に代行を呼ぶ<small>地図でタップ・料金は先にわかる</small></a>
+  <a class="callrow" href="tel:05017243179">電話で呼ぶ　050-1724-3179</a>
   <div class="foot">料金は業者ごとに異なります　
-    <a href="touroku.html">運転代行業者の方はこちら</a></div>
+    <a href="touroku.html">運転代行業者の方はこちら</a>　·　
+    <a href="rireki.html">ご利用履歴</a></div>
 </div>
 
 <script>
