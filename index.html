@@ -2,6 +2,27 @@
 <!DOCTYPE html><html lang="ja"><head>
 
 <meta charset="UTF-8"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17580686224"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17580686224');
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== document) {
+      if (t.tagName === 'A' && (t.getAttribute('href')||'').indexOf('tel:') === 0) {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-17580686224/SImfCIiF4-YcEJD3j79B',
+          'value': 1900.0,
+          'currency': 'JPY'
+        });
+        return;
+      }
+      t = t.parentNode;
+    }
+  }, true);
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#060609"/>
 <title>代行naw｜プラットホームアプリ</title>
