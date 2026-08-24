@@ -50,17 +50,6 @@ body{
 .leaflet-container{background:#0a0f1c}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-/* 代行なう ウォーターマーク */
-.wm{
-  position:absolute;left:0;right:0;top:0;z-index:480;
-  padding:calc(12px + env(safe-area-inset-top)) 16px 24px;
-  background:linear-gradient(180deg,rgba(11,18,32,.92) 0%,rgba(11,18,32,.6) 60%,transparent 100%);
-  pointer-events:none;
-}
-.wm .t{font-size:14.5px;font-weight:800;letter-spacing:.02em;line-height:1.2}
-.wm .t em{font-style:normal;color:var(--amber)}
-.wm .t span{display:block;font-size:9px;color:var(--dim);font-weight:800;letter-spacing:.2em;margin-top:3px}
-
 /* 中央ピン */
 #crosshair{
   position:absolute; left:50%; top:50%; z-index:500;
@@ -83,7 +72,7 @@ body{
 .sheet{
   flex:none; background:var(--surface); border-top:1px solid var(--line);
   border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom));
-  box-shadow:0 -12px 30px rgba(0,0,0,.45); max-height:64vh; overflow-y:auto;
+  box-shadow:0 -12px 30px rgba(0,0,0,.45); max-height:66vh; overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
 .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
@@ -100,6 +89,30 @@ h2{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
 .btn.ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line);font-size:14px;padding:13px}
 .btn:disabled{background:var(--surface-2);color:var(--muted);transform:none}
 .row{display:flex;gap:9px;margin-top:9px}
+
+/* 住所・店名の検索 */
+.srch{margin-bottom:12px}
+.srch .in{display:flex;gap:8px}
+.srch input{
+  flex:1;min-width:0;height:48px;margin:0;padding:0 14px;
+  background:var(--surface-2);color:var(--text);
+  border:1px solid var(--line);border-radius:12px;
+  font-size:16px;font-family:inherit;font-weight:600;-webkit-appearance:none;
+}
+.srch input:focus{outline:none;border-color:var(--amber)}
+.srch input::placeholder{color:#59708F}
+.srch button{
+  flex:none;height:48px;padding:0 18px;border:0;border-radius:12px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--text);
+  font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
+}
+.srch button:disabled{opacity:.5}
+.hits{margin-top:8px;border-radius:12px;overflow:hidden;background:var(--surface-2);
+  border:1px solid var(--line);display:none}
+.hits div{padding:13px 14px;font-size:14px;line-height:1.45;border-bottom:1px solid var(--line);cursor:pointer}
+.hits div:last-child{border-bottom:0}
+.hits div:active{background:rgba(255,176,32,.16)}
+.hits .msg{color:var(--muted);font-weight:700;cursor:default}
 
 /* 業者一覧（代行なう掲示板） */
 .tabs{display:flex;background:var(--surface-2);border:1px solid var(--line);
@@ -196,19 +209,14 @@ input::placeholder{color:#59708F}
   opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;
 }
 .toast.show{opacity:1;transform:none}
-.drv-icon{
-  width:30px;height:30px;border-radius:50%;background:var(--amber);
-  border:3px solid #241400;box-shadow:0 0 0 4px rgba(255,176,32,.3);
-}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<h1 class="sr">運転代行を呼ぶ｜代行なうアプリ。地図でお迎え場所を決めて、空車の運転代行を指名できます</h1>
+<h1 class="sr">運転代行を呼ぶ｜代行なうアプリ。地図でも住所でもお迎え場所と行き先を指定できます</h1>
 
 <div id="map"></div>
-<div class="wm"><div class="t">代行<em>なう</em>アプリ<span>NAKASU · TENJIN · HAKATA</span></div></div>
 <div id="crosshair"><div class="pin"></div></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
@@ -267,6 +275,52 @@ async function place(lat, lng){
     }
   } catch(e){}
   return lat.toFixed(5)+', '+lng.toFixed(5);
+}
+
+/* ===== 住所・店名で場所を探す ===== */
+function searchBox(ph){
+  return '<div class="srch">'+
+    '<div class="in">'+
+      '<input id="sq" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="'+ph+'">'+
+      '<button type="button" id="sb">検索</button>'+
+    '</div>'+
+    '<div class="hits" id="sh"></div>'+
+  '</div>';
+}
+function bindSearch(){
+  var q=$('sq'), b=$('sb'), h=$('sh');
+  if (!q) return;
+  function show(html, tmp){
+    h.innerHTML=html; h.style.display=html?'block':'none';
+    if (tmp) setTimeout(function(){ h.style.display='none'; }, 2800);
+  }
+  function run(){
+    var v=(q.value||'').trim();
+    if (!v) return;
+    b.disabled=true; show('<div class="msg">検索しています…</div>');
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=jp&accept-language=ja&q='+encodeURIComponent(v))
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        b.disabled=false;
+        if (!rows || !rows.length){
+          show('<div class="msg">見つかりませんでした。市区町村から入れるか、地図を直接動かしてください。</div>', true);
+          return;
+        }
+        h.innerHTML=''; h.style.display='block';
+        rows.forEach(function(row){
+          var d=document.createElement('div');
+          d.textContent=String(row.display_name).replace(/, 日本$/,'');
+          d.addEventListener('click', function(){
+            map.setView([parseFloat(row.lat), parseFloat(row.lon)], 17);
+            h.style.display='none'; q.blur();
+          });
+          h.appendChild(d);
+        });
+      })
+      .catch(function(){ b.disabled=false; show('<div class="msg">検索できませんでした。通信状況をご確認ください。</div>', true); });
+  }
+  b.onclick=run;
+  q.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); run(); } });
 }
 
 async function route(){
@@ -344,12 +398,14 @@ function viewCompanies(){
   $('sheet').innerHTML =
     '<div class="grab"></div>' +
     '<h2>お迎え場所と代行を選ぶ</h2>' +
-    '<p class="sub">地図を動かしてピンを車のある場所に合わせ、呼びたい運転代行を選んでください。</p>' +
+    '<p class="sub">住所やお店の名前で探すか、地図を動かしてピンを合わせてください。</p>' +
+    searchBox('今いる住所・お店の名前') +
     '<div class="tabs">' +
       '<button class="tb'+(clTab==='osusume'?' on':'')+'" id="tb1">おすすめ順</button>' +
       '<button class="tb'+(clTab==='soon'?' on':'')+'" id="tb2">すぐ来る順</button>' +
     '</div>' + body;
 
+  bindSearch();
   $('tb1').onclick=function(){ clTab='osusume'; viewCompanies(); };
   $('tb2').onclick=function(){ clTab='soon';    viewCompanies(); };
 
@@ -380,20 +436,23 @@ async function clLoad(){
   if(step==='co') viewCompanies();
 }
 
-/* ===== 画面 ===== */
+/* ===== 出発地・行き先の指定 ===== */
 function viewPick(){
   $('crosshair').className = (step==='a') ? '' : 'b';
   $('sheet').innerHTML =
     '<div class="grab"></div>' +
     '<h2>'+(step==='a'?'今いる場所を指定':'行き先を指定')+'</h2>' +
     '<p class="sub">'+(step==='a'
-      ? '地図を動かしてピンを車のある場所に合わせてください。'
-      : '車を届けてほしい場所にピンを合わせてください。')+'</p>' +
+      ? '住所やお店の名前で探すか、地図を動かしてピンを車のある場所に合わせてください。'
+      : '住所やお店の名前で探すか、地図を動かして届けてほしい場所にピンを合わせてください。')+'</p>' +
+    searchBox(step==='a' ? '今いる住所・お店の名前' : '行き先の住所・お店の名前') +
     (step==='b' && prefName ? '<div class="pref">'+esc(prefName)+' を指名しています<span>出発地は設定済みです</span></div>' : '') +
     '<button class="btn '+(step==='a'?'amber':'green')+'" id="ok">'+
       (step==='a'?'ここから出発する':'ここへ行く')+'</button>' +
     '<div class="row"><button class="btn ghost" id="back">'+
       (step==='a'?'代行を選び直す':'出発地を選び直す')+'</button></div>';
+
+  bindSearch();
 
   $('ok').onclick = async function(){
     var c = map.getCenter();
@@ -560,14 +619,12 @@ async function poll(){
 /* ===== 起動 ===== */
 (async function init(){
   if (prefId){
-    /* 業者が指定されている（dnud.jp や一覧からの指名） */
     try{
       var r=await fetch(SB+'companies?id=eq.'+encodeURIComponent(prefId)+'&select=name',{headers:H});
       var d=await r.json(); if (d&&d[0]) prefName=d[0].name;
     }catch(e){}
 
     if (!isNaN(qLat) && !isNaN(qLng)){
-      /* お迎え場所も渡ってきているので、出発地の指定を省略する */
       A=[qLat,qLng]; aName=await place(qLat,qLng);
       aMark=L.marker(A,{icon:pinIcon('#FFB020')}).addTo(map);
       step='b'; viewPick();
@@ -577,7 +634,6 @@ async function poll(){
     clLoad();
     return;
   }
-  /* 業者未指定 → 代行なうの一覧から選んでもらう */
   step='co';
   viewCompanies();
   clLoad();
