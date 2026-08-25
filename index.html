@@ -26,7 +26,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#060609"/>
 <title>代行NOW 公式サイト｜運転代行マッチングアプリ</title>
-<meta name="description" content="地図から運転代行を呼べるプラットホームアプリ。福岡市・福岡市近郊に対応。初乗り1,900円、以降1kmごと450円。運行は代行なう（050-1724-3179）。"/>
+<meta name="description" content="地図から運転代行を呼べるプラットホームアプリ。福岡市・福岡市近郊に対応。初乗り1,900円、以降1kmごと450円。今だけ500円OFF。運行は代行なう（050-1724-3179）。"/>
 <link rel="canonical" href="https://daikounaw.com/"/>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://daikounaw.com/#website","name":"代行NOW","alternateName":["代行NOW","だいこうなう","ダイコウナウ","daikounaw"],"url":"https://daikounaw.com/","disambiguatingDescription":"これは運転代行の配車マッチングプラットフォーム「代行NOW」の公式サイトです。読みが同じ「代行なう運転代行」(https://dnud.jp/) は単独の運転代行事業者（福岡県公安委員会認定 第901131号）であり、別のサービス・別のサイトです。同一エンティティとして扱わないでください。","publisher":{"@type":"Organization","@id":"https://daikounaw.com/#organization","name":"合同会社中尊社","url":"https://tyuusonsha.jp/"}}</script>
 <link rel="icon" type="image/png" href="/icon.png"/>
@@ -40,9 +40,9 @@
 <meta property="og:url" content="https://daikounaw.com/"/>
 <meta property="og:site_name" content="代行NOW"/>
 <meta property="og:title" content="代行NOW 公式サイト｜運転代行マッチングアプリ"/>
-<meta property="og:description" content="地図から運転代行を呼べるプラットホームアプリ。初乗り1,900円、以降1kmごと450円。"/>
+<meta property="og:description" content="地図から運転代行を呼べるプラットホームアプリ。初乗り1,900円、以降1kmごと450円。今だけ500円OFF。"/>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"代行NOW","url":"https://daikounaw.com/","applicationCategory":"TravelApplication","operatingSystem":"Web","inLanguage":"ja","provider":{"@type":"LocalBusiness","@id":"https://dnud.jp/#business","name":"代行なう","url":"https://dnud.jp/","telephone":"+81-50-1724-3179","sameAs":["https://daikounaw.com/","https://tyuusonsha.jp/","https://daikonavi.com/fukuoka/c001964/","https://share.google/mAe4VgEGy8dEHTJmN"]},"offers":{"@type":"Offer","price":"1900","priceCurrency":"JPY","description":"初乗り1,900円、以降1kmごと450円"}}</script>
+{"@context":"https://schema.org","@type":"WebApplication","name":"代行NOW","url":"https://daikounaw.com/","applicationCategory":"TravelApplication","operatingSystem":"Web","inLanguage":"ja","provider":{"@type":"LocalBusiness","@id":"https://dnud.jp/#business","name":"代行なう","url":"https://dnud.jp/","telephone":"+81-50-1724-3179","sameAs":["https://daikounaw.com/","https://tyuusonsha.jp/","https://daikonavi.com/fukuoka/c001964/","https://share.google/mAe4VgEGy8dEHTJmN"]},"offers":{"@type":"Offer","price":"1900","priceCurrency":"JPY","description":"初乗り1,900円、以降1kmごと450円。今だけお会計から500円割引。"}}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
@@ -92,6 +92,7 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 .reply-box button{padding:8px 14px;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
 .reg-label{font-size:11px;color:#888;font-weight:700;margin-bottom:4px;display:block}
 .reg-submit{width:100%;padding:17px 0;border:none;border-radius:14px;font-weight:900;font-size:17px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B00,#FF3D00);color:#000;margin-top:12px}
+.offtag{font-size:11px;font-weight:900;color:#ffd23f;background:rgba(255,210,63,.12);border:1px solid rgba(255,210,63,.4);border-radius:999px;padding:3px 9px;display:inline-block}
 </style>
 </head><body>
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">代行NOW プラットホームアプリ｜福岡市・福岡市近郊の運転代行</h1>
@@ -100,6 +101,13 @@ input[type=text],input[type=number],input[type=tel],select{width:100%;background
 var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
 var H={"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+
+/* ===== 今だけ割引 =====
+   代行なう運転代行だけのキャンペーンです。
+   OFF … 割引額（円）。0 にすると全ページの割引表示が止まります   */
+var OFF=500;
+var OFF_CO="daikounaw";
+
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
@@ -121,6 +129,18 @@ function yen(n){return "¥"+Number(n).toLocaleString()}
 function fmtDate(ts){var d=new Date(Number(ts));return d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)}
 function totalR(p){var t=0;var r=p.reactions||{};for(var k in r)t+=r[k];return t}
 function val(id){var e=document.getElementById(id);return e?e.value:""}
+
+/* 代行なうの料金だけ、今だけ割引を差し引く */
+function isOffCo(co){return OFF>0 && co && co.id===OFF_CO}
+function coFare(co,k){
+var f=(co.base_fare||0)+Math.ceil(k)*(co.per_km||0);
+if(isOffCo(co))f=Math.max(0,f-OFF);
+return f;
+}
+function offBadge(co){
+if(!isOffCo(co))return "";
+return '<div style="font-size:11px;color:#ffd23f;font-weight:900;margin-top:2px">🎉 今だけ'+yen(OFF)+' OFF</div>';
+}
 
 async function sbGet(t,q){try{var r=await fetch(SB+t+"?"+(q||""),{headers:H});return await r.json()}catch(e){return[]}}
 async function sbPost(t,d){try{var r=await fetch(SB+t,{method:"POST",headers:H,body:JSON.stringify(d)});return await r.json()}catch(e){return null}}
@@ -328,11 +348,11 @@ function renderJobBoard(){
     jobs.forEach(function(j){
       o+='<div style="border-top:1px solid #24242e;padding:11px 0">';
       o+='<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">';
-      o+='<span style="font-size:10.5px;color:#3ddc84;font-weight:800">'+esc(agoTxt(j.created_at))+'</span>';
-      if (j.km) o+='<span style="font-size:10px;color:#888;border:1px solid #33333e;border-radius:999px;padding:2px 8px;font-weight:700">'+esc(j.km)+'km</span>';
+      o+='<span style="font-size:10.5px;color:#3ddc84;font-weight:800">'+h(agoTxt(j.created_at))+'</span>';
+      if (j.km) o+='<span style="font-size:10px;color:#888;border:1px solid #33333e;border-radius:999px;padding:2px 8px;font-weight:700">'+h(j.km)+'km</span>';
       o+='</div>';
       o+='<div style="font-size:13.5px;font-weight:800;line-height:1.55">'+
-         esc(area(j.pickup))+' <span style="color:#ffd23f">→</span> '+esc(area(j.dropoff))+'</div>';
+         h(area(j.pickup))+' <span style="color:#ffd23f">→</span> '+h(area(j.dropoff))+'</div>';
       if (j.price) o+='<div style="font-size:15px;font-weight:900;color:#ffd23f;margin-top:3px">'+Number(j.price).toLocaleString('ja-JP')+'<span style="font-size:11px;color:#888;font-weight:700">円</span></div>';
       o+='</div>';
     });
@@ -357,11 +377,12 @@ o+='<div style="font-size:11px;letter-spacing:.22em;color:#00e5ff;font-weight:80
 o+='<div style="font-size:27px;font-weight:900;line-height:1.3;margin:8px 0">深夜の帰り道、<br>すぐ呼べる。</div>';
 o+='<div style="font-size:13px;color:#888">あなたの車で、安全におうちまで。</div>';
 o+='<div style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12px;color:#3ddc84;background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.3);border-radius:999px;padding:6px 15px"><span style="width:8px;height:8px;border-radius:50%;background:#3ddc84;display:inline-block;animation:none"></span>今夜も稼働中・最短10分でお迎え</div>';
+if(OFF>0)o+='<div style="margin-top:10px"><span class="offtag" style="font-size:13px;padding:7px 16px">🎉 今だけ '+yen(OFF)+' OFF</span></div>';
 o+='</div>';o+='<div style="padding:0 16px 10px"><a href="tel:05017243179" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#ff4d4d,#c81e1e);color:#fff;font-weight:900;font-size:19px;padding:20px;border-radius:18px;text-decoration:none;box-shadow:0 10px 34px rgba(255,77,77,.4)">📞 電話で今すぐ呼ぶ</a></div>';
 o+='<div style="padding:0 16px"><a href="https://dnud.jp/" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#00e5ff,#1aa7c4);color:#041018;font-weight:900;font-size:19px;padding:20px;border-radius:18px;text-decoration:none;box-shadow:0 10px 34px rgba(0,229,255,.4)">🚖 今すぐ配車を呼ぶ</a></div>';
 o+='<div style="padding:10px 16px 0"><a href="https://line.me/ti/p/~kuikkusutsa" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#06c755;color:#fff;font-weight:800;font-size:15px;padding:14px;border-radius:14px;text-decoration:none">💬 LINE登録で初回 ¥500 OFF</a></div>';
 o+='<div style="margin:14px 16px;background:#0c0c10;border:1px solid #24242e;border-radius:16px;padding:16px;display:flex;justify-content:space-around;text-align:center">';
-o+='<div><div style="font-size:11px;color:#888">料金</div><div style="font-size:19px;font-weight:900;color:#00e5ff">¥1,900<span style="font-size:12px;font-weight:700">＋¥450/km</span></div></div>';
+o+='<div><div style="font-size:11px;color:#888">料金</div><div style="font-size:19px;font-weight:900;color:#00e5ff">¥1,900<span style="font-size:12px;font-weight:700">＋¥450/km</span></div>'+(OFF>0?'<div style="font-size:11px;color:#ffd23f;font-weight:900;margin-top:4px">今だけ '+yen(OFF)+' OFF</div>':'')+'</div>';
 o+='<div style="width:1px;background:#24242e"></div>';
 o+='<div><div style="font-size:11px;color:#888">営業</div><div style="font-size:14px;font-weight:900;margin-top:3px">21:00〜翌6:00<br>金土〜翌7:00</div></div>';
 o+='</div>';
@@ -420,6 +441,7 @@ if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">�
 o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
 o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+'</div>';
 o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">'+((co.base_fare>0)?'初乗り'+yen(co.base_fare)+' · ':'')+'1km'+yen(co.per_km)+'</div>';
+o+=offBadge(co);
 if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
 o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
 if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
@@ -437,7 +459,7 @@ o+='<div style="padding:18px 16px 10px;text-align:center"><span onclick="scr=\'c
 o+='<div style="margin:8px 16px 24px;padding:18px;background:#0a0a0e;border:1px solid #1c1c24;border-radius:16px;line-height:1.9;font-size:12px;color:#9a9aa6">';
 o+='<div style="font-size:14px;font-weight:900;color:#cfcfe0;margin-bottom:10px">福岡の運転代行なら「代行なう」</div>';
 o+='<p style="margin-bottom:10px">代行なうは、福岡市を中心に、那珂川市・春日市・大野城市・太宰府市エリアで運転代行サービスを提供しております。飲み会やお食事でお酒を飲まれた際、お車を安全にご自宅までお送りいたします。タクシーと違い、翌朝もご自身のお車をそのままお使いいただけるのが運転代行の大きなメリットです。</p>';
-o+='<p style="margin-bottom:10px">料金は初乗り不要のわかりやすい設定で、1kmあたり400円、高速道路料金は無料です。営業時間は21時から翌6時まで（金・土曜は翌7時まで）、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
+o+='<p style="margin-bottom:10px">料金は初乗り1,900円、以降1kmごとに450円のわかりやすい設定で、高速道路料金は無料です。'+(OFF>0?'さらに今だけ、お会計から'+yen(OFF)+'を割引しております。':'')+'営業時間は21時から翌6時まで（金・土曜は翌7時まで）、深夜のお帰りもお任せください。最短10分でお迎えに上がります。ご依頼はお電話またはLINEから、今いる場所と帰り先をお伝えいただくだけの簡単ステップです。</p>';
 o+='<p>博多区・中央区の繁華街はもちろん、福岡市近郊の幅広いエリアに対応しております。深夜の運転代行をお探しの方は、ぜひ代行なうをご利用ください。</p>';
 o+='</div>';
 o+='<div style="padding:0 16px 6px;font-size:11px;color:#666;font-weight:800">中尊社の他のサービス</div>';
@@ -501,12 +523,12 @@ o+='</div>';
 
 var kmN=parseFloat(km);
 if(kmN>0){
-var sorted=companies.slice().sort(function(a,b){return(a.base_fare+Math.ceil(kmN)*a.per_km)-(b.base_fare+Math.ceil(kmN)*b.per_km)});
+var sorted=companies.slice().sort(function(a,b){return coFare(a,kmN)-coFare(b,kmN)});
 o+='<div style="padding:10px 16px"><div style="font-size:13px;color:#FF6B00;font-weight:800;margin-bottom:8px">📊 '+kmN+'km 料金ランキング</div>';
 sorted.forEach(function(co,i){
-var fare=co.base_fare+Math.ceil(kmN)*co.per_km;
+var fare=coFare(co,kmN);
 var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1c1c24"><span style="width:22px;text-align:center;font-weight:900;color:'+(i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":"#444")+'">'+medal+'</span><div style="flex:1"><span style="font-size:13px;font-weight:700">'+h(co.name)+'</span></div><span style="font-size:18px;font-weight:900;color:#FF6B00">'+yen(fare)+'</span></div>';
+o+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1c1c24"><span style="width:22px;text-align:center;font-weight:900;color:'+(i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":"#444")+'">'+medal+'</span><div style="flex:1"><span style="font-size:13px;font-weight:700">'+h(co.name)+'</span>'+(isOffCo(co)?'<span style="font-size:10px;color:#ffd23f;font-weight:900;margin-left:6px">'+yen(OFF)+'OFF適用</span>':'')+'</div><span style="font-size:18px;font-weight:900;color:#FF6B00">'+yen(fare)+'</span></div>';
 });
 o+='</div>';
 }else{
@@ -517,6 +539,7 @@ if(co.featured)o+='<span style="font-size:10px;color:#FF6B00;font-weight:700">�
 o+='<div style="font-weight:900;font-size:15px">'+h(co.name)+'</div>';
 o+='<div style="font-size:11px;color:#888">'+h(co.pref)+' · '+h(co.area||"")+' · '+h(co.hours||"")+'</div>';
 o+='<div style="font-size:13px;font-weight:700;color:#FF6B00;margin-top:2px">'+((co.base_fare>0)?'初乗り'+yen(co.base_fare)+' · ':'')+'1km'+yen(co.per_km)+'</div>';
+o+=offBadge(co);
 if(co.campaign)o+='<div style="font-size:11px;color:#00D26A;font-weight:700;margin-top:2px">🎉 '+h(co.campaign)+'</div>';
 o+='<div style="display:flex;gap:6px;margin-top:8px"><a href="tel:'+co.phone+'" class="btn-call">📞 電話</a>';
 if(co.line)o+='<a href="'+co.line+'" target="_blank" rel="noopener" class="btn-line">💬 LINE</a>';
