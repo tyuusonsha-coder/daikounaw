@@ -70,6 +70,7 @@ input::placeholder{color:#59708F}
 .yen small{font-size:12px}
 .co{font-size:12px;color:var(--muted);font-weight:700}
 .mine{color:var(--amber);font-size:14px;font-weight:800;margin-top:10px}
+.perk{color:var(--green);font-size:12.5px;font-weight:800;margin-top:8px;line-height:1.7}
 .stars{display:flex;gap:5px;margin:10px 0}
 .stars button{background:none;border:0;font-size:30px;line-height:1;padding:0;color:var(--line);cursor:pointer}
 .stars button.on{color:var(--amber)}
@@ -136,12 +137,18 @@ function draw(list){
   $('app').innerHTML=list.map(function(o){
     var lb=label(o.status);
     var rated=(o.rating!=null);
+    var pu=String(o.pickup||'');
+    var perks=[];
+    if (pu.indexOf('長距離割引')>=0) perks.push('長距離割引 適用済');
+    if (pu.indexOf('高速代無料')>=0) perks.push('高速代 無料');
+    if (pu.indexOf('円OFF適用済')>=0) perks.push('500円OFF 適用済');
     var h='<div class="card" data-id="'+o.id+'">'+
       '<div class="date">'+fmt(o.created_at)+'<span class="chip '+lb[0]+'">'+lb[1]+'</span></div>'+
       '<div class="pt"><b>出発</b><span>'+esc(o.pickup)+'</span></div>'+
       '<div class="pt"><b>到着</b><span>'+esc(o.dropoff)+'</span></div>'+
       '<div class="foot"><div class="yen">'+Number(o.price||0).toLocaleString()+'<small>円</small></div>'+
-        '<div class="co">'+(o.km?'約'+o.km+'km／':'')+esc(conames[o.company_id]||'')+'</div></div>';
+        '<div class="co">'+(o.km?'約'+o.km+'km／':'')+esc(conames[o.company_id]||'')+'</div></div>'+
+      (perks.length?'<div class="perk">'+perks.join('　·　')+'</div>':'');
     if (o.status==='done'){
       if (rated){
         h+='<div class="mine">'+'★'.repeat(o.rating)+'☆'.repeat(5-o.rating)+' 評価済み</div>';

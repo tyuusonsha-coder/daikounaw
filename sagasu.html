@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>近くの運転代行を探す｜代行なう</title>
-<meta name="description" content="中洲・天神・博多の運転代行を空車状況で比較。そのまま指名して呼べます。">
+<meta name="description" content="中洲・天神・博多の運転代行を空車状況で比較。そのまま指名して呼べます。代行なうは高速代無料・長距離割引あり。">
 <meta name="theme-color" content="#0B1220">
 
 <!-- Google tag (gtag.js) -->
@@ -91,6 +91,7 @@ body{
 .kv b{flex:none;width:44px;color:var(--muted);font-size:10.5px;font-weight:800;padding-top:3px;letter-spacing:.06em}
 .rate{color:var(--amber);font-weight:800;font-size:13px}
 .rate i{color:var(--muted);font-style:normal;font-size:11.5px;margin-left:6px;font-weight:700}
+.perk{color:var(--green);font-weight:800;font-size:12.5px;line-height:1.6}
 .pays{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px}
 .pays span{font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
 
@@ -149,6 +150,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 var cos=[], mode='rec';
+var OWN_CO='daikounaw';   /* 高速無料・長距離割引は自社案件のみ */
 
 function liveMin(c){
   if (!c.appeal_until) return 0;
@@ -191,6 +193,9 @@ function card(c){
         ? '<div class="areas">'+c.areas.map(function(a){return '<span>'+esc(a)+'</span>';}).join('')+'</div>':'')+
       '<div class="kv"><b>営業</b><span>'+esc(c.hours||'お問い合わせください')+'</span></div>'+
       '<div class="kv"><b>料金</b><span>'+esc(c.price_note||'お問い合わせください')+'</span></div>'+
+      (c.id===OWN_CO
+        ? '<div class="kv"><b>特典</b><span class="perk">高速代 無料／長距離割引（10km超 400円・20km超 350円）</span></div>'
+        : '')+
       '<div class="kv"><b>評価</b>'+stars(c.rating_avg,c.rating_count)+'</div>'+
       (c.pay_methods&&c.pay_methods.length
         ? '<div class="pays">'+c.pay_methods.map(function(p){return '<span>'+esc(p)+'</span>';}).join('')+'</div>':'')+
