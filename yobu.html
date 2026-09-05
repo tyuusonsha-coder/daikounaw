@@ -46,8 +46,8 @@ body{
   font-feature-settings:"palt";
   display:flex; flex-direction:column;
 }
-#map{flex:1;min-height:0;background:#0a0f1c}
-.leaflet-container{background:#0a0f1c}
+#map{flex:1;min-height:0;background:#e8e4dd}
+.leaflet-container{background:#e8e4dd}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* 中央ピン */
@@ -331,8 +331,8 @@ var prefId=qs.get('co')||null, prefName='';
 var qLat=parseFloat(qs.get('lat')), qLng=parseFloat(qs.get('lng'));
 
 map = L.map('map', {zoomControl:false, attributionControl:false}).setView([33.5902,130.4017], 15);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {maxZoom:19}).addTo(map);
-L.control.attribution({prefix:false}).addAttribution('&copy; OpenStreetMap, CARTO').addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+L.control.attribution({prefix:false}).addAttribution('&copy; OpenStreetMap contributors').addTo(map);
 
 if (!isNaN(qLat) && !isNaN(qLng)){
   map.setView([qLat, qLng], 17);

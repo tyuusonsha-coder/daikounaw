@@ -40,7 +40,7 @@
   .card.donec{opacity:.75}
   .empty{color:var(--sub);font-size:13px;text-align:center;padding:20px}
   .setup{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px 18px;text-align:center}
-  .setup input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--txt);font-size:16px;margin:12px 0;text-align:center;font-family:inherit}
+  .setup input{width:100%;background:#e8e4dd;border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--txt);font-size:16px;margin:12px 0;text-align:center;font-family:inherit}
   .setup input:focus{outline:none;border-color:var(--cyan)}
   .dot-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;animation:bl 1.2s infinite}
   @keyframes bl{50%{opacity:.3}}
@@ -55,10 +55,10 @@
   .rcv-card .stamp{text-align:right;margin-top:14px;font-size:12px;color:#444}
   .rcv-close{margin-top:16px;background:#fff;color:#111;border:none;border-radius:10px;padding:12px 28px;font-weight:800;cursor:pointer}
   #dmapWrap{margin:10px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
-  #dmap{height:240px;width:100%;background:#0a0f1c}
+  #dmap{height:240px;width:100%;background:#e8e4dd}
   .gpsbar{font-size:12px;color:var(--sub);padding:8px 12px;background:var(--bg2);display:flex;justify-content:space-between;align-items:center}
   .gpson{color:var(--green)}.gpsoff{color:var(--red)}
-  .leaflet-container{background:#0a0f1c}
+  .leaflet-container{background:#e8e4dd}
   .hidden{display:none}
   #alertStopBtn{display:none;position:fixed;left:0;right:0;bottom:0;z-index:10000;width:100%;padding:26px 0 calc(26px + env(safe-area-inset-bottom));border:none;background:#d32f2f;color:#fff;font-size:26px;font-weight:800;letter-spacing:4px;font-family:inherit;cursor:pointer}
   #alertStopBtn:active{background:#a52020}
@@ -334,7 +334,7 @@ function closeReceipt(){document.getElementById("receiptOverlay").classList.add(
 function hav(a,b,c,d){var R=6371,r=function(x){return x*Math.PI/180};var dLa=r(c-a),dLo=r(d-b);var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dLo/2)*Math.sin(dLo/2);return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
 function mkDot(color){return L.divIcon({className:"",html:"<div style='background:"+color+";width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 8px "+color+"'></div>",iconSize:[16,16],iconAnchor:[8,8]});}
 var dmap=null,dDriverMk=null,dCustMk=null,dLine=null,dWatch=null,dActiveId=null,dFit=false,dLastPatch=0;
-function ensureMap(){if(dmap)return;dmap=L.map("dmap",{zoomControl:true,attributionControl:false}).setView([33.59,130.40],13);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(dmap);setTimeout(function(){if(dmap)dmap.invalidateSize()},200);}
+function ensureMap(){if(dmap)return;dmap=L.map("dmap",{zoomControl:true,attributionControl:false}).setView([33.59,130.40],13);L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(dmap);setTimeout(function(){if(dmap)dmap.invalidateSize()},200);}
 function drawDLine(){if(!dmap||!dDriverMk||!dCustMk)return;var a=dDriverMk.getLatLng(),b=dCustMk.getLatLng();if(dLine)dmap.removeLayer(dLine);dLine=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:"#00e5ff",weight:3,dashArray:"7 6"}).addTo(dmap);var km=hav(a.lat,a.lng,b.lat,b.lng);document.getElementById("gpsDist").textContent="お客まで 約"+km.toFixed(1)+"km";}
 function startGps(){
   if(dWatch!=null||!navigator.geolocation)return;

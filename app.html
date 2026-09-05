@@ -53,8 +53,8 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
   font-feature-settings:"palt"; height:100dvh; position:relative;
 }
-#map{position:absolute;inset:0;z-index:0;background:#0a0f1c}
-.leaflet-container{background:#0a0f1c}
+#map{position:absolute;inset:0;z-index:0;background:#e8e4dd}
+.leaflet-container{background:#e8e4dd}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* 上部バー */
@@ -209,8 +209,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 var map=L.map('map',{zoomControl:false,attributionControl:false}).setView([33.5902,130.4017],15);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
-L.control.attribution({prefix:false}).addAttribution('&copy; OpenStreetMap, CARTO').addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+L.control.attribution({prefix:false}).addAttribution('&copy; OpenStreetMap contributors').addTo(map);
 
 navigator.geolocation && navigator.geolocation.getCurrentPosition(function(p){
   map.setView([p.coords.latitude,p.coords.longitude],16);
