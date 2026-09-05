@@ -260,7 +260,8 @@ function yen(n){ return Number(n).toLocaleString('ja-JP'); }
    代行なう運転代行だけのキャンペーンです。
    他社を選んだときは適用しません（料金は各社の設定どおり）。
    OFF … 割引額（円）。0 にすると割引はすべて止まります       */
-var OFF = 500;
+var OFF = 1000;
+var OFF_COND = '口コミ記入で';
 var OFF_CO = 'daikounaw';
 
 function isOwn(){ return prefId === OFF_CO; }
@@ -273,7 +274,7 @@ function offAmount(){
 function offBar(){
   var v = offAmount();
   if (!v) return '';
-  return '<div class="offbar">\uD83C\uDF89 今だけ'+yen(v)+'円OFF' +
+  return '<div class="offbar">\uD83C\uDF89 '+OFF_COND+yen(v)+'円OFF' +
          '<span>概算料金から差し引いています</span></div>';
 }
 
@@ -452,7 +453,7 @@ function cardHtml(c){
     o+='<div class="cpk"><span>高速代 無料</span><span>10km超 400円／20km超 350円</span></div>';
   }
   if(c.campaign) o+='<div class="ccp">\uD83C\uDF89 '+esc(c.campaign)+'</div>';
-  else if(c.id===OFF_CO && OFF>0) o+='<div class="ccp">\uD83C\uDF89 今だけ'+yen(OFF)+'円OFF</div>';
+  else if(c.id===OFF_CO && OFF>0) o+='<div class="ccp">\uD83C\uDF89 '+OFF_COND+yen(OFF)+'円OFF</div>';
   o+='<div class="cb">';
   if(c.phone) o+='<a class="call" href="tel:'+esc(String(c.phone).replace(/[^0-9+]/g,''))+'">電話をかける</a>';
   o+='<button class="go" data-co="'+esc(c.id)+'" data-nm="'+esc(c.name)+'">この場所に呼ぶ</button>';
@@ -577,7 +578,7 @@ function viewForm(){
     '<div class="fare"><div class="yen">'+yen(price)+'<small>円</small></div>' +
       '<div class="d">' +
         (lg ? '<em>長距離割引 '+yen(lg)+'円</em> 適用済<br>' : '') +
-        (off ? '<b>今だけ'+yen(off)+'円OFF</b> 適用済（<s>'+yen(price+off)+'円</s>）<br>' : '') +
+        (off ? '<b>'+OFF_COND+yen(off)+'円OFF</b> 適用済（<s>'+yen(price+off)+'円</s>）<br>' : '') +
         '約'+dist.toFixed(1)+'km の概算料金<br>'+rateNote() +
         (prefId && prefId!==OFF_CO ? '<br>※料金は業者により異なります' : '') + '</div></div>' +
     perkBar() +
@@ -643,7 +644,7 @@ function viewTrack(o, co){
   }
   var pu = String(o.pickup||'');
   var offNote = (pu.indexOf('円OFF適用済') >= 0)
-    ? '<b>今だけ'+yen(OFF)+'円OFF</b> 適用済<br>' : '';
+    ? '<b>'+OFF_COND+yen(OFF)+'円OFF</b> 適用済<br>' : '';
   var lgNote = (pu.indexOf('長距離割引') >= 0) ? '<em>長距離割引</em> 適用済<br>' : '';
   var hwNote = (pu.indexOf('高速代無料') >= 0) ? '<em>高速代は無料（当社負担）</em><br>' : '';
   $('sheet').innerHTML =
