@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>今夜の運勢 | 代行NOW</title>
+<meta name="description" content="代行NOWの夜のおみくじ。今夜の運勢、帰り道運、ラッキーな一杯を占います。1日1回、その日の運勢が決まります。">
+<meta property="og:site_name" content="代行NOW">
+<meta property="og:title" content="今夜の運勢 | 代行NOW">
+<meta property="og:description" content="夜の街のおみくじ。今夜の運勢と帰り道運を占います。">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://daikounaw.com/uranai.html">
+<style>
+  :root{
+    --night:#0C1526;
+    --night-2:#16243F;
+    --haze:#1E3358;
+    --lantern:#F2542D;
+    --neon:#5FE3E0;
+    --gold:#E7C36A;
+    --paper:#F5F0E3;
+    --paper-shade:#E4DBC6;
+    --text:#DCE3F0;
+    --dim:#8496B4;
+    --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+    --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,"Noto Sans JP",sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{margin:0;padding:0;}
+
+  body{
+    background:
+      radial-gradient(120% 70% at 50% 0%, var(--haze) 0%, var(--night-2) 42%, var(--night) 100%),
+      var(--night);
+    color:var(--text);
+    font-family:var(--gothic);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:
+      calc(env(safe-area-inset-top) + 28px)
+      20px
+      calc(env(safe-area-inset-bottom) + 40px);
+    display:flex;
+    justify-content:center;
+  }
+
+  .wrap{width:100%;max-width:420px;}
+
+  /* ---- 見出し ---- */
+  .head{text-align:center;margin-bottom:26px;}
+
+  .brand{
+    font-size:12px;
+    letter-spacing:.34em;
+    color:var(--neon);
+    text-indent:.34em;
+    margin:0 0 14px;
+  }
+
+  .title{
+    font-family:var(--mincho);
+    font-size:34px;
+    font-weight:600;
+    letter-spacing:.16em;
+    text-indent:.16em;
+    margin:0;
+    color:#fff;
+    text-shadow:0 0 22px rgba(95,227,224,.35);
+  }
+
+  .lead{
+    margin:12px 0 0;
+    font-size:13px;
+    line-height:1.9;
+    color:var(--dim);
+  }
+
+  /* ---- みくじ箱 ---- */
+  .box{
+    width:150px;
+    margin:34px auto 0;
+    border:0;
+    padding:0;
+    background:none;
+    cursor:pointer;
+    display:block;
+    font:inherit;
+    color:inherit;
+  }
+
+  .box:focus-visible{outline:2px solid var(--neon);outline-offset:8px;border-radius:6px;}
+
+  .box-body{
+    position:relative;
+    height:150px;
+    border-radius:5px;
+    background:
+      linear-gradient(160deg,#8C2A17 0%,#5E1A0E 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      0 18px 44px rgba(0,0,0,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .box-body::after{
+    content:"";
+    position:absolute;
+    left:12px;right:12px;top:12px;bottom:12px;
+    border:1px solid rgba(231,195,106,.5);
+    border-radius:2px;
+  }
+
+  .box-kanji{
+    font-family:var(--mincho);
+    writing-mode:vertical-rl;
+    font-size:26px;
+    letter-spacing:.24em;
+    color:var(--gold);
+  }
+
+  .box-hint{
+    margin-top:14px;
+    font-size:12px;
+    letter-spacing:.12em;
+    color:var(--dim);
+  }
+
+  .box:hover .box-body{transform:translateY(-2px);}
+  .box-body{transition:transform .25s ease;}
+
+  /* ---- 結果 ---- */
+  .result{display:none;}
+  .result.show{display:block;}
+
+  .slip-stage{
+    overflow:hidden;
+    padding-top:6px;
+  }
+
+  .slip{
+    background:linear-gradient(180deg,var(--paper) 0%,var(--paper-shade) 100%);
+    color:#2A2118;
+    border-radius:3px;
+    padding:26px 20px 22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.55);
+    position:relative;
+    border-top:5px solid var(--lantern);
+  }
+
+  .slip.animate{animation:rise .85s cubic-bezier(.16,.84,.3,1) both;}
+
+  @keyframes rise{
+    from{transform:translateY(101%);opacity:0;}
+    to{transform:translateY(0);opacity:1;}
+  }
+
+  .rank-row{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    border-bottom:1px solid rgba(42,33,24,.18);
+    padding-bottom:20px;
+  }
+
+  .rank{
+    font-family:var(--mincho);
+    writing-mode:vertical-rl;
+    font-size:52px;
+    font-weight:600;
+    line-height:1.02;
+    letter-spacing:.06em;
+    color:#8C2A17;
+    flex:none;
+  }
+
+  .rank-side{padding-top:4px;}
+
+  .rank-name{
+    font-family:var(--mincho);
+    font-size:19px;
+    margin:0 0 10px;
+    letter-spacing:.06em;
+  }
+
+  .rank-text{
+    margin:0;
+    font-size:13.5px;
+    line-height:2;
+    color:#4A3E30;
+  }
+
+  /* ---- 三運 ---- */
+  .fortunes{
+    margin:20px 0 0;
+    padding:0;
+    list-style:none;
+  }
+
+  .fortunes li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:9px 0;
+    border-bottom:1px dotted rgba(42,33,24,.22);
+  }
+
+  .f-name{
+    font-family:var(--mincho);
+    font-size:14px;
+    letter-spacing:.08em;
+    color:#3A3024;
+    flex:none;
+  }
+
+  .pips{display:flex;gap:5px;}
+
+  .pip{
+    width:11px;height:11px;
+    border-radius:50%;
+    border:1px solid #8C2A17;
+  }
+
+  .pip.on{background:#8C2A17;}
+
+  /* ---- ラッキー ---- */
+  .lucky{
+    margin:18px 0 0;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    text-align:center;
+  }
+
+  .lucky div{
+    background:rgba(140,42,23,.07);
+    border-radius:3px;
+    padding:11px 6px;
+  }
+
+  .lucky dt{
+    font-size:10.5px;
+    color:#7A6A56;
+    margin-bottom:6px;
+    letter-spacing:.06em;
+  }
+
+  .lucky dd{
+    margin:0;
+    font-family:var(--mincho);
+    font-size:15px;
+    color:#2A2118;
+    letter-spacing:.04em;
+  }
+
+  /* ---- 一手 ---- */
+  .advice{
+    margin:20px 0 0;
+    background:#2A2118;
+    color:var(--paper);
+    border-radius:3px;
+    padding:16px 18px;
+  }
+
+  .advice h3{
+    font-family:var(--mincho);
+    font-size:13px;
+    margin:0 0 8px;
+    color:var(--gold);
+    letter-spacing:.1em;
+  }
+
+  .advice p{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.95;
+  }
+
+  /* ---- ボタン ---- */
+  .actions{margin-top:22px;display:grid;gap:11px;}
+
+  .btn{
+    display:block;
+    text-align:center;
+    padding:16px;
+    border-radius:4px;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-decoration:none;
+    border:0;
+    font-family:inherit;
+    cursor:pointer;
+  }
+
+  .btn-main{
+    background:var(--lantern);
+    color:#fff;
+    box-shadow:0 10px 30px rgba(242,84,45,.32);
+  }
+
+  .btn-sub{
+    background:transparent;
+    color:var(--text);
+    border:1px solid rgba(220,227,240,.3);
+  }
+
+  .btn:focus-visible{outline:2px solid var(--neon);outline-offset:3px;}
+
+  .again{
+    margin-top:20px;
+    text-align:center;
+    font-size:12px;
+    line-height:1.9;
+    color:var(--dim);
+  }
+
+  .foot{
+    margin-top:34px;
+    text-align:center;
+    font-size:11.5px;
+    line-height:2;
+    color:#5D6E8C;
+  }
+
+  .foot a{color:var(--dim);}
+
+  @media (prefers-reduced-motion:reduce){
+    .slip.animate{animation:none;}
+    .box-body{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="head">
+    <p class="brand">代行NOW</p>
+    <h1 class="title">今夜の運勢</h1>
+    <p class="lead">夜の街のおみくじです。<br>運勢は1日1回、その日のぶんが決まります。</p>
+  </header>
+
+  <button class="box" id="drawBtn" type="button">
+    <span class="box-body"><span class="box-kanji">御籤</span></span>
+    <span class="box-hint">箱をふって引く</span>
+  </button>
+
+  <section class="result" id="result" aria-live="polite">
+    <div class="slip-stage">
+      <div class="slip" id="slip">
+
+        <div class="rank-row">
+          <div class="rank" id="rank">大吉</div>
+          <div class="rank-side">
+            <h2 class="rank-name" id="rankName">追い風の夜</h2>
+            <p class="rank-text" id="rankText"></p>
+          </div>
+        </div>
+
+        <ul class="fortunes" id="fortunes"></ul>
+
+        <dl class="lucky">
+          <div><dt>ラッキーな一杯</dt><dd id="lDrink">—</dd></div>
+          <div><dt>ラッキーな街</dt><dd id="lTown">—</dd></div>
+          <div><dt>ラッキーナンバー</dt><dd id="lNum">—</dd></div>
+        </dl>
+
+        <div class="advice">
+          <h3>今夜の一手</h3>
+          <p id="advice"></p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-main" href="yobu.html">代行を呼ぶ</a>
+      <button class="btn btn-sub" id="copyBtn" type="button">結果をコピーする</button>
+    </div>
+
+    <p class="again">同じ日は何度引いても同じ運勢です。<br>次の運勢は明日の0時から。</p>
+  </section>
+
+  <p class="foot">
+    飲んだら運転はしない。帰り道は代行NOWへ。<br>
+    <a href="index.html">代行NOW トップへ</a>
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var RANKS = [
+    { key:"大吉", name:"追い風の夜", weight:8,
+      text:"押せば動く夜です。迷っていた誘いも、言いそびれた一言も、今夜は通ります。",
+      advice:"最初に浮かんだ人に連絡してください。今夜の縁は、そこから伸びます。" },
+    { key:"中吉", name:"機嫌のいい夜", weight:18,
+      text:"大きな山はありませんが、笑って終われる夜です。人の話をよく聞く日ほど得をします。",
+      advice:"会計はきれいに割ってください。あとを引かない夜になります。" },
+    { key:"吉",   name:"静かに整う夜", weight:22,
+      text:"派手さはないぶん、地に足がつく夜。先延ばしにしていた小さな用事が片づきます。",
+      advice:"帰りの手配だけ先に決めておくと、あとの時間が一気に軽くなります。" },
+    { key:"小吉", name:"一杯目がいちばん旨い夜", weight:22,
+      text:"始まりが良く、後半はゆるやかに下る流れ。盛り上がりの頂点は思ったより早く来ます。",
+      advice:"いちばん楽しい瞬間に席を立てたら、今夜はあなたの勝ちです。" },
+    { key:"末吉", name:"引き際が肝心な夜", weight:20,
+      text:"急がなければ問題のない夜。焦って動いたぶんだけ、財布と時間が減ります。",
+      advice:"二次会の返事は、外の空気を吸ってから決めてください。" },
+    { key:"凶",   name:"何もしないのが上策の夜", weight:10,
+      text:"歯車がわずかに噛み合わない夜です。ただし、この凶は帰り道の選び方ひとつで裏返ります。",
+      advice:"今夜は自分でハンドルを握らないこと。それだけで凶が吉に変わります。" }
+  ];
+
+  var LUCK_LABELS = ["帰り道運", "縁運", "金運"];
+
+  var DRINKS = ["ハイボール","熱燗","生ビール","レモンサワー","焼酎のお湯割り","ウーロン茶","白ワイン","ジンジャーエール","梅酒ソーダ"];
+  var TOWNS  = ["中洲","天神","博多駅前","薬院","那珂川","春日","大野城","太宰府","西中洲"];
+
+  /* 日付シード。同じ日は同じ結果になります。 */
+  function todaySeed() {
+    var d = new Date();
+    var s = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    return s;
+  }
+
+  /* 決まった値から擬似乱数をつくります。 */
+  function makeRandom(seed) {
+    var x = seed % 2147483647;
+    if (x <= 0) { x += 2147483646; }
+    return function () {
+      x = (x * 16807) % 2147483647;
+      return (x - 1) / 2147483646;
+    };
+  }
+
+  function pickRank(rnd) {
+    var total = 0, i;
+    for (i = 0; i < RANKS.length; i++) { total += RANKS[i].weight; }
+    var r = rnd() * total;
+    for (i = 0; i < RANKS.length; i++) {
+      r -= RANKS[i].weight;
+      if (r <= 0) { return RANKS[i]; }
+    }
+    return RANKS[RANKS.length - 1];
+  }
+
+  function pipRow(label, level) {
+    var li = document.createElement("li");
+
+    var name = document.createElement("span");
+    name.className = "f-name";
+    name.textContent = label;
+
+    var pips = document.createElement("span");
+    pips.className = "pips";
+    for (var i = 0; i < 5; i++) {
+      var p = document.createElement("span");
+      p.className = i < level ? "pip on" : "pip";
+      pips.appendChild(p);
+    }
+
+    li.appendChild(name);
+    li.appendChild(pips);
+    li.setAttribute("aria-label", label + " 5段階中 " + level);
+    return li;
+  }
+
+  var state = null;
+
+  function draw() {
+    var rnd = makeRandom(todaySeed());
+    var rank = pickRank(rnd);
+
+    /* 運勢が高いほど各運も上がりやすくします。 */
+    var base = (RANKS.length - RANKS.indexOf(rank)) / RANKS.length;
+    var levels = LUCK_LABELS.map(function () {
+      var v = Math.round(base * 3.4 + rnd() * 2.2);
+      return Math.max(1, Math.min(5, v));
+    });
+
+    var drink = DRINKS[Math.floor(rnd() * DRINKS.length)];
+    var town  = TOWNS[Math.floor(rnd() * TOWNS.length)];
+    var num   = 1 + Math.floor(rnd() * 9);
+
+    document.getElementById("rank").textContent = rank.key;
+    document.getElementById("rankName").textContent = rank.name;
+    document.getElementById("rankText").textContent = rank.text;
+    document.getElementById("advice").textContent = rank.advice;
+
+    var list = document.getElementById("fortunes");
+    list.textContent = "";
+    LUCK_LABELS.forEach(function (label, i) {
+      list.appendChild(pipRow(label, levels[i]));
+    });
+
+    document.getElementById("lDrink").textContent = drink;
+    document.getElementById("lTown").textContent = town;
+    document.getElementById("lNum").textContent = num;
+
+    state = {
+      rank: rank,
+      levels: levels,
+      drink: drink,
+      town: town,
+      num: num
+    };
+
+    var result = document.getElementById("result");
+    var slip = document.getElementById("slip");
+    result.classList.add("show");
+    slip.classList.remove("animate");
+    void slip.offsetWidth;
+    slip.classList.add("animate");
+
+    document.getElementById("drawBtn").style.display = "none";
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function shareText() {
+    if (!state) { return ""; }
+    return [
+      "【今夜の運勢】" + state.rank.key + "／" + state.rank.name,
+      LUCK_LABELS[0] + " " + state.levels[0] + "／5　" +
+      LUCK_LABELS[1] + " " + state.levels[1] + "／5　" +
+      LUCK_LABELS[2] + " " + state.levels[2] + "／5",
+      "ラッキーな一杯：" + state.drink + "　ラッキーな街：" + state.town,
+      state.rank.advice,
+      "占う → https://daikounaw.com/uranai.html"
+    ].join("\n");
+  }
+
+  document.getElementById("drawBtn").addEventListener("click", draw);
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var btn = this;
+    var text = shareText();
+    var done = function () {
+      btn.textContent = "コピーしました";
+      setTimeout(function () { btn.textContent = "結果をコピーする"; }, 2000);
+    };
+    var fallback = function () {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); }
+      catch (e) { btn.textContent = "コピーできませんでした"; }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+  });
+})();
+</script>
+</body>
+</html>

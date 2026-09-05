@@ -162,9 +162,9 @@ body{background:#060609;color:#efefef;font-family:-apple-system,BlinkMacSystemFo
 .hdr{background:#0e0e13;padding:8px 16px;border-bottom:1px solid #1c1c24;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
 .logo{font-weight:900;font-size:18px;cursor:pointer}.logo span{color:#FF6B00}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,9,.97);border-top:1px solid #1c1c24;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nav button{flex:1;padding:13px 0 16px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:#444;font-family:inherit}
+.nav button{flex:1;min-width:0;padding:13px 0 16px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#444;font-family:inherit;white-space:nowrap}
 .nav button.on{color:#FF6B00}
-.nav button .ico{font-size:26px;line-height:1}
+.nav button .ico{font-size:23px;line-height:1}
 #ctabar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);width:100%;max-width:480px;display:flex;gap:8px;padding:0 12px;z-index:98;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
 #ctabar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 #ctabar a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 0;border-radius:999px;text-decoration:none;font-weight:900;font-size:16px;white-space:nowrap}
@@ -407,6 +407,7 @@ out+='<div class="nav">';
 out+='<button class="'+(scr==="home"?"on":"")+'" onclick="scr=\'home\';render()"><span class="ico">🏠</span>ホーム</button>';
 out+='<button class="'+(scr==="battle"?"on":"")+'" onclick="scr=\'battle\';render()"><span class="ico">⚔️</span>バトル</button>';
 out+='<button onclick="location.href=\'pachi.html\'" style="color:#ffd23f"><span class="ico">🎰</span>パチンコ</button>';
+out+='<button onclick="location.href=\'uranai.html\'" style="color:#b9a6ff"><span class="ico">🔮</span>占い</button>';
 out+='<button onclick="location.href=\'disri.html\'"><span class="ico">☎️</span><span style="background:linear-gradient(90deg,#ff5cc8,#ffd54a,#00ffe0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">テレクラ</span></button>';
 out+='</div>';
 app.innerHTML=out;
