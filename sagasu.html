@@ -194,7 +194,7 @@ function card(c){
       '<div class="kv"><b>営業</b><span>'+esc(c.hours||'お問い合わせください')+'</span></div>'+
       '<div class="kv"><b>料金</b><span>'+esc(c.price_note||'お問い合わせください')+'</span></div>'+
       (c.id===OWN_CO
-        ? '<div class="kv"><b>特典</b><span class="perk">高速代 無料／長距離割引（10km超 400円・20km超 350円）</span></div>'
+        ? '<div class="kv"><b>特典</b><span class="perk">高速代 無料／長距離割引（20km超 300円）</span></div>'
         : '')+
       '<div class="kv"><b>評価</b>'+stars(c.rating_avg,c.rating_count)+'</div>'+
       (c.pay_methods&&c.pay_methods.length

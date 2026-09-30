@@ -153,9 +153,9 @@ function toast(m){ var t=$('toast'); t.textContent=m; t.className='toast show';
   clearTimeout(t._t); t._t=setTimeout(function(){t.className='toast';},3600); }
 function yen(n){ return Number(n).toLocaleString('ja-JP'); }
 
-/* 料金：初乗り400円（御願有）、以降1kmごと450円 */
+/* 料金：初乗り400円（御願有）、以降1kmごと350円 */
 function fare(km){
-  return 400 + Math.ceil(km) * 450;
+  return 400 + Math.ceil(km) * 350;
 }
 function hav(a, b){
   var R=6371, dLat=(b[0]-a[0])*Math.PI/180, dLng=(b[1]-a[1])*Math.PI/180;
@@ -259,7 +259,7 @@ function viewForm(){
       '<div class="pt b"><span class="tag">到着</span><span class="txt">'+esc(bName)+'</span></div>' +
     '</div>' +
     '<div class="fare"><div class="yen">'+yen(price)+'<small>円</small></div>' +
-      '<div class="d">約'+dist.toFixed(1)+'km の概算料金<br>初乗り400円（御願有）／1kmごと450円</div></div>' +
+      '<div class="d">約'+dist.toFixed(1)+'km の概算料金<br>初乗り400円（御願有）／1kmごと350円</div></div>' +
     (prefName ? '<div class="pref">'+esc(prefName)+' を指名しています<span>90秒間この業者が優先して受注します</span></div>' : '') +
     '<input id="cphone" type="tel" inputmode="tel" placeholder="電話番号（必須）" autocomplete="tel">' +
     '<input id="cname" placeholder="お名前" autocomplete="name">' +
