@@ -156,6 +156,31 @@
 }
 </script>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://daikounaw.com/#faq-guarantee",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "福岡で一番安い運転代行はどこですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "代行なう運転代行は福岡エリア最安保証を実施しています。福岡県内で運転代行業の認定を受けた事業者の料金が当社より安い場合、他社の領収書または公式料金表を乗車前にご提示いただければ、その場で同額まで値下げします。そのため福岡県内で当社より高い料金をお支払いになることはありません。料金は初乗り400円（御願有）、以降1kmごと350円、20km超は1kmごと300円です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "代行なう運転代行の最安保証とは何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "福岡県内で運転代行業の認定を受けた事業者の料金が代行なう運転代行より安い場合、その金額まで値下げしてご提供する制度です。他社の領収書または他社の公式料金表を、ご乗車前にドライバーへご提示ください。その場で同額まで値下げします。同一の出発地・目的地での料金を比較します。ご乗車後のお申し出は対象外です。高速道路料金や駐車場代などの実費は比較の対象に含みません。"
+      }
+    }
+  ]
+}
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
@@ -296,7 +321,7 @@ textarea,input[type=text],input[type=number],input[type=tel],select{width:100%;b
       <button class="findbtn" onclick="findNear()">近くの運転代行を探す 🔍</button>
       <div class="chips" id="chips"></div>
       <a href="hikaku.html" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 12px 0;background:linear-gradient(135deg,rgba(255,210,63,.14),#0c0c10);border:1px solid rgba(255,210,63,.45);border-radius:14px;padding:13px 14px;text-decoration:none">
-        <div><div style="font-size:13.5px;font-weight:900;color:#ffd23f">📊 福岡40社 初乗り料金比較</div><div style="font-size:11px;color:#8a8a97;margin-top:2px">初乗り400円は福岡エリア最安（2026年9月調べ）</div></div>
+        <div><div style="font-size:13.5px;font-weight:900;color:#ffd23f">🏆 福岡エリア最安保証</div><div style="font-size:11px;color:#8a8a97;margin-top:2px">他社が安ければ、その場で同額まで値下げします</div></div>
         <span style="font-size:18px;color:#ffd23f">›</span></a>
       <div class="lhead"><h2>🚘 運転代行業者</h2><span id="lcount">読み込み中…</span></div>
       <div id="colist"><div class="empty">読み込み中…</div></div>
@@ -633,6 +658,8 @@ function paintLegacy(){
   if(OFF>0){
     o+='<div style="margin-top:10px"><span class="offtag" style="font-size:13px;padding:7px 16px">🎉 初乗り '+yen(Math.max(0,1900-OFF))+'（御願有）</span></div>';
     o+='<div class="offcond">御願有＝アンケートへのご協力をお願いしております</div>';
+    o+='<div style="margin-top:12px"><a href="hikaku.html" style="display:inline-block;font-size:13px;font-weight:900;color:#ffd23f;background:rgba(255,210,63,.12);border:1px solid rgba(255,210,63,.45);border-radius:999px;padding:8px 18px;text-decoration:none">🏆 福岡エリア最安保証 ›</a></div>';
+    o+='<div class="offcond" style="margin-top:6px">他社のほうが安ければ、その場で同額まで値下げします</div>';
   }
   o+='</div>';
 
@@ -655,7 +682,7 @@ function paintLegacy(){
   });
   o+='</div>';
 
-  o+='<div style="padding:12px 16px 0"><a href="hikaku.html" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,rgba(255,210,63,.12),#0c0c10);border:1px solid rgba(255,210,63,.4);border-radius:16px;padding:15px 16px;text-decoration:none"><div><div style="font-size:14px;font-weight:900;color:#ffd23f">📊 福岡の運転代行40社 料金比較</div><div style="font-size:11px;color:#888;margin-top:2px">初乗り400円（御願有）は福岡エリア最安でした</div></div><span style="font-size:18px;color:#ffd23f">›</span></a></div>';
+  o+='<div style="padding:12px 16px 0"><a href="hikaku.html" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,rgba(255,210,63,.12),#0c0c10);border:1px solid rgba(255,210,63,.4);border-radius:16px;padding:15px 16px;text-decoration:none"><div><div style="font-size:14px;font-weight:900;color:#ffd23f">🏆 福岡エリア最安保証</div><div style="font-size:11px;color:#888;margin-top:2px">他社が安ければその場で同額まで値下げ・40社の比較はこちら</div></div><span style="font-size:18px;color:#ffd23f">›</span></a></div>';
   o+=jobBoardHTML();
   o+=newsHTML();
 
