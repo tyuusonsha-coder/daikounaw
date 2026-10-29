@@ -3,40 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>運転代行を呼ぶ｜代行なうアプリ</title>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17580686224"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-17580686224');
-
-  /* 電話番号がタップされたときにコンバージョンを送信 */
-  document.addEventListener('click', function(e){
-    var t = e.target;
-    while (t && t !== document) {
-      if (t.tagName === 'A' && (t.getAttribute('href')||'').indexOf('tel:') === 0) {
-        gtag('event', 'conversion', {
-          'send_to': 'AW-17580686224/SImfCIiF4-YcEJD3j79B',
-          'value': 1900.0,
-          'currency': 'JPY'
-        });
-        return;
-      }
-      t = t.parentNode;
-    }
-  }, true);
-</script>
-
+<title>運転代行を呼ぶ｜代行なう</title>
+<meta name="theme-color" content="#0B1220">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="代行なう">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
 :root{
   --bg:#0B1220; --surface:#142338; --surface-2:#1B2E48; --line:#22385A;
-  --text:#E8EEF7; --muted:#8FA3BF; --dim:#5E7690;
-  --amber:#FFB020; --green:#2ECC71; --red:#FF5A5A;
+  --text:#E8EEF7; --muted:#8FA3BF; --amber:#FFB020; --green:#2ECC71; --red:#FF5A5A;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%;overflow:hidden}
@@ -46,13 +25,16 @@ body{
   font-feature-settings:"palt";
   display:flex; flex-direction:column;
 }
-#map{flex:1;min-height:0;background:#e8e4dd}
-.leaflet-container{background:#e8e4dd}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#map{flex:1;min-height:0;background:#a8a49c}
+.leaflet-container{background:#a8a49c}
+#map .leaflet-tile-pane{filter:brightness(.68) saturate(.8) contrast(1.04)}
+.leaflet-control-attribution{font-size:8.5px!important;background:rgba(0,0,0,.35)!important;
+  color:#cfd6e2!important;padding:1px 6px!important;border-radius:6px 0 0 0}
+.leaflet-control-attribution a{color:#cfd6e2!important}
 
 /* 中央ピン */
 #crosshair{
-  position:absolute; left:50%; top:50%; z-index:500;
+  position:fixed; left:50%; top:50%; z-index:500;
   transform:translate(-50%,-100%); pointer-events:none; text-align:center;
   transition:transform .12s;
 }
@@ -72,14 +54,13 @@ body{
 .sheet{
   flex:none; background:var(--surface); border-top:1px solid var(--line);
   border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom));
-  box-shadow:0 -12px 30px rgba(0,0,0,.45); max-height:66vh; overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+  box-shadow:0 -12px 30px rgba(0,0,0,.45); max-height:64vh; overflow-y:auto;
 }
 .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
 h2{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
 .sub{font-size:13px;color:var(--muted);margin:0 0 14px;font-weight:600;line-height:1.7}
 
-/* 今だけ割引の帯 */
+/* 御願有（初乗り400円）の帯 */
 .offbar{
   display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   background:linear-gradient(135deg,rgba(255,176,32,.17),rgba(255,176,32,.05));
@@ -88,6 +69,19 @@ h2{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
   font-size:13.5px;font-weight:900;color:var(--amber);letter-spacing:.01em;
 }
 .offbar span{font-size:11px;color:var(--muted);font-weight:700}
+.offbar .bd{
+  background:#E14B3C;color:#fff;font-size:10.5px;font-weight:900;
+  letter-spacing:.06em;padding:3px 8px;border-radius:6px;
+}
+
+/* 高速無料・長距離割引 */
+.perks{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.perk{
+  flex:1 1 140px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:12px;padding:9px 11px;line-height:1.5;
+}
+.perk b{display:block;color:var(--green);font-size:13px;font-weight:900;margin-bottom:2px}
+.perk i{font-style:normal;color:var(--muted);font-size:11px;font-weight:700}
 
 .btn{
   width:100%;border:0;border-radius:14px;font-family:inherit;
@@ -99,70 +93,6 @@ h2{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
 .btn.ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line);font-size:14px;padding:13px}
 .btn:disabled{background:var(--surface-2);color:var(--muted);transform:none}
 .row{display:flex;gap:9px;margin-top:9px}
-
-/* 住所・店名の検索 */
-.srch{margin-bottom:12px}
-.srch .in{display:flex;gap:8px}
-.srch input{
-  flex:1;min-width:0;height:48px;margin:0;padding:0 14px;
-  background:var(--surface-2);color:var(--text);
-  border:1px solid var(--line);border-radius:12px;
-  font-size:16px;font-family:inherit;font-weight:600;-webkit-appearance:none;
-}
-.srch input:focus{outline:none;border-color:var(--amber)}
-.srch input::placeholder{color:#59708F}
-.srch button{
-  flex:none;height:48px;padding:0 18px;border:0;border-radius:12px;
-  background:var(--surface-2);border:1px solid var(--line);color:var(--text);
-  font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
-}
-.srch button:disabled{opacity:.5}
-.hits{margin-top:8px;border-radius:12px;overflow:hidden;background:var(--surface-2);
-  border:1px solid var(--line);display:none}
-.hits div{padding:13px 14px;font-size:14px;line-height:1.45;border-bottom:1px solid var(--line);cursor:pointer}
-.hits div:last-child{border-bottom:0}
-.hits div:active{background:rgba(255,176,32,.16)}
-.hits .msg{color:var(--muted);font-weight:700;cursor:default}
-
-/* 業者一覧（代行なう掲示板） */
-.tabs{display:flex;background:var(--surface-2);border:1px solid var(--line);
-  border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
-.tb{flex:1;background:transparent;border:none;border-radius:10px;color:var(--muted);
-  font-size:13px;font-weight:800;padding:10px 4px;font-family:inherit;cursor:pointer}
-.tb.on{background:var(--amber);color:#241400}
-.cc{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
-  padding:13px 14px;margin-bottom:9px}
-.cc.feat{border-color:rgba(255,176,32,.45)}
-.cc .cf{font-size:9.5px;font-weight:900;color:var(--amber);letter-spacing:.08em}
-.cc .cnm{font-size:15px;font-weight:900;line-height:1.35;margin-top:2px}
-.cc .car{font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
-.cc .chr{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px;line-height:1.5}
-.cc .ctel{font-size:14px;font-weight:800;color:#4ADE80;margin-top:5px;letter-spacing:.02em}
-.cc .ccp{font-size:11px;color:#4ADE80;font-weight:800;margin-top:3px}
-.cc .cst{font-size:9.5px;font-weight:900;padding:3px 9px;border-radius:999px;white-space:nowrap}
-.cc .cst.on{background:rgba(74,222,128,.14);color:#4ADE80;border:1px solid rgba(74,222,128,.35)}
-.cc .cst.off{background:var(--surface);color:var(--dim);border:1px solid var(--line)}
-.cc .cfr{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.cc .cfr span{font-size:11px;font-weight:700;color:var(--text);background:var(--surface);
-  border:1px solid var(--line);border-radius:8px;padding:4px 9px}
-.cc .cfr span b{color:var(--amber);font-weight:900}
-.cc .cpk{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.cc .cpk span{font-size:10.5px;font-weight:800;color:#4ADE80;
-  background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.30);
-  border-radius:8px;padding:4px 9px}
-.perks{display:flex;gap:8px;margin:0 0 12px}
-.perk{flex:1 1 0;min-width:0;background:var(--surface-2);border:1px solid var(--line);
-  border-radius:12px;padding:9px 11px;line-height:1.5}
-.perk b{display:block;color:var(--green);font-size:13px;font-weight:900;margin-bottom:2px}
-.perk i{font-style:normal;color:var(--muted);font-size:11px;font-weight:700}
-.fare .d em{font-style:normal;color:var(--green);font-weight:900}
-.cc .cb{display:flex;gap:7px;margin-top:10px}
-.cc .cb a,.cc .cb button{flex:1;text-align:center;border-radius:11px;font-size:12.5px;
-  font-weight:800;padding:11px 4px;text-decoration:none;font-family:inherit;border:0;cursor:pointer}
-.cc .cb a.call{background:var(--surface);border:1px solid var(--line);color:#4ADE80}
-.cc .cb button.go{background:var(--amber);color:#241400}
-.cnone{text-align:center;color:var(--muted);font-size:13px;font-weight:700;
-  line-height:1.9;padding:22px 10px}
 
 .route{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .pt{display:flex;gap:10px;align-items:flex-start}
@@ -179,6 +109,7 @@ h2{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:.02em}
 .fare .yen small{font-size:14px;margin-left:2px}
 .fare .d{font-size:12px;color:var(--muted);font-weight:700;line-height:1.6}
 .fare .d b{color:var(--amber);font-weight:900}
+.fare .d em{font-style:normal;color:var(--green);font-weight:900}
 .fare .d s{opacity:.75}
 
 input{
@@ -186,6 +117,15 @@ input{
   border:1px solid var(--line);border-radius:12px;
   padding:15px;font-size:16px;font-family:inherit;font-weight:600;margin-bottom:9px;
 }
+.find{display:flex;gap:8px;margin-bottom:10px}
+.find input{margin-bottom:0}
+.find .sbtn{width:auto;flex:none;padding:14px 16px;font-size:14px;white-space:nowrap}
+.sug{margin:-2px 0 12px}
+.si{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;
+  padding:12px 13px;margin-bottom:7px;font-size:13.5px;font-weight:700;line-height:1.5;
+  cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.si:active{border-color:var(--amber)}
+.si.muted{color:var(--muted);font-weight:600;cursor:default}
 input:focus{outline:none;border-color:var(--amber)}
 input::placeholder{color:#59708F}
 
@@ -231,15 +171,50 @@ input::placeholder{color:#59708F}
   opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;
 }
 .toast.show{opacity:1;transform:none}
+.drv-icon{
+  width:30px;height:30px;border-radius:50%;background:var(--amber);
+  border:3px solid #241400;box-shadow:0 0 0 4px rgba(255,176,32,.3);
+}
+
+/* TikTokライブ配信バナー（地図の上に出します） */
+.dnud-live{
+  --dnud-night:#0e1622; --dnud-amber:#e9b64c; --dnud-text:#f4efe6;
+  position:fixed; right:12px; top:calc(12px + env(safe-area-inset-top));
+  z-index:800; display:none; align-items:center; gap:9px;
+  padding:9px 15px 9px 11px;
+  border:1px solid rgba(233,182,76,.45); border-radius:999px;
+  background:var(--dnud-night); box-shadow:0 8px 24px rgba(0,0,0,.5);
+  color:var(--dnud-text); font-size:13px; line-height:1.2;
+  letter-spacing:.02em; text-decoration:none;
+}
+.dnud-live[data-visible="true"]{display:flex}
+.dnud-live__dot{
+  width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#ff4b5c;
+  box-shadow:0 0 0 0 rgba(255,75,92,.7); animation:dnud-pulse 1.8s ease-out infinite;
+}
+.dnud-live__label{font-weight:700}
+.dnud-live__sub{display:block;margin-top:2px;font-size:10.5px;font-weight:400;color:rgba(244,239,230,.68);letter-spacing:0}
+@keyframes dnud-pulse{
+  0%{box-shadow:0 0 0 0 rgba(255,75,92,.7)}
+  70%{box-shadow:0 0 0 8px rgba(255,75,92,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,75,92,0)}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<h1 class="sr">運転代行を呼ぶ｜代行なうアプリ。地図でも住所でもお迎え場所と行き先を指定できます</h1>
-
 <div id="map"></div>
 <div id="crosshair"><div class="pin"></div></div>
+
+<a class="dnud-live" id="dnudLive" href="#" target="_blank" rel="noopener">
+  <span class="dnud-live__dot" aria-hidden="true"></span>
+  <span>
+    <span class="dnud-live__label">TikTokでライブ配信中</span>
+    <span class="dnud-live__sub">今夜の福岡の街を走っています</span>
+  </span>
+</a>
+
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 
@@ -256,45 +231,58 @@ function toast(m){ var t=$('toast'); t.textContent=m; t.className='toast show';
   clearTimeout(t._t); t._t=setTimeout(function(){t.className='toast';},3600); }
 function yen(n){ return Number(n).toLocaleString('ja-JP'); }
 
-/* ===== 今だけ割引 =====
-   代行なう運転代行だけのキャンペーンです。
-   他社を選んだときは適用しません（料金は各社の設定どおり）。
-   OFF … 割引額（円）。0 にすると割引はすべて止まります       */
+/* ===== 自社案件の判定 =====
+   指名なし、または自社を指名しているときだけ
+   「初乗り400円（御願有）」「長距離割引」「高速無料」を適用します。
+   他社を指名しているときは各社の料金です。 */
+var OWN_CO = 'daikounaw';
+function isOwn(){ return !prefId || prefId === OWN_CO; }
+
+/* ===== 初乗り400円（御願有） =====
+   OFF … 割引額（円）。0 にすると割引はすべて止まります
+   OFF_COND … 割引の条件。表示にそのまま使われます */
 var OFF = 1500;
 var OFF_COND = '御願有 ';
-var OFF_CO = 'daikounaw';
-
-function isOwn(){ return prefId === OFF_CO; }
+var OFF_CO = OWN_CO;
 
 function offAmount(){
   if (OFF <= 0) return 0;
-  if (!isOwn()) return 0;
+  if (!isOwn()) return 0;   /* 他社を指名しているときは割引なし */
   return OFF;
 }
 function offBar(){
   var v = offAmount();
   if (!v) return '';
-  return '<div class="offbar">\uD83C\uDF89 '+OFF_COND+yen(v)+'円OFF' +
-         '<span>概算料金から差し引いています</span></div>';
+  return '<div class="offbar"><span class="bd">御願有</span>初乗り400円' +
+         '<span>アンケートへのご協力をお願いしております。概算料金に反映済みです</span></div>';
+}
+
+/* ===== 高速無料・長距離割引の案内 ===== */
+function perkBar(){
+  if (!isOwn()) return '';
+  return '<div class="perks">' +
+    '<div class="perk"><b>高速代 無料</b><i>全区間 当社が負担します</i></div>' +
+    '<div class="perk"><b>長距離割引</b><i>20km超から自動で適用</i></div>' +
+    '</div>';
 }
 
 /* ===== 料金 =====
    初乗り 400円（御願有）
    〜20km        1kmごと 350円
       20km超        1kmごと 300円
-   高速代は当社負担（自社案件のみ）        */
+   高速代は当社負担（お客様の請求には含めません） */
 var BASE = 1900, R1 = 350, R2 = 350, R3 = 300;
 
 function fareBase(km){
   var k = Math.ceil(km);
-  if (!isOwn()) return BASE + k * R1;
+  if (!isOwn()) return BASE + k * R1;      /* 他社指名は従来料金 */
   var f = BASE;
   f += Math.min(k, 10) * R1;
   if (k > 10) f += Math.min(k - 10, 10) * R2;
   if (k > 20) f += (k - 20) * R3;
   return f;
 }
-/* 長距離割引でいくら安くなったか（表示用） */
+/* 長距離割引でいくら安くなったか（案内表示用） */
 function longOff(km){
   if (!isOwn()) return 0;
   var k = Math.ceil(km);
@@ -303,14 +291,7 @@ function longOff(km){
 function fare(km){
   return Math.max(0, fareBase(km) - offAmount());
 }
-/* 高速無料・長距離割引の案内 */
-function perkBar(){
-  if (!isOwn()) return '';
-  return '<div class="perks">' +
-    '<div class="perk"><b>高速代 無料</b><i>全区間 当社が負担します</i></div>' +
-    '<div class="perk"><b>長距離割引</b><i>20km超から自動で適用</i></div>' +
-    '</div>';
-}
+/* 料金の内訳テキスト */
 function rateNote(){
   if (!isOwn()) return '初乗り400円（御願有）／1kmごと350円';
   return '初乗り400円（御願有）／〜20km 1kmごと350円・20km超 300円<br>' +
@@ -324,7 +305,7 @@ function hav(a, b){
 
 var map, A=null, B=null, aMark=null, bMark=null, line=null, drvMark=null;
 var aName='', bName='', dist=0, price=0;
-var step='co', orderId=null, notified500=false, ratingVal=0, poller=null;
+var step='a', orderId=null, notified500=false, ratingVal=0, poller=null;
 var qs=new URLSearchParams(location.search);
 var prefId=qs.get('co')||null, prefName='';
 var qLat=parseFloat(qs.get('lat')), qLng=parseFloat(qs.get('lng'));
@@ -337,7 +318,7 @@ if (!isNaN(qLat) && !isNaN(qLng)){
   map.setView([qLat, qLng], 17);
 } else {
   navigator.geolocation && navigator.geolocation.getCurrentPosition(function(p){
-    if (step==='co' || step==='a') map.setView([p.coords.latitude, p.coords.longitude], 17);
+    if (step==='a') map.setView([p.coords.latitude, p.coords.longitude], 17);
   }, function(){}, {enableHighAccuracy:true, timeout:8000});
 }
 
@@ -355,52 +336,6 @@ async function place(lat, lng){
   return lat.toFixed(5)+', '+lng.toFixed(5);
 }
 
-/* ===== 住所・店名で場所を探す ===== */
-function searchBox(ph){
-  return '<div class="srch">'+
-    '<div class="in">'+
-      '<input id="sq" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="'+ph+'">'+
-      '<button type="button" id="sb">検索</button>'+
-    '</div>'+
-    '<div class="hits" id="sh"></div>'+
-  '</div>';
-}
-function bindSearch(){
-  var q=$('sq'), b=$('sb'), h=$('sh');
-  if (!q) return;
-  function show(html, tmp){
-    h.innerHTML=html; h.style.display=html?'block':'none';
-    if (tmp) setTimeout(function(){ h.style.display='none'; }, 2800);
-  }
-  function run(){
-    var v=(q.value||'').trim();
-    if (!v) return;
-    b.disabled=true; show('<div class="msg">検索しています…</div>');
-    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=jp&accept-language=ja&q='+encodeURIComponent(v))
-      .then(function(r){ return r.json(); })
-      .then(function(rows){
-        b.disabled=false;
-        if (!rows || !rows.length){
-          show('<div class="msg">見つかりませんでした。市区町村から入れるか、地図を直接動かしてください。</div>', true);
-          return;
-        }
-        h.innerHTML=''; h.style.display='block';
-        rows.forEach(function(row){
-          var d=document.createElement('div');
-          d.textContent=String(row.display_name).replace(/, 日本$/,'');
-          d.addEventListener('click', function(){
-            map.setView([parseFloat(row.lat), parseFloat(row.lon)], 17);
-            h.style.display='none'; q.blur();
-          });
-          h.appendChild(d);
-        });
-      })
-      .catch(function(){ b.disabled=false; show('<div class="msg">検索できませんでした。通信状況をご確認ください。</div>', true); });
-  }
-  b.onclick=run;
-  q.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); run(); } });
-}
-
 async function route(){
   try {
     var u='https://router.project-osrm.org/route/v1/driving/'+A[1]+','+A[0]+';'+B[1]+','+B[0]+'?overview=full&geometries=geojson';
@@ -415,110 +350,39 @@ async function route(){
   return hav(A,B) * 1.3;
 }
 
+function fixPin(){
+  var m=$('map').getBoundingClientRect(), c=$('crosshair');
+  c.style.left=(m.left+m.width/2)+'px'; c.style.top=(m.top+m.height/2)+'px';
+}
+function relayout(){ setTimeout(function(){ try{map.invalidateSize();}catch(e){} fixPin(); }, 60); }
+window.addEventListener('resize', relayout);
+window.addEventListener('orientationchange', relayout);
+
+/* 住所・お店の名前で場所を探す */
+async function doSearch(){
+  var q=$('q')?$('q').value.trim():''; if(!q) return;
+  var s=$('sug'); s.innerHTML='<div class="si muted">検索しています…</div>';
+  try{
+    var r=await fetch('https://nominatim.openstreetmap.org/search?format=json&accept-language=ja&countrycodes=jp&limit=6&q='+encodeURIComponent(q));
+    var d=await r.json();
+    if(!d||!d.length){ s.innerHTML='<div class="si muted">見つかりませんでした。地図を動かして指定してください。</div>'; return; }
+    s.innerHTML=d.map(function(x,i){ return '<div class="si" data-i="'+i+'">'+esc(x.display_name)+'</div>'; }).join('');
+    Array.prototype.forEach.call(s.querySelectorAll('.si'),function(el){
+      el.onclick=function(){
+        var x=d[parseInt(this.getAttribute('data-i'),10)];
+        map.setView([parseFloat(x.lat),parseFloat(x.lon)],17);
+        s.innerHTML=''; if($('q')) $('q').blur(); relayout();
+      };
+    });
+  }catch(e){ s.innerHTML='<div class="si muted">検索できませんでした。地図を動かして指定してください。</div>'; }
+}
+
 function pinIcon(color){
   return L.divIcon({className:'', iconSize:[18,18], iconAnchor:[9,9],
     html:'<div style="width:18px;height:18px;border-radius:50%;background:'+color+';border:3px solid #0B1220;box-shadow:0 0 0 3px '+color+'55"></div>'});
 }
 
-/* ===== 業者一覧（代行なう掲示板） ===== */
-var clTab='osusume', clAll=[], clLoaded=false;
-
-function isSoon(c){
-  if(!c.is_open) return false;
-  if(!c.appeal_until) return false;
-  return new Date(c.appeal_until).getTime() > Date.now();
-}
-
-function cardHtml(c){
-  var o='<div class="cc'+(c.featured?' feat':'')+'">';
-  o+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:9px">';
-  o+='<div style="min-width:0">';
-  if(c.featured) o+='<div class="cf">\uD83C\uDFC5 認定</div>';
-  o+='<div class="cnm">'+esc(c.name)+'</div>';
-  var ar=[c.pref,c.area].filter(Boolean).join(' · ');
-  if(ar) o+='<div class="car">\uD83D\uDCCD '+esc(ar)+'</div>';
-  o+='</div>';
-  o+='<div class="cst '+(c.is_open?'on':'off')+'">'+(isSoon(c)?'すぐ行けます':(c.is_open?'受付中':'受付停止'))+'</div>';
-  o+='</div>';
-  if(c.hours) o+='<div class="chr">\uD83D\uDD52 '+esc(c.hours)+'</div>';
-  if(c.phone) o+='<div class="ctel">'+esc(c.phone)+'</div>';
-  if(c.base_fare>0 || c.per_km>0){
-    o+='<div class="cfr">';
-    if(c.base_fare>0) o+='<span>初乗り <b>'+yen(c.base_fare)+'円</b></span>';
-    if(c.per_km>0)    o+='<span>追加 <b>1km '+yen(c.per_km)+'円</b></span>';
-    o+='</div>';
-  }
-  if(c.id===OFF_CO){
-    o+='<div class="cpk"><span>高速代 無料</span><span>20km超 1kmごと300円</span></div>';
-  }
-  if(c.campaign) o+='<div class="ccp">\uD83C\uDF89 '+esc(c.campaign)+'</div>';
-  else if(c.id===OFF_CO && OFF>0) o+='<div class="ccp">\uD83C\uDF89 '+OFF_COND+yen(OFF)+'円OFF</div>';
-  o+='<div class="cb">';
-  if(c.phone) o+='<a class="call" href="tel:'+esc(String(c.phone).replace(/[^0-9+]/g,''))+'">電話をかける</a>';
-  o+='<button class="go" data-co="'+esc(c.id)+'" data-nm="'+esc(c.name)+'">この場所に呼ぶ</button>';
-  o+='</div></div>';
-  return o;
-}
-
-function viewCompanies(){
-  $('crosshair').className='';
-  var body;
-  if(!clLoaded){
-    body='<div class="cnone">運転代行を読み込んでいます…</div>';
-  }else{
-    var v=clAll.slice();
-    if(clTab==='soon') v=v.filter(isSoon);
-    if(!v.length){
-      body= (clTab==='soon')
-        ? '<div class="cnone">いま「すぐ行けます」と出している<br>運転代行はありません。<br>おすすめ順からご依頼ください。</div>'
-        : '<div class="cnone">登録業者はまだありません。<br>050-1724-3179 でも受け付けています。</div>';
-    }else{
-      body=v.map(cardHtml).join('');
-    }
-  }
-
-  $('sheet').innerHTML =
-    '<div class="grab"></div>' +
-    '<h2>お迎え場所と代行を選ぶ</h2>' +
-    '<p class="sub">住所やお店の名前で探すか、地図を動かしてピンを合わせてください。</p>' +
-    searchBox('今いる住所・お店の名前') +
-    '<div class="tabs">' +
-      '<button class="tb'+(clTab==='osusume'?' on':'')+'" id="tb1">おすすめ順</button>' +
-      '<button class="tb'+(clTab==='soon'?' on':'')+'" id="tb2">すぐ来る順</button>' +
-    '</div>' + body;
-
-  bindSearch();
-  $('tb1').onclick=function(){ clTab='osusume'; viewCompanies(); };
-  $('tb2').onclick=function(){ clTab='soon';    viewCompanies(); };
-
-  var gos=$('sheet').querySelectorAll('button.go');
-  for(var i=0;i<gos.length;i++){
-    (function(b){
-      b.onclick=async function(){
-        prefId=b.getAttribute('data-co');
-        prefName=b.getAttribute('data-nm');
-        b.disabled=true; b.textContent='確認しています…';
-        var c=map.getCenter();
-        A=[c.lat,c.lng]; aName=await place(c.lat,c.lng);
-        if(aMark) map.removeLayer(aMark);
-        aMark=L.marker(A,{icon:pinIcon('#FFB020')}).addTo(map);
-        step='b'; viewPick();
-      };
-    })(gos[i]);
-  }
-}
-
-async function clLoad(){
-  try{
-    var r=await fetch(SB+'companies?select=*&order=featured.desc,is_open.desc,name.asc&limit=30',{headers:H});
-    var d=await r.json();
-    clAll=Array.isArray(d)?d:[];
-  }catch(e){ clAll=[]; }
-  clLoaded=true;
-  if(step==='co') viewCompanies();
-}
-
-/* ===== 出発地・行き先の指定 ===== */
+/* ===== 画面 ===== */
 function viewPick(){
   $('crosshair').className = (step==='a') ? '' : 'b';
   $('sheet').innerHTML =
@@ -527,16 +391,20 @@ function viewPick(){
     perkBar() +
     '<h2>'+(step==='a'?'今いる場所を指定':'行き先を指定')+'</h2>' +
     '<p class="sub">'+(step==='a'
-      ? '住所やお店の名前で探すか、地図を動かしてピンを車のある場所に合わせてください。'
-      : '住所やお店の名前で探すか、地図を動かして届けてほしい場所にピンを合わせてください。')+'</p>' +
-    searchBox(step==='a' ? '今いる住所・お店の名前' : '行き先の住所・お店の名前') +
-    (step==='b' && prefName ? '<div class="pref">'+esc(prefName)+' を指名しています<span>出発地は設定済みです</span></div>' : '') +
+      ? '地図を動かしてピンを車のある場所に合わせてください。'
+      : '車を届けてほしい場所にピンを合わせてください。')+'</p>' +
+    '<div class="find"><input id="q" type="search" enterkeyhint="search" placeholder="'+(step==='a'?'今いる住所・お店の名前':'行き先の住所・お店の名前')+'">' +
+      '<button class="btn ghost sbtn" id="qb">検索</button></div>' +
+    '<div class="sug" id="sug"></div>' +
     '<button class="btn '+(step==='a'?'amber':'green')+'" id="ok">'+
       (step==='a'?'ここから出発する':'ここへ行く')+'</button>' +
-    '<div class="row"><button class="btn ghost" id="back">'+
-      (step==='a'?'代行を選び直す':'出発地を選び直す')+'</button></div>';
+    (step==='b' ? '<div class="row"><button class="btn ghost" id="back">出発地を選び直す</button></div>' : '');
 
-  bindSearch();
+  if ($('qb')) $('qb').onclick = doSearch;
+  if ($('q')) $('q').addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){ e.preventDefault(); doSearch(); }
+  });
+  relayout();
 
   $('ok').onclick = async function(){
     var c = map.getCenter();
@@ -556,12 +424,8 @@ function viewPick(){
       step='form'; viewForm();
     }
   };
-  $('back').onclick = function(){
-    if (step==='a'){
-      step='co'; viewCompanies();
-    } else {
-      step='a'; if (aMark){map.removeLayer(aMark);aMark=null;} viewPick();
-    }
+  if ($('back')) $('back').onclick = function(){
+    step='a'; if (aMark){map.removeLayer(aMark);aMark=null;} viewPick();
   };
 }
 
@@ -578,8 +442,7 @@ function viewForm(){
       '<div class="d">' +
         (lg ? '<em>長距離割引 '+yen(lg)+'円</em> 適用済<br>' : '') +
         (off ? '<b>'+OFF_COND+yen(off)+'円OFF</b> 適用済（<s>'+yen(price+off)+'円</s>）<br>' : '') +
-        '約'+dist.toFixed(1)+'km の概算料金<br>'+rateNote() +
-        (prefId && prefId!==OFF_CO ? '<br>※料金は業者により異なります' : '') + '</div></div>' +
+        '約'+dist.toFixed(1)+'km の概算料金<br>'+rateNote()+'</div></div>' +
     perkBar() +
     (prefName ? '<div class="pref">'+esc(prefName)+' を指名しています<span>90秒間この業者が優先して受注します</span></div>' : '') +
     '<input id="cphone" type="tel" inputmode="tel" placeholder="電話番号（必須）" autocomplete="tel">' +
@@ -589,6 +452,7 @@ function viewForm(){
     '<div class="row"><button class="btn ghost" id="re">場所を選び直す</button></div>' +
     '<div class="err" id="err"></div>';
 
+  relayout();
   $('re').onclick = function(){
     step='a'; if(aMark){map.removeLayer(aMark);aMark=null;}
     if(bMark){map.removeLayer(bMark);bMark=null;} if(line){map.removeLayer(line);line=null;}
@@ -605,7 +469,7 @@ async function submit(){
   var tags=[];
   if (mo) tags.push(mo);
   if (longOff(dist)) tags.push('長距離割引'+yen(longOff(dist))+'円適用済');
-  if (offAmount()) tags.push(yen(offAmount())+'円OFF適用済');
+  if (offAmount()) tags.push('初乗り400円（御願有）適用済');
   if (isOwn()) tags.push('高速代無料');
   var body={
     cname: nm||'お客様', cphone: ph,
@@ -618,11 +482,11 @@ async function submit(){
   try {
     var r=await fetch(SB+'orders',{method:'POST',headers:H,body:JSON.stringify(body)});
     var d=await r.json();
-    if (!r.ok || !d || !d[0]) throw new Error();
+    if (!r.ok || !d || !d[0]) throw new Error((d && (d.message || d.hint)) || ('HTTP ' + r.status));
     orderId=d[0].id; step='track'; poll();
   } catch(e){
     $('go').disabled=false; $('go').textContent='この内容で代行を呼ぶ';
-    $('err').textContent='送信できませんでした。050-1724-3179 でも受け付けています';
+    $('err').innerHTML='送信できませんでした（'+esc(e && e.message ? e.message : '通信エラー')+'）<br>お電話でも受け付けています <a href="tel:050-1724-3179" style="color:var(--amber)">050-1724-3179</a>';
   }
 }
 
@@ -717,27 +581,61 @@ async function poll(){
   poller = setTimeout(poll, 6000);
 }
 
-/* ===== 起動 ===== */
-(async function init(){
-  if (prefId){
-    try{
-      var r=await fetch(SB+'companies?id=eq.'+encodeURIComponent(prefId)+'&select=name',{headers:H});
-      var d=await r.json(); if (d&&d[0]) prefName=d[0].name;
-    }catch(e){}
+(async function(){
+  if (!prefId) return;
+  try{
+    var r=await fetch(SB+'companies?id=eq.'+encodeURIComponent(prefId)+'&select=name',{headers:H});
+    var d=await r.json(); if (d&&d[0]) prefName=d[0].name;
+  }catch(e){}
+})();
 
-    if (!isNaN(qLat) && !isNaN(qLng)){
-      A=[qLat,qLng]; aName=await place(qLat,qLng);
-      aMark=L.marker(A,{icon:pinIcon('#FFB020')}).addTo(map);
-      step='b'; viewPick();
-    } else {
-      step='a'; viewPick();
-    }
-    clLoad();
-    return;
+viewPick();
+
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
+
+/* ===== TikTokライブ配信バナー ===== */
+(function () {
+  var TIKTOK_ID = "dnud.jp";
+
+  /* 営業スケジュール  0=日 1=月 2=火 3=水 4=木 5=金 6=土 */
+  var SCHEDULE = {
+    0: { open: false, until: 6 },  // 日曜 定休
+    1: { open: true,  until: 6 },  // 月曜
+    2: { open: true,  until: 6 },  // 火曜
+    3: { open: true,  until: 6 },  // 水曜
+    4: { open: false, until: 6 },  // 木曜 定休
+    5: { open: true,  until: 7 },  // 金曜
+    6: { open: true,  until: 7 }   // 土曜
+  };
+  var START_HOUR = 21;
+
+  var el = document.getElementById("dnudLive");
+  if (!el) return;
+  el.href = "https://www.tiktok.com/@" + TIKTOK_ID + "/live";
+
+  var param = new URLSearchParams(location.search).get("live");
+  if (param === "on" || param === "off" || param === "auto") {
+    try { localStorage.setItem("dnudLive", param); } catch (e) {}
   }
-  step='co';
-  viewCompanies();
-  clLoad();
+  var override = "auto";
+  try { override = localStorage.getItem("dnudLive") || "auto"; } catch (e) {}
+
+  function isOpen() {
+    var now = new Date(), h = now.getHours(), day = now.getDay();
+    if (h >= START_HOUR) return SCHEDULE[day].open;
+    var prev = (day + 6) % 7, rule = SCHEDULE[prev];
+    return rule.open && h < rule.until;
+  }
+  function update() {
+    var show = override === "on" ? true : override === "off" ? false : isOpen();
+    el.setAttribute("data-visible", show ? "true" : "false");
+  }
+  update();
+  setInterval(update, 60000);
 })();
 </script>
 </body>
