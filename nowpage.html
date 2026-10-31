@@ -1,0 +1,333 @@
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0a0e"/>
+<title>ナウページ 福岡県版｜お店・会社の電話帳（代行NOW）</title>
+<meta name="description" content="ナウページは福岡県内のお店・会社を地域と業種から探せる無料の電話帳です。福岡市・北九州市・久留米市・那珂川市など県内全市町村に対応。運営：合同会社中尊社（代行NOW）。"/>
+<link rel="canonical" href="https://daikounaw.com/nowpage.html"/>
+<link rel="icon" type="image/png" href="/icon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://daikounaw.com/nowpage.html"/>
+<meta property="og:site_name" content="代行NOW"/>
+<meta property="og:title" content="ナウページ 福岡県版｜お店・会社の電話帳"/>
+<meta property="og:image" content="https://daikounaw.com/icon.png"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"ナウページ 福岡県版","url":"https://daikounaw.com/nowpage.html","description":"福岡県内のお店・会社を地域と業種から探せる電話帳","isPartOf":{"@id":"https://daikounaw.com/#website"},"publisher":{"@type":"Organization","name":"合同会社中尊社","url":"https://tyuusonsha.jp/"}}</script>
+<style>
+:root{
+  --bg:#0a0a0e; --panel:#14141b; --line:#24242e;
+  --yel:#FFD23F; --yel2:#F2B705; --ink:#141008;
+  --tx:#f0f0f5; --tx2:#a8a8b8; --tx3:#6a6a78; --green:#2FBF71;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;line-height:1.5;-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:520px;margin:0 auto;padding-bottom:60px}
+a{color:inherit}
+button,select,input{font-family:inherit}
+
+.top{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,10,14,.96);z-index:20}
+.back{text-decoration:none;color:var(--tx2);font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.brand{font-weight:900;font-size:15px}
+.brand span{color:var(--yel)}
+
+/* 表紙：電話帳の黄色い表紙 */
+.cover{margin:14px 14px 0;background:var(--yel);color:var(--ink);border-radius:6px 16px 16px 6px;padding:22px 20px 18px 26px;position:relative;overflow:hidden;box-shadow:inset 8px 0 0 var(--yel2)}
+.cover::after{content:'';position:absolute;right:-30px;bottom:-40px;width:150px;height:150px;border-radius:50%;border:18px solid rgba(20,16,8,.07)}
+.cover .ed{font-size:12px;font-weight:800;letter-spacing:.06em}
+.cover h1{font-size:40px;font-weight:900;line-height:1.05;letter-spacing:-.02em;margin:6px 0 8px}
+.cover p{font-size:13px;font-weight:700;line-height:1.7;max-width:22em}
+
+/* 検索 */
+.find{padding:16px 14px 6px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:8px}
+.lbl{font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:5px}
+select,input[type=search]{width:100%;font-size:16px;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 12px;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--tx2) 50%),linear-gradient(135deg,var(--tx2) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.go{flex:none;font-size:15px;font-weight:900;color:var(--ink);background:var(--yel);border:none;border-radius:10px;padding:0 18px;cursor:pointer}
+.go:active{background:var(--yel2)}
+
+.cats{display:flex;flex-wrap:wrap;gap:6px;padding:4px 14px 2px}
+.cat{font-size:13px;font-weight:700;color:var(--tx2);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+.cat.on{color:var(--ink);background:var(--yel);border-color:var(--yel)}
+
+.bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px;font-size:12px;color:var(--tx2)}
+.bar label{display:flex;align-items:center;gap:6px;font-weight:700}
+.bar input{width:16px;height:16px;accent-color:var(--yel)}
+
+/* 一覧：電話帳の行 */
+.list{margin:0 14px;border-top:2px solid var(--yel)}
+.it{padding:13px 2px 12px;border-bottom:1px solid var(--line)}
+.it .nm{font-size:16px;font-weight:800;line-height:1.35}
+.it .kd{display:inline-block;font-size:11px;font-weight:700;color:var(--yel);margin-left:6px;vertical-align:2px}
+.it .ad{font-size:12.5px;color:var(--tx2);margin-top:3px}
+.it .hr{font-size:12px;color:var(--tx3);margin-top:2px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.acts a{text-decoration:none;font-size:13px;font-weight:800;border-radius:8px;padding:7px 11px;border:1px solid var(--line);color:var(--tx)}
+.acts a.tel{background:var(--yel);border-color:var(--yel);color:var(--ink);font-variant-numeric:tabular-nums}
+.pr{background:linear-gradient(90deg,rgba(255,210,63,.12),transparent);padding-left:10px;padding-right:10px;margin:0 -10px}
+.pr .badge{font-size:10.5px;font-weight:800;color:var(--ink);background:var(--yel);border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:2px}
+
+.msg{text-align:center;color:var(--tx2);font-size:13.5px;line-height:1.8;padding:30px 16px}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--yel);border-radius:50%;margin:0 auto 12px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.more{display:block;width:calc(100% - 28px);margin:14px 14px 0;font-size:14px;font-weight:800;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer}
+
+.info{margin:26px 14px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.info h2{font-size:15px;font-weight:900;margin-bottom:6px}
+.info p{font-size:12.5px;color:var(--tx2);line-height:1.8}
+.info .cta{display:block;text-align:center;text-decoration:none;font-size:14px;font-weight:900;color:#fff;background:#06C755;border-radius:10px;padding:12px;margin-top:12px}
+.foot{font-size:11px;color:var(--tx3);text-align:center;line-height:1.8;padding:20px 16px 0}
+.foot a{color:var(--tx2)}
+:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+  <a class="back" href="index.html">← 代行NOW</a>
+  <div class="brand">ナウ<span>ページ</span></div>
+</div>
+
+<div class="cover">
+  <div class="ed">福岡県版　2026</div>
+  <h1>ナウページ</h1>
+  <p>福岡県のお店・会社を、地域と業種から探せる電話帳です。</p>
+</div>
+
+<div class="find">
+  <div>
+    <div class="lbl">地域</div>
+    <select id="area"></select>
+  </div>
+  <div>
+    <div class="lbl">店名・キーワード（空欄でも検索できます）</div>
+    <div class="row">
+      <input type="search" id="kw" placeholder="例：ラーメン、山田" enterkeyhint="search"/>
+      <button class="go" id="go">探す</button>
+    </div>
+  </div>
+</div>
+
+<div class="cats" id="cats"></div>
+
+<div class="bar">
+  <span id="count"></span>
+  <label><input type="checkbox" id="telOnly"/>電話番号ありのみ</label>
+</div>
+
+<div class="list" id="list"></div>
+<div id="state"></div>
+<button class="more" id="more" style="display:none">さらに表示</button>
+
+<div class="info">
+  <h2>掲載・修正のご依頼</h2>
+  <p>お店や会社の掲載、電話番号・住所の修正、掲載の取りやめは無料で承ります。LINEでお気軽にご連絡ください。</p>
+  <a class="cta" href="https://line.me/R/ti/p/@521tfdpi" target="_blank" rel="noopener">LINEで依頼する</a>
+</div>
+
+<div class="foot">
+  掲載データ：© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors（ODbL）<br>
+  掲載内容は最新でない場合があります。ご来店前に各店舗へご確認ください。<br>
+  運営：合同会社中尊社（代行NOW）
+</div>
+
+</div>
+
+<script>
+/* ===== 地域（福岡県の全市区町村） ===== */
+var AREAS = [
+  ["福岡市", ["東区","博多区","中央区","南区","城南区","早良区","西区"]],
+  ["北九州市", ["門司区","若松区","戸畑区","小倉北区","小倉南区","八幡東区","八幡西区"]],
+  ["市", ["那珂川市","春日市","大野城市","太宰府市","筑紫野市","糸島市","古賀市","福津市","宗像市","久留米市","飯塚市","大牟田市","直方市","田川市","柳川市","八女市","筑後市","大川市","行橋市","豊前市","中間市","小郡市","うきは市","宮若市","嘉麻市","朝倉市","みやま市"]],
+  ["町村", ["宇美町","篠栗町","志免町","須恵町","新宮町","久山町","粕屋町","芦屋町","水巻町","岡垣町","遠賀町","小竹町","鞍手町","桂川町","筑前町","東峰村","大刀洗町","大木町","広川町","香春町","添田町","糸田町","川崎町","大任町","赤村","福智町","苅田町","みやこ町","吉富町","上毛町","築上町"]]
+];
+
+/* ===== 業種（OpenStreetMapのタグ） ===== */
+var CATS = [
+  {id:"all",   name:"すべて",       q:null},
+  {id:"food",  name:"飲食店",       q:[["amenity","^(restaurant|fast_food|food_court)$"]]},
+  {id:"bar",   name:"居酒屋・バー", q:[["amenity","^(bar|pub|biergarten)$"]]},
+  {id:"cafe",  name:"カフェ",       q:[["amenity","^cafe$"]]},
+  {id:"conv",  name:"コンビニ",     q:[["shop","^convenience$"]]},
+  {id:"super", name:"スーパー",     q:[["shop","^(supermarket|department_store|mall)$"]]},
+  {id:"hair",  name:"美容・理容",   q:[["shop","^(hairdresser|beauty|cosmetics)$"]]},
+  {id:"clinic",name:"病院・医院",   q:[["amenity","^(hospital|clinic|doctors)$"],["healthcare","^(hospital|clinic|doctor)$"]]},
+  {id:"dent",  name:"歯科",         q:[["amenity","^dentist$"],["healthcare","^dentist$"]]},
+  {id:"pharm", name:"薬局",         q:[["amenity","^pharmacy$"],["shop","^chemist$"]]},
+  {id:"hotel", name:"ホテル・宿",   q:[["tourism","^(hotel|motel|guest_house|hostel|apartment)$"]]},
+  {id:"car",   name:"車・整備",     q:[["shop","^(car|car_repair|car_parts|tyres)$"],["amenity","^(car_wash|car_rental)$"]]},
+  {id:"fuel",  name:"ガソリン",     q:[["amenity","^fuel$"]]},
+  {id:"daikou",name:"運転代行",     q:[["name","運転代行|代行"]], pr:true},
+  {id:"estate",name:"不動産",       q:[["office","^estate_agent$"],["shop","^estate_agent$"]]},
+  {id:"pro",   name:"士業",         q:[["office","^(lawyer|accountant|tax_advisor|notary)$"]]},
+  {id:"bank",  name:"銀行・郵便",   q:[["amenity","^(bank|post_office)$"]]},
+  {id:"edu",   name:"塾・習い事",   q:[["amenity","^(prep_school|music_school|driving_school|language_school)$"],["leisure","^(fitness_centre|sports_centre)$"]]},
+  {id:"shop",  name:"その他のお店", q:[["shop","."]]},
+  {id:"pub",   name:"役所・公共",   q:[["amenity","^(townhall|police|fire_station|library|community_centre)$"],["office","^government$"]]}
+];
+
+/* 業種の日本語ラベル */
+var KIND = {restaurant:"飲食店",fast_food:"ファストフード",food_court:"フードコート",bar:"バー",pub:"居酒屋",biergarten:"ビアガーデン",cafe:"カフェ",convenience:"コンビニ",supermarket:"スーパー",department_store:"百貨店",mall:"商業施設",hairdresser:"美容室",beauty:"美容サロン",cosmetics:"化粧品",hospital:"病院",clinic:"クリニック",doctors:"医院",doctor:"医院",dentist:"歯科",pharmacy:"薬局",chemist:"ドラッグストア",hotel:"ホテル",motel:"モーテル",guest_house:"民宿・ゲストハウス",hostel:"ホステル",apartment:"宿泊施設",car:"自動車販売",car_repair:"自動車整備",car_parts:"カー用品",tyres:"タイヤ",car_wash:"洗車",car_rental:"レンタカー",fuel:"ガソリンスタンド",estate_agent:"不動産",lawyer:"法律事務所",accountant:"会計事務所",tax_advisor:"税理士",notary:"公証役場",bank:"銀行",post_office:"郵便局",prep_school:"学習塾",music_school:"音楽教室",driving_school:"自動車学校",language_school:"語学教室",fitness_centre:"フィットネス",sports_centre:"スポーツ施設",townhall:"役所",police:"警察",fire_station:"消防署",library:"図書館",community_centre:"公民館",government:"官公庁",bakery:"パン屋",clothes:"衣料品",hardware:"ホームセンター",doityourself:"ホームセンター",electronics:"家電",mobile_phone:"携帯ショップ",laundry:"クリーニング",dry_cleaning:"クリーニング",florist:"花屋",butcher:"精肉店",books:"書店",optician:"メガネ",variety_store:"100円ショップ",alcohol:"酒屋",confectionery:"菓子店",furniture:"家具",bicycle:"自転車",pet:"ペット",shoes:"靴",jewelry:"宝飾",second_hand:"リサイクル",massage:"マッサージ",karaoke_box:"カラオケ"};
+
+/* 自社PR（運転代行の業種と、関連キーワードの時だけ先頭に出ます） */
+var PR = {name:"代行なう運転代行", kind:"運転代行", ad:"福岡市（中洲・天神・博多）・那珂川市・春日市・大野城市・太宰府市", hr:"夜間営業／初乗り400円（御願有）", tel:"050-1724-3179", web:"https://dnud.jp/"};
+
+/* 予備も含めたOverpassの接続先 */
+var EP = ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
+
+var PAGE = 40;
+var cur = {area:"博多区", cat:"food", kw:""};
+var rows = [], shown = 0;
+var $ = function(id){ return document.getElementById(id); };
+
+/* ===== 画面の初期化 ===== */
+(function init(){
+  try{
+    var s = JSON.parse(localStorage.getItem("nowpage") || "{}");
+    if (s.area) cur.area = s.area;
+    if (s.cat) cur.cat = s.cat;
+  }catch(e){}
+  var sel = $("area"), h = "";
+  AREAS.forEach(function(g){
+    h += '<optgroup label="' + g[0] + '">';
+    g[1].forEach(function(n){ h += '<option' + (n === cur.area ? ' selected' : '') + '>' + n + '</option>'; });
+    h += '</optgroup>';
+  });
+  sel.innerHTML = h;
+  var c = "";
+  CATS.forEach(function(x){ c += '<button class="cat' + (x.id === cur.cat ? ' on' : '') + '" data-id="' + x.id + '">' + x.name + '</button>'; });
+  $("cats").innerHTML = c;
+
+  $("cats").addEventListener("click", function(e){
+    var b = e.target.closest(".cat"); if (!b) return;
+    cur.cat = b.getAttribute("data-id");
+    [].forEach.call(document.querySelectorAll(".cat"), function(x){ x.classList.toggle("on", x === b); });
+    search();
+  });
+  sel.addEventListener("change", function(){ cur.area = sel.value; search(); });
+  $("go").addEventListener("click", function(){ search(); });
+  $("kw").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); $("kw").blur(); search(); } });
+  $("telOnly").addEventListener("change", function(){ shown = 0; $("list").innerHTML = ""; render(); });
+  $("more").addEventListener("click", render);
+  search();
+})();
+
+/* ===== 検索 ===== */
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\"']/g, " ").replace(/\s+/g, " ").trim(); }
+
+function buildQuery(){
+  var cat = CATS.filter(function(x){ return x.id === cur.cat; })[0];
+  var kw = cur.kw ? '["name"~"' + reEsc(cur.kw) + '",i]' : '';
+  var parts = [];
+  if (!cat.q){
+    if (!kw) { parts.push('nwr(area.a)["name"]["shop"];', 'nwr(area.a)["name"]["amenity"~"^(restaurant|cafe|bar|pub|fast_food|clinic|dentist|pharmacy|bank)$"];', 'nwr(area.a)["name"]["office"];'); }
+    else parts.push('nwr(area.a)' + kw + ';');
+  } else {
+    cat.q.forEach(function(t){ parts.push('nwr(area.a)["' + t[0] + '"~"' + t[1] + '"]["name"]' + kw + ';'); });
+  }
+  return '[out:json][timeout:25];' +
+    'area["ISO3166-2"="JP-40"]->.p;' +
+    'rel(area.p)["boundary"="administrative"]["name"="' + cur.area + '"];' +
+    'map_to_area->.a;(' + parts.join('') + ');out center tags 600;';
+}
+
+function fetchOverpass(q, i){
+  i = i || 0;
+  return fetch(EP[i], {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}})
+    .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(function(e){ if (i + 1 < EP.length) return fetchOverpass(q, i + 1); throw e; });
+}
+
+var seq = 0;
+function search(){
+  cur.kw = $("kw").value.trim();
+  try{ localStorage.setItem("nowpage", JSON.stringify({area:cur.area, cat:cur.cat})); }catch(e){}
+  var my = ++seq;
+  rows = []; shown = 0;
+  $("list").innerHTML = ""; $("more").style.display = "none"; $("count").textContent = "";
+  $("state").innerHTML = '<div class="msg"><div class="spin"></div>' + esc(cur.area) + 'を検索しています…</div>';
+  var q = buildQuery(), key = "np:" + q, cached = null;
+  try{ cached = sessionStorage.getItem(key); }catch(e){}
+  var p = cached ? Promise.resolve(JSON.parse(cached)) : fetchOverpass(q).then(function(d){ try{ sessionStorage.setItem(key, JSON.stringify(d)); }catch(e){} return d; });
+  p.then(function(d){
+    if (my !== seq) return;
+    rows = toRows(d.elements || []);
+    $("state").innerHTML = "";
+    render();
+  }).catch(function(){
+    if (my !== seq) return;
+    $("state").innerHTML = '<div class="msg">混み合っていて検索できませんでした。<br>少し時間をおいて、もう一度「探す」を押してください。</div>';
+  });
+}
+
+/* ===== データ整形 ===== */
+function tel(t){
+  var p = t.phone || t["contact:phone"] || t.mobile || t["contact:mobile"] || "";
+  p = p.split(";")[0].trim();
+  if (!p) return "";
+  p = p.replace(/^\+81[\s-]?/, "0").replace(/^0\(?0?/, "0").replace(/[()]/g, "").replace(/\s+/g, "-");
+  return p;
+}
+function addr(t){
+  if (t["addr:full"]) return t["addr:full"];
+  var a = [t["addr:province"], t["addr:city"], t["addr:suburb"], t["addr:quarter"], t["addr:neighbourhood"]].filter(Boolean).join("");
+  var n = [t["addr:block_number"], t["addr:housenumber"]].filter(Boolean).join("-");
+  return (a + n) || (t["addr:street"] ? t["addr:street"] + (t["addr:housenumber"] || "") : "");
+}
+function kind(t){
+  var v = t.amenity || t.shop || t.healthcare || t.office || t.tourism || t.leisure || "";
+  return KIND[v] || "";
+}
+function hours(h){
+  if (!h) return "";
+  return h.replace(/Mo/g,"月").replace(/Tu/g,"火").replace(/We/g,"水").replace(/Th/g,"木").replace(/Fr/g,"金").replace(/Sa/g,"土").replace(/Su/g,"日").replace(/PH/g,"祝").replace(/off/g,"休").replace(/;\s*/g,"／");
+}
+function toRows(els){
+  var seen = {}, out = [];
+  els.forEach(function(e){
+    var t = e.tags || {}; var nm = t.name; if (!nm) return;
+    var lat = e.lat || (e.center && e.center.lat), lon = e.lon || (e.center && e.center.lon);
+    var k = nm + "|" + (lat ? lat.toFixed(3) : "");
+    if (seen[k]) return; seen[k] = 1;
+    out.push({name:nm, branch:t["branch"] || "", kind:kind(t), ad:addr(t), tel:tel(t), hr:hours(t.opening_hours), web:t.website || t["contact:website"] || "", lat:lat, lon:lon});
+  });
+  out.sort(function(a, b){
+    if (!!b.tel !== !!a.tel) return b.tel ? 1 : -1;
+    return a.name.localeCompare(b.name, "ja");
+  });
+  return out;
+}
+
+/* ===== 表示 ===== */
+function showPR(){
+  var cat = CATS.filter(function(x){ return x.id === cur.cat; })[0];
+  return cat.pr || /代行|運転|飲み|送迎/.test(cur.kw);
+}
+function item(r, isPR){
+  var h = '<div class="it' + (isPR ? ' pr' : '') + '">';
+  h += '<div class="nm">' + (isPR ? '<span class="badge">PR</span>' : '') + esc(r.name) + (r.branch ? ' ' + esc(r.branch) : '') + (r.kind ? '<span class="kd">' + esc(r.kind) + '</span>' : '') + '</div>';
+  if (r.ad) h += '<div class="ad">' + esc(r.ad) + '</div>';
+  if (r.hr) h += '<div class="hr">' + esc(r.hr) + '</div>';
+  h += '<div class="acts">';
+  if (r.tel) h += '<a class="tel" href="tel:' + esc(r.tel.replace(/[^0-9+]/g, "")) + '">📞 ' + esc(r.tel) + '</a>';
+  if (r.lat) h += '<a href="https://www.google.com/maps/search/?api=1&query=' + r.lat + ',' + r.lon + '" target="_blank" rel="noopener">地図</a>';
+  if (r.web && /^https?:\/\//.test(r.web)) h += '<a href="' + esc(r.web) + '" target="_blank" rel="noopener">サイト</a>';
+  h += '</div></div>';
+  return h;
+}
+function render(){
+  var list = $("telOnly").checked ? rows.filter(function(r){ return r.tel; }) : rows;
+  var h = "";
+  if (shown === 0 && showPR()) h += item(PR, true);
+  list.slice(shown, shown + PAGE).forEach(function(r){ h += item(r, false); });
+  $("list").insertAdjacentHTML("beforeend", h);
+  shown += PAGE;
+  $("count").textContent = esc(cur.area) + "　" + list.length + "件";
+  $("more").style.display = shown < list.length ? "block" : "none";
+  if (!list.length && !showPR()) $("state").innerHTML = '<div class="msg">見つかりませんでした。<br>地域や業種を変えてお試しください。</div>';
+}
+</script>
+</body></html>
