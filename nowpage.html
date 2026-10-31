@@ -102,9 +102,9 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--tx2) 50%),li
     <select id="area"></select>
   </div>
   <div>
-    <div class="lbl">店名・キーワード（空欄でも検索できます）</div>
+    <div class="lbl">店名・キーワード（空欄でも可／複数はスペースで区切る）</div>
     <div class="row">
-      <input type="search" id="kw" placeholder="例：ラーメン、山田" enterkeyhint="search"/>
+      <input type="search" id="kw" placeholder="例：ラーメン　老司" enterkeyhint="search"/>
       <button class="go" id="go">探す</button>
     </div>
   </div>
@@ -216,29 +216,34 @@ var $ = function(id){ return document.getElementById(id); };
 
 /* ===== 検索 ===== */
 function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
-function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\"']/g, " ").replace(/\s+/g, " ").trim(); }
+function reEsc(s){ return s.replace(/\u3000/g, " ").replace(/[.*+?^${}()|[\]\\"']/g, " ").replace(/\s+/g, " ").trim(); }
 
+function tokens(){ return reEsc(cur.kw).split(" ").filter(Boolean); }
 function buildQuery(){
   var cat = CATS.filter(function(x){ return x.id === cur.cat; })[0];
-  var kw = cur.kw ? '["name"~"' + reEsc(cur.kw) + '",i]' : '';
+  var tk = tokens();
   var parts = [];
   if (!cat.q){
-    if (!kw) { parts.push('nwr(area.a)["name"]["shop"];', 'nwr(area.a)["name"]["amenity"~"^(restaurant|cafe|bar|pub|fast_food|clinic|dentist|pharmacy|bank)$"];', 'nwr(area.a)["name"]["office"];'); }
-    else parts.push('nwr(area.a)' + kw + ';');
+    if (tk.length) parts.push('nwr(area.c)(area.p)["name"~"' + tk[0] + '",i];');
+    else parts.push('nwr(area.c)(area.p)["name"]["shop"];', 'nwr(area.c)(area.p)["name"]["amenity"~"^(restaurant|cafe|bar|pub|fast_food|clinic|dentist|pharmacy|bank)$"];', 'nwr(area.c)(area.p)["name"]["office"];');
   } else {
-    cat.q.forEach(function(t){ parts.push('nwr(area.a)["' + t[0] + '"~"' + t[1] + '"]["name"]' + kw + ';'); });
+    cat.q.forEach(function(x){ parts.push('nwr(area.c)(area.p)["' + x[0] + '"~"' + x[1] + '"]["name"];'); });
   }
-  return '[out:json][timeout:25];' +
+  return '[out:json][timeout:20];' +
     'area["ISO3166-2"="JP-40"]->.p;' +
-    'rel(area.p)["boundary"="administrative"]["name"="' + cur.area + '"];' +
-    'map_to_area->.a;(' + parts.join('') + ');out center tags 600;';
+    'area["name"="' + cur.area + '"]["boundary"="administrative"]->.c;' +
+    '(' + parts.join('') + ');out center tags 800;';
 }
 
+/* 1か所20秒で打ち切り、つながらなければ次の接続先へ */
+var ctrl = null;
 function fetchOverpass(q, i){
   i = i || 0;
-  return fetch(EP[i], {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}})
-    .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
-    .catch(function(e){ if (i + 1 < EP.length) return fetchOverpass(q, i + 1); throw e; });
+  ctrl = window.AbortController ? new AbortController() : null;
+  var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 20000);
+  return fetch(EP[i], {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal: ctrl ? ctrl.signal : undefined})
+    .then(function(r){ clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(function(e){ clearTimeout(timer); if (e && e.name === "AbortError" && e.byUser) throw e; if (i + 1 < EP.length) return fetchOverpass(q, i + 1); throw e; });
 }
 
 var seq = 0;
@@ -246,6 +251,7 @@ function search(){
   cur.kw = $("kw").value.trim();
   try{ localStorage.setItem("nowpage", JSON.stringify({area:cur.area, cat:cur.cat})); }catch(e){}
   var my = ++seq;
+  if (ctrl) { try{ ctrl.abort(); }catch(e){} }
   rows = []; shown = 0;
   $("list").innerHTML = ""; $("more").style.display = "none"; $("count").textContent = "";
   $("state").innerHTML = '<div class="msg"><div class="spin"></div>' + esc(cur.area) + 'を検索しています…</div>';
@@ -259,7 +265,7 @@ function search(){
     render();
   }).catch(function(){
     if (my !== seq) return;
-    $("state").innerHTML = '<div class="msg">混み合っていて検索できませんでした。<br>少し時間をおいて、もう一度「探す」を押してください。</div>';
+    $("state").innerHTML = '<div class="msg">検索サーバーが混み合っていて、つながりませんでした。<br><button class="more" style="width:auto;display:inline-block;margin-top:12px;padding:10px 22px" onclick="search()">もう一度探す</button></div>';
   });
 }
 
@@ -277,9 +283,15 @@ function addr(t){
   var n = [t["addr:block_number"], t["addr:housenumber"]].filter(Boolean).join("-");
   return (a + n) || (t["addr:street"] ? t["addr:street"] + (t["addr:housenumber"] || "") : "");
 }
+var CUISINE = {ramen:"ラーメン",sushi:"寿司",udon:"うどん",soba:"そば",yakiniku:"焼肉",yakitori:"焼き鳥",izakaya:"居酒屋",japanese:"和食",chinese:"中華",korean:"韓国料理",italian:"イタリアン",french:"フレンチ",pizza:"ピザ",curry:"カレー",burger:"ハンバーガー",tempura:"天ぷら",tonkatsu:"とんかつ",okonomiyaki:"お好み焼き",takoyaki:"たこ焼き",motsunabe:"もつ鍋",gyoza:"餃子",coffee_shop:"喫茶",cake:"ケーキ",steak_house:"ステーキ",seafood:"海鮮",noodle:"麺類",beef_bowl:"牛丼",donut:"ドーナツ",chicken:"チキン"};
 function kind(t){
   var v = t.amenity || t.shop || t.healthcare || t.office || t.tourism || t.leisure || "";
-  return KIND[v] || "";
+  var k = KIND[v] || "";
+  if (t.cuisine){
+    var c = t.cuisine.split(";").map(function(x){ return CUISINE[x.trim()]; }).filter(Boolean).join("・");
+    if (c) k = c;
+  }
+  return k;
 }
 function hours(h){
   if (!h) return "";
@@ -292,7 +304,7 @@ function toRows(els){
     var lat = e.lat || (e.center && e.center.lat), lon = e.lon || (e.center && e.center.lon);
     var k = nm + "|" + (lat ? lat.toFixed(3) : "");
     if (seen[k]) return; seen[k] = 1;
-    out.push({name:nm, branch:t["branch"] || "", kind:kind(t), ad:addr(t), tel:tel(t), hr:hours(t.opening_hours), web:t.website || t["contact:website"] || "", lat:lat, lon:lon});
+    out.push({txt:(nm + " " + (t["name:ja-Hira"]||"") + " " + (t["name:ja-Kana"]||"") + " " + kind(t) + " " + addr(t)).toLowerCase(), name:nm, branch:t["branch"] || "", kind:kind(t), ad:addr(t), tel:tel(t), hr:hours(t.opening_hours), web:t.website || t["contact:website"] || "", lat:lat, lon:lon});
   });
   out.sort(function(a, b){
     if (!!b.tel !== !!a.tel) return b.tel ? 1 : -1;
@@ -319,7 +331,12 @@ function item(r, isPR){
   return h;
 }
 function render(){
-  var list = $("telOnly").checked ? rows.filter(function(r){ return r.tel; }) : rows;
+  var tk = tokens().map(function(x){ return x.toLowerCase(); });
+  var list = rows.filter(function(r){
+    if ($("telOnly").checked && !r.tel) return false;
+    for (var i = 0; i < tk.length; i++) if (r.txt.indexOf(tk[i]) < 0) return false;
+    return true;
+  });
   var h = "";
   if (shown === 0 && showPR()) h += item(PR, true);
   list.slice(shown, shown + PAGE).forEach(function(r){ h += item(r, false); });
