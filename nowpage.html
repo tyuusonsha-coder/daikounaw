@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Hiragino Kaku Gothic ProN
 a{color:inherit}
 button,select,input{font-family:inherit}
 
-.top{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,10,14,.96);z-index:20}
+.top{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0a0a0e;z-index:20}
 .back{text-decoration:none;color:var(--tx2);font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .brand{font-weight:900;font-size:15px}
 .brand span{color:var(--yel)}
@@ -138,11 +138,13 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--tx2) 50%),li
 <script>
 /* ===== 地域（福岡県の全市区町村） ===== */
 var AREAS = [
-  ["福岡市", ["東区","博多区","中央区","南区","城南区","早良区","西区"]],
-  ["北九州市", ["門司区","若松区","戸畑区","小倉北区","小倉南区","八幡東区","八幡西区"]],
-  ["市", ["那珂川市","春日市","大野城市","太宰府市","筑紫野市","糸島市","古賀市","福津市","宗像市","久留米市","飯塚市","大牟田市","直方市","田川市","柳川市","八女市","筑後市","大川市","行橋市","豊前市","中間市","小郡市","うきは市","宮若市","嘉麻市","朝倉市","みやま市"]],
-  ["町村", ["宇美町","篠栗町","志免町","須恵町","新宮町","久山町","粕屋町","芦屋町","水巻町","岡垣町","遠賀町","小竹町","鞍手町","桂川町","筑前町","東峰村","大刀洗町","大木町","広川町","香春町","添田町","糸田町","川崎町","大任町","赤村","福智町","苅田町","みやこ町","吉富町","上毛町","築上町"]]
+  ["福岡市", [["東区",33.6176,130.4178,4000],["博多区",33.5914,130.4157,2500],["中央区",33.5890,130.3925,2000],["南区",33.5612,130.4264,2500],["城南区",33.5763,130.3700,2000],["早良区",33.5826,130.3487,3000],["西区",33.5832,130.3236,4000]]],
+  ["北九州市", [["門司区",33.9450,130.9622,3000],["若松区",33.9050,130.8113,3000],["戸畑区",33.8957,130.8292,1500],["小倉北区",33.8835,130.8752,2500],["小倉南区",33.8457,130.8885,3500],["八幡東区",33.8630,130.8115,2000],["八幡西区",33.8572,130.7395,3500]]],
+  ["市", [["那珂川市",33.4996,130.4223,3000],["春日市",33.5328,130.4702,2000],["大野城市",33.5363,130.4787,2000],["太宰府市",33.5126,130.5241,2500],["筑紫野市",33.4963,130.5157,3000],["糸島市",33.5574,130.1956,4000],["古賀市",33.7286,130.4700,2500],["福津市",33.7668,130.4913,3000],["宗像市",33.8053,130.5404,3500],["久留米市",33.3193,130.5083,4000],["飯塚市",33.6458,130.6915,3500],["大牟田市",33.0298,130.4459,3500],["直方市",33.7437,130.7298,2500],["田川市",33.6387,130.8061,2500],["柳川市",33.1631,130.4059,3000],["八女市",33.2116,130.5577,3000],["筑後市",33.2121,130.5021,2500],["大川市",33.2065,130.3838,2500],["行橋市",33.7286,130.9830,3000],["豊前市",33.6117,131.1305,3000],["中間市",33.8169,130.7090,2000],["小郡市",33.3963,130.5555,2500],["うきは市",33.3475,130.7549,3000],["宮若市",33.7235,130.6667,3000],["嘉麻市",33.5634,130.7117,3000],["朝倉市",33.4234,130.6655,3500],["みやま市",33.1524,130.4747,3000]]],
+  ["町村", [["宇美町",33.5678,130.5115,2000],["篠栗町",33.6240,130.5266,2000],["志免町",33.5913,130.4797,1800],["須恵町",33.5869,130.5079,1800],["新宮町",33.7154,130.4466,2000],["久山町",33.6467,130.4999,2000],["粕屋町",33.6107,130.4805,2000],["芦屋町",33.8939,130.6637,2000],["水巻町",33.8549,130.6949,1800],["岡垣町",33.8541,130.6114,2500],["遠賀町",33.8484,130.6680,2000],["小竹町",33.6927,130.7128,1800],["鞍手町",33.7924,130.6740,2000],["桂川町",33.5788,130.6782,1800],["筑前町",33.4568,130.5953,2500],["東峰村",33.3939,130.8706,3000],["大刀洗町",33.3725,130.6225,2000],["大木町",33.2101,130.4396,1800],["広川町",33.2416,130.5516,2000],["香春町",33.6687,130.8471,2500],["添田町",33.5717,130.8540,3000],["糸田町",33.6522,130.7799,1500],["川崎町",33.6000,130.8150,2500],["大任町",33.6122,130.8541,1800],["赤村",33.6172,130.8706,2000],["福智町",33.6838,130.7787,2500],["苅田町",33.7762,130.9799,2500],["みやこ町",33.6993,130.9800,3000],["吉富町",33.6029,131.1764,1500],["上毛町",33.5860,131.1536,2500],["築上町",33.6557,131.0559,2500]]]
 ];
+var POS = {};
+AREAS.forEach(function(g){ g[1].forEach(function(a){ POS[a[0]] = a; }); });
 
 /* ===== 業種（OpenStreetMapのタグ） ===== */
 var CATS = [
@@ -183,16 +185,16 @@ var rows = [], shown = 0;
 var $ = function(id){ return document.getElementById(id); };
 
 /* ===== 画面の初期化 ===== */
-(function init(){
+function init(){
   try{
     var s = JSON.parse(localStorage.getItem("nowpage") || "{}");
-    if (s.area) cur.area = s.area;
+    if (s.area && POS[s.area]) cur.area = s.area;
     if (s.cat) cur.cat = s.cat;
   }catch(e){}
   var sel = $("area"), h = "";
   AREAS.forEach(function(g){
     h += '<optgroup label="' + g[0] + '">';
-    g[1].forEach(function(n){ h += '<option' + (n === cur.area ? ' selected' : '') + '>' + n + '</option>'; });
+    g[1].forEach(function(a){ var n = a[0]; h += '<option' + (n === cur.area ? ' selected' : '') + '>' + n + '</option>'; });
     h += '</optgroup>';
   });
   sel.innerHTML = h;
@@ -212,7 +214,7 @@ var $ = function(id){ return document.getElementById(id); };
   $("telOnly").addEventListener("change", function(){ shown = 0; $("list").innerHTML = ""; render(); });
   $("more").addEventListener("click", render);
   search();
-})();
+}
 
 /* ===== 検索 ===== */
 function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
@@ -221,29 +223,43 @@ function reEsc(s){ return s.replace(/\u3000/g, " ").replace(/[.*+?^${}()|[\]\\"'
 function tokens(){ return reEsc(cur.kw).split(" ").filter(Boolean); }
 function buildQuery(){
   var cat = CATS.filter(function(x){ return x.id === cur.cat; })[0];
-  var tk = tokens();
+  var tk = tokens(), a = POS[cur.area];
+  var at = '(around:' + a[3] + ',' + a[1] + ',' + a[2] + ')';
   var parts = [];
   if (!cat.q){
-    if (tk.length) parts.push('nwr(area.c)(area.p)["name"~"' + tk[0] + '",i];');
-    else parts.push('nwr(area.c)(area.p)["name"]["shop"];', 'nwr(area.c)(area.p)["name"]["amenity"~"^(restaurant|cafe|bar|pub|fast_food|clinic|dentist|pharmacy|bank)$"];', 'nwr(area.c)(area.p)["name"]["office"];');
+    if (tk.length) parts.push('nwr' + at + '["name"~"' + tk[0] + '",i];');
+    else parts.push('nwr' + at + '["name"]["shop"];', 'nwr' + at + '["name"]["amenity"~"^(restaurant|cafe|bar|pub|fast_food|clinic|dentist|pharmacy|bank)$"];', 'nwr' + at + '["name"]["office"];');
   } else {
-    cat.q.forEach(function(x){ parts.push('nwr(area.c)(area.p)["' + x[0] + '"~"' + x[1] + '"]["name"];'); });
+    cat.q.forEach(function(x){ parts.push('nwr' + at + '["' + x[0] + '"~"' + x[1] + '"]["name"];'); });
   }
-  return '[out:json][timeout:20];' +
-    'area["ISO3166-2"="JP-40"]->.p;' +
-    'area["name"="' + cur.area + '"]["boundary"="administrative"]->.c;' +
-    '(' + parts.join('') + ');out center tags 800;';
+  return '[out:json][timeout:25];(' + parts.join('') + ');out center tags 800;';
 }
 
-/* 1か所20秒で打ち切り、つながらなければ次の接続先へ */
-var ctrl = null;
-function fetchOverpass(q, i){
-  i = i || 0;
-  ctrl = window.AbortController ? new AbortController() : null;
-  var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 20000);
-  return fetch(EP[i], {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal: ctrl ? ctrl.signal : undefined})
-    .then(function(r){ clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.json(); })
-    .catch(function(e){ clearTimeout(timer); if (e && e.name === "AbortError" && e.byUser) throw e; if (i + 1 < EP.length) return fetchOverpass(q, i + 1); throw e; });
+/* 3か所の検索サーバーに同時に問い合わせ、一番早く返ってきた結果を使う */
+var live = [];
+function stopAll(){ live.forEach(function(c){ try{ c.abort(); }catch(e){} }); live = []; }
+function fetchOverpass(q){
+  stopAll();
+  return new Promise(function(resolve, reject){
+    var left = EP.length, done = false;
+    EP.forEach(function(url){
+      var c = window.AbortController ? new AbortController() : null;
+      if (c) live.push(c);
+      var timer = setTimeout(function(){ if (c) c.abort(); }, 30000);
+      fetch(url, {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}, signal: c ? c.signal : undefined})
+        .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(d){
+          clearTimeout(timer);
+          if (done) return;
+          if (!d || !d.elements) throw new Error("bad");
+          done = true; stopAll(); resolve(d);
+        })
+        .catch(function(){
+          clearTimeout(timer);
+          if (--left === 0 && !done) reject(new Error("all failed"));
+        });
+    });
+  });
 }
 
 var seq = 0;
@@ -251,13 +267,19 @@ function search(){
   cur.kw = $("kw").value.trim();
   try{ localStorage.setItem("nowpage", JSON.stringify({area:cur.area, cat:cur.cat})); }catch(e){}
   var my = ++seq;
-  if (ctrl) { try{ ctrl.abort(); }catch(e){} }
   rows = []; shown = 0;
   $("list").innerHTML = ""; $("more").style.display = "none"; $("count").textContent = "";
-  $("state").innerHTML = '<div class="msg"><div class="spin"></div>' + esc(cur.area) + 'を検索しています…</div>';
-  var q = buildQuery(), key = "np:" + q, cached = null;
-  try{ cached = sessionStorage.getItem(key); }catch(e){}
-  var p = cached ? Promise.resolve(JSON.parse(cached)) : fetchOverpass(q).then(function(d){ try{ sessionStorage.setItem(key, JSON.stringify(d)); }catch(e){} return d; });
+  $("state").innerHTML = '<div class="msg"><div class="spin"></div>' + esc(cur.area) + '周辺を検索しています…<br><span style="font-size:12px;color:var(--tx3)">初回は10秒ほどかかることがあります</span></div>';
+  var q = buildQuery(), key = "np2:" + q, cached = null;
+  try{
+    var c = JSON.parse(localStorage.getItem(key) || "null");
+    if (c && Date.now() - c.t < 7 * 864e5) cached = c.d;
+  }catch(e){}
+  var p = cached ? Promise.resolve(cached) : fetchOverpass(q).then(function(d){
+    var slim = {elements:(d.elements || []).map(function(x){ return {lat:x.lat, lon:x.lon, center:x.center, tags:x.tags}; })};
+    try{ localStorage.setItem(key, JSON.stringify({t:Date.now(), d:slim})); }catch(e){ try{ Object.keys(localStorage).forEach(function(k){ if (k.indexOf("np2:") === 0) localStorage.removeItem(k); }); }catch(_){} }
+    return slim;
+  });
   p.then(function(d){
     if (my !== seq) return;
     rows = toRows(d.elements || []);
@@ -346,5 +368,8 @@ function render(){
   $("more").style.display = shown < list.length ? "block" : "none";
   if (!list.length && !showPR()) $("state").innerHTML = '<div class="msg">見つかりませんでした。<br>地域や業種を変えてお試しください。</div>';
 }
+
+/* 全部の準備ができてから起動 */
+init();
 </script>
 </body></html>
