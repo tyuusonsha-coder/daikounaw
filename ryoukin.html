@@ -66,7 +66,8 @@ a{color:inherit}
 .bars{display:grid; gap:10px}
 .bar{display:grid; grid-template-columns:7em 1fr auto; align-items:center; gap:10px; font-size:15px}
 .bar .track{height:10px; background:var(--line); border-radius:5px; overflow:hidden}
-.bar .fill{height:100%; background:var(--sub); width:0; transition:width .25s ease}
+.bar .track{display:block}
+.bar .fill{display:block; height:100%; background:var(--sub); width:0; transition:width .25s ease}
 .bar.best .fill{background:var(--lamp)}
 .bar.best .nm{font-weight:700}
 .bar .yen{font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right}
