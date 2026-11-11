@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>応援ボード | 代行NOW 運転代行ドライバーの応援募集</title>
+<meta name="description" content="運転代行業者が今夜足りない随伴ドライバー・代行ドライバーを募集し、空いているドライバーが応募できる掲示板です。福岡の代行NOWが運営。">
+<link rel="canonical" href="https://daikounaw.com/ouen.html">
+<meta property="og:site_name" content="代行NOW">
+<meta property="og:title" content="応援ボード | 代行NOW">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#EEF2F7; --panel:#FFFFFF; --ink:#15233B; --sub:#4A5872; --line:#C9D3E0;
+  --lamp:#F2B705; --lamp-ink:#15233B; --ok:#1E7A4F; --err:#B3261E; --field:#F7F9FC;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0E1A2E; --panel:#15243D; --ink:#E8EEF6; --sub:#9BAAC2; --line:#2A3B57;
+    --ok:#5FD39A; --err:#FF8A80; --field:#0F1D33;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0E1A2E; --panel:#15243D; --ink:#E8EEF6; --sub:#9BAAC2; --line:#2A3B57;
+  --ok:#5FD39A; --err:#FF8A80; --field:#0F1D33;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px; line-height:1.7; -webkit-text-size-adjust:100%}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--lamp); outline-offset:2px}
+.wrap{max-width:720px; margin:0 auto; padding:0 18px 40px}
+.disp{font-family:"Dela Gothic One","Hiragino Kaku Gothic StdN",sans-serif; font-weight:400}
+.top{display:flex; justify-content:space-between; align-items:center; padding:18px 0}
+.logo{font-size:20px; text-decoration:none}
+.top a.sm{font-size:14px; color:var(--sub); text-decoration:none}
+h1{font-size:clamp(26px,7vw,38px); line-height:1.3; margin:16px 0 8px}
+.lead{color:var(--sub); margin:0 0 20px}
+
+.tabs{display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line); border-radius:6px; overflow:hidden; margin-bottom:20px}
+.tabs button{appearance:none; border:0; background:var(--panel); color:var(--sub); font:inherit; font-weight:700; padding:12px 6px; cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--lamp); color:var(--lamp-ink)}
+
+.post{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px; margin-bottom:14px}
+.post.full{opacity:.6}
+.when{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.when .d{font-size:22px}
+.when .t{font-variant-numeric:tabular-nums; font-weight:700}
+.role{display:inline-block; font-size:13px; font-weight:700; padding:1px 10px; border-radius:3px; background:var(--lamp); color:var(--lamp-ink); margin-left:auto}
+.meta{margin:8px 0 0; font-size:15px}
+.meta div{display:flex; gap:10px}
+.meta dt{color:var(--sub); min-width:4.5em}
+.meta dd{margin:0}
+.note{color:var(--sub); font-size:14px; margin:8px 0 0; white-space:pre-wrap}
+.acts{display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap}
+.btn{appearance:none; border:0; background:var(--lamp); color:var(--lamp-ink); font:inherit; font-weight:700; padding:11px 20px; border-radius:4px; cursor:pointer}
+.btn:disabled{background:var(--line); color:var(--sub); cursor:default}
+.link{appearance:none; border:0; background:none; color:var(--sub); font:inherit; font-size:14px; text-decoration:underline; cursor:pointer; padding:6px}
+.left{font-size:14px; color:var(--sub)}
+.empty{text-align:center; color:var(--sub); padding:30px 10px}
+
+form .f{margin-bottom:14px}
+label{display:block; font-weight:700; font-size:15px; margin-bottom:4px}
+.hint{font-weight:400; color:var(--sub); font-size:13px}
+input,select,textarea{width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--field);
+  border:1px solid var(--line); border-radius:4px; padding:10px 12px}
+textarea{min-height:80px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.fee{background:var(--panel); border-left:5px solid var(--lamp); padding:10px 14px; font-size:14px; margin:4px 0 16px}
+.rules{font-size:13px; color:var(--sub); margin-top:18px}
+.rules p{margin:0 0 6px}
+.msg{font-weight:700; margin:12px 0 0}
+.msg.ok{color:var(--ok)} .msg.err{color:var(--err)}
+
+dialog{border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); padding:20px; width:min(92vw,460px)}
+dialog::backdrop{background:rgba(5,10,20,.6)}
+dialog h2{font-size:20px; margin:0 0 6px}
+.entries{margin:12px 0 0; padding:0; list-style:none}
+.entries li{border-top:1px solid var(--line); padding:10px 0}
+.entries a{font-weight:700}
+.dlg-acts{display:flex; justify-content:flex-end; gap:8px; margin-top:12px}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo disp" href="/">代行NOW</a>
+    <a class="sm" href="/ryoukin.html">料金プラン</a>
+  </header>
+
+  <h1 class="disp">今夜、人が足りない。<br>今夜、手が空いている。</h1>
+  <p class="lead">運転代行業者とドライバーをつなぐ応援ボードです。ドライバーは応募先の業者と直接契約して応援に入ります。</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-list" aria-selected="true" aria-controls="p-list">募集を見る</button>
+    <button role="tab" id="t-new" aria-selected="false" aria-controls="p-new">募集を出す（業者）</button>
+  </div>
+
+  <section id="p-list" role="tabpanel" aria-labelledby="t-list">
+    <div id="list"><p class="empty">読み込み中です…</p></div>
+  </section>
+
+  <section id="p-new" role="tabpanel" aria-labelledby="t-new" hidden>
+    <form id="newForm" novalidate>
+      <div class="f"><label for="cn">業者名</label><input id="cn" required maxlength="60" autocomplete="organization"></div>
+      <div class="f"><label for="ct">電話番号 <span class="hint">ドライバーが連絡する番号です</span></label><input id="ct" type="tel" required maxlength="20" inputmode="tel"></div>
+      <div class="f"><label for="pl">ご利用中の料金プラン</label>
+        <select id="pl"><option value="free">フリー</option><option value="standard">スタンダード</option><option value="pro">プロ</option></select>
+      </div>
+      <div class="fee" id="feeNote"></div>
+      <div class="row2">
+        <div class="f"><label for="wd">日付</label><input id="wd" type="date" required></div>
+        <div class="f"><label for="rl">役割</label>
+          <select id="rl"><option>随伴</option><option>代行運転（二種）</option><option>どちらでも</option></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="st">開始</label><input id="st" type="time" value="21:00" required></div>
+        <div class="f"><label for="et">終了</label><input id="et" type="time" value="03:00" required></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="ar">エリア</label><input id="ar" required maxlength="60" placeholder="中洲・天神"></div>
+        <div class="f"><label for="sl">人数</label><select id="sl"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      </div>
+      <div class="f"><label for="py">報酬</label><input id="py" required maxlength="60" placeholder="売上の40％、日額保証5,000円 など"></div>
+      <div class="f"><label for="nt">備考 <span class="hint">任意</span></label><textarea id="nt" maxlength="300" placeholder="集合場所、服装など"></textarea></div>
+      <div class="f"><label for="pn">暗証番号（4〜8桁の数字） <span class="hint">応募者を見るときに使います</span></label><input id="pn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" required autocomplete="new-password"></div>
+      <button class="btn" type="submit" id="newBtn">募集を出す</button>
+      <p class="msg" id="newMsg" role="status"></p>
+    </form>
+    <div class="rules">
+      <p>応援に入るドライバーとは、業者さまが直接、業務委託契約を結んでください。自社の従業員を他社へ貸し出す形にはしないでください。</p>
+      <p>応援ドライバーは、業者さまの保険・乗務記録・安全運転管理者の管理のもとで稼働させてください。</p>
+      <p>代行NOW（合同会社中尊社）は募集と応募をつなぐ場の提供のみを行います。</p>
+    </div>
+  </section>
+</div>
+
+<dialog id="applyDlg">
+  <form method="dialog" id="applyForm" novalidate>
+    <h2 class="disp">この募集に応募する</h2>
+    <p class="note" id="applyInfo"></p>
+    <div class="f"><label for="dn">お名前</label><input id="dn" maxlength="40" autocomplete="name"></div>
+    <div class="f"><label for="dt">電話番号</label><input id="dt" type="tel" maxlength="20" inputmode="tel" autocomplete="tel"></div>
+    <div class="f"><label for="dl">免許</label><select id="dl"><option>普通免許（一種）</option><option>二種免許</option></select></div>
+    <p class="msg" id="applyMsg" role="status"></p>
+    <div class="dlg-acts">
+      <button class="link" value="cancel" formnovalidate>閉じる</button>
+      <button class="btn" type="button" id="applyBtn">応募する</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="ownerDlg">
+  <form method="dialog" id="ownerForm" novalidate>
+    <h2 class="disp">応募者を見る</h2>
+    <p class="note" id="ownerInfo"></p>
+    <div class="f"><label for="op">暗証番号</label><input id="op" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>
+    <ul class="entries" id="entries"></ul>
+    <p class="msg" id="ownerMsg" role="status"></p>
+    <div class="dlg-acts">
+      <button class="link" value="cancel" formnovalidate>閉じる</button>
+      <button class="link" type="button" id="closeBtn">募集を締め切る</button>
+      <button class="btn" type="button" id="ownerBtn">確認する</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  var SB = "https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
+  var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
+  var H = {"apikey":KEY, "Authorization":"Bearer "+KEY, "Content-Type":"application/json"};
+  var WD = ["日","月","火","水","木","金","土"];
+  var posts = [], current = null;
+
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+  function todayJST(){
+    var d = new Date(Date.now() + 9*3600*1000);
+    return d.toISOString().slice(0,10);
+  }
+  function fmtDate(s){
+    var p = s.split("-"); var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return (+p[1])+"月"+(+p[2])+"日（"+WD[d.getDay()]+"）";
+  }
+  function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function load(k){try{return localStorage.getItem(k)||""}catch(e){return ""}}
+
+  async function rpc(name, body){
+    var r = await fetch(SB+"rpc/"+name, {method:"POST", headers:H, body:JSON.stringify(body)});
+    var t = await r.text(); var j = null;
+    try{ j = t ? JSON.parse(t) : null }catch(e){}
+    if(!r.ok){ throw new Error((j && j.message) || "通信に失敗しました。電波の良い場所でもう一度お試しください。"); }
+    return j;
+  }
+
+  /* tabs */
+  function showTab(which){
+    var list = which==="list";
+    $("t-list").setAttribute("aria-selected", list);
+    $("t-new").setAttribute("aria-selected", !list);
+    $("p-list").hidden = !list; $("p-new").hidden = list;
+    if(list) loadPosts();
+  }
+  $("t-list").onclick = function(){showTab("list")};
+  $("t-new").onclick = function(){showTab("new")};
+
+  /* list */
+  async function loadPosts(){
+    try{
+      var url = SB+"ouen_posts?select=*&work_date=gte."+todayJST()+"&status=neq.closed&order=work_date.asc,start_time.asc";
+      var r = await fetch(url,{headers:H});
+      if(!r.ok) throw new Error();
+      posts = await r.json();
+      render();
+    }catch(e){
+      $("list").innerHTML = '<p class="empty">募集を読み込めませんでした。少し待ってから開き直してください。</p>';
+    }
+  }
+  function render(){
+    if(!posts.length){
+      $("list").innerHTML = '<p class="empty">いまは募集がありません。<br>人手が足りない業者さまは「募集を出す」から投稿できます。</p>';
+      return;
+    }
+    $("list").innerHTML = posts.map(function(p){
+      var left = p.slots - p.filled, full = p.status!=="open" || left<=0;
+      return '<article class="post'+(full?' full':'')+'">'+
+        '<div class="when"><span class="d disp">'+fmtDate(p.work_date)+'</span>'+
+        '<span class="t">'+esc(p.start_time)+'〜'+esc(p.end_time)+'</span>'+
+        '<span class="role">'+esc(p.role)+'</span></div>'+
+        '<dl class="meta">'+
+          '<div><dt>業者</dt><dd>'+esc(p.company_name)+'</dd></div>'+
+          '<div><dt>エリア</dt><dd>'+esc(p.area)+'</dd></div>'+
+          '<div><dt>報酬</dt><dd>'+esc(p.pay)+'</dd></div>'+
+        '</dl>'+
+        (p.note?'<p class="note">'+esc(p.note)+'</p>':'')+
+        '<div class="acts">'+
+          '<button class="btn" data-apply="'+p.id+'"'+(full?' disabled':'')+'>'+(full?'締め切りました':'応募する')+'</button>'+
+          (full?'':'<span class="left">残り'+left+'名</span>')+
+          '<button class="link" data-owner="'+p.id+'">応募者を見る（業者用）</button>'+
+        '</div></article>';
+    }).join("");
+  }
+  $("list").addEventListener("click", function(e){
+    var a = e.target.closest("[data-apply]"), o = e.target.closest("[data-owner]");
+    if(a){ openApply(a.getAttribute("data-apply")); }
+    if(o){ openOwner(o.getAttribute("data-owner")); }
+  });
+
+  /* apply */
+  function find(id){ return posts.filter(function(p){return p.id===id})[0] }
+  function openApply(id){
+    current = find(id); if(!current) return;
+    $("applyInfo").textContent = fmtDate(current.work_date)+" "+current.start_time+"〜"+current.end_time+"／"+current.company_name+"／"+current.role;
+    $("dn").value = load("ouen_name"); $("dt").value = load("ouen_tel");
+    $("applyMsg").textContent = ""; $("applyMsg").className = "msg";
+    $("applyBtn").disabled = false; $("applyBtn").hidden = false;
+    $("applyDlg").showModal();
+  }
+  $("applyBtn").onclick = async function(){
+    var name = $("dn").value.trim(), tel = $("dt").value.trim(), m = $("applyMsg");
+    if(!name || tel.replace(/[^0-9]/g,"").length < 10){
+      m.className="msg err"; m.textContent="お名前と電話番号（10桁以上）を入力してください。"; return;
+    }
+    this.disabled = true;
+    try{
+      var res = await rpc("apply_ouen",{p_post_id:current.id, p_name:name, p_tel:tel, p_license:$("dl").value});
+      store("ouen_name",name); store("ouen_tel",tel);
+      if(res==="ok"){
+        m.className="msg ok";
+        m.innerHTML = "応募が確定しました。"+esc(current.company_name)+"さまから連絡があります。急ぎの場合は <a href=\"tel:"+esc(current.company_tel.replace(/[^0-9+]/g,""))+"\">"+esc(current.company_tel)+"</a> へお電話ください。";
+        $("applyBtn").hidden = true; loadPosts();
+      }else if(res==="already"){
+        m.className="msg err"; m.textContent="この募集にはすでに応募済みです。"; this.disabled=false;
+      }else if(res==="full"){
+        m.className="msg err"; m.textContent="ひと足遅く、この募集は締め切られました。"; loadPosts();
+      }else{
+        m.className="msg err"; m.textContent="入力内容を確認してください。"; this.disabled=false;
+      }
+    }catch(e){ m.className="msg err"; m.textContent=e.message; this.disabled=false; }
+  };
+
+  /* owner */
+  function openOwner(id){
+    current = find(id); if(!current) return;
+    $("ownerInfo").textContent = fmtDate(current.work_date)+" "+current.start_time+"〜／"+current.company_name;
+    $("op").value=""; $("entries").innerHTML=""; $("ownerMsg").textContent=""; $("ownerMsg").className="msg";
+    $("ownerDlg").showModal();
+  }
+  $("ownerBtn").onclick = async function(){
+    var m = $("ownerMsg");
+    try{
+      var rows = await rpc("get_ouen_entries",{p_post_id:current.id, p_pin:$("op").value});
+      if(!rows || !rows.length){ m.className="msg"; m.textContent="まだ応募はありません。"; $("entries").innerHTML=""; return; }
+      m.textContent="";
+      $("entries").innerHTML = rows.map(function(r){
+        return '<li>'+esc(r.driver_name)+'（'+esc(r.license)+'）<br><a href="tel:'+esc(r.driver_tel.replace(/[^0-9+]/g,""))+'">'+esc(r.driver_tel)+'</a></li>';
+      }).join("");
+    }catch(e){ m.className="msg err"; m.textContent=e.message; }
+  };
+  $("closeBtn").onclick = async function(){
+    var m = $("ownerMsg");
+    if(!confirm("この募集を締め切りますか？一覧から消えます。")) return;
+    try{
+      await rpc("close_ouen",{p_post_id:current.id, p_pin:$("op").value});
+      m.className="msg ok"; m.textContent="募集を締め切りました。"; loadPosts();
+    }catch(e){ m.className="msg err"; m.textContent=e.message; }
+  };
+
+  /* new post */
+  function feeText(){
+    $("feeNote").textContent = $("pl").value==="free"
+      ? "フリープランは、応援ドライバーが1名確定するごとにマッチング料330円（税込）がかかります。"
+      : "スタンダード・プロプランの業者さまは、マッチング料は無料です。";
+  }
+  $("pl").onchange = feeText; feeText();
+  $("wd").min = todayJST(); $("wd").value = todayJST();
+  $("cn").value = load("ouen_cn"); $("ct").value = load("ouen_ct");
+  var savedPlan = load("ouen_pl"); if(savedPlan){ $("pl").value = savedPlan; feeText(); }
+
+  $("newForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    var m = $("newMsg"), btn = $("newBtn");
+    var need = ["cn","ct","wd","st","et","ar","py"];
+    for(var i=0;i<need.length;i++){ if(!$(need[i]).value.trim()){ m.className="msg err"; m.textContent="未入力の項目があります。"; $(need[i]).focus(); return; } }
+    if(!/^[0-9]{4,8}$/.test($("pn").value)){ m.className="msg err"; m.textContent="暗証番号は4〜8桁の数字にしてください。"; $("pn").focus(); return; }
+    btn.disabled = true;
+    try{
+      await rpc("create_ouen_post",{
+        p_company_name:$("cn").value, p_company_tel:$("ct").value, p_plan:$("pl").value, p_area:$("ar").value,
+        p_work_date:$("wd").value, p_start_time:$("st").value, p_end_time:$("et").value, p_role:$("rl").value,
+        p_slots:+$("sl").value, p_pay:$("py").value, p_note:$("nt").value, p_pin:$("pn").value
+      });
+      store("ouen_cn",$("cn").value); store("ouen_ct",$("ct").value); store("ouen_pl",$("pl").value);
+      m.className="msg ok"; m.textContent="募集を出しました。応募者は一覧の「応募者を見る」から暗証番号で確認できます。";
+      $("nt").value=""; $("pn").value="";
+      setTimeout(function(){ showTab("list"); m.textContent=""; }, 1500);
+    }catch(err){ m.className="msg err"; m.textContent=err.message; }
+    btn.disabled = false;
+  });
+
+  loadPosts();
+  setInterval(function(){ if(!$("p-list").hidden && !document.querySelector("dialog[open]")) loadPosts(); }, 60000);
+})();
+</script>
+</body>
+</html>
