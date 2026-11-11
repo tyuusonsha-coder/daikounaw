@@ -64,6 +64,8 @@ a:focus-visible{outline:3px solid var(--text);outline-offset:2px}
 var SB="https://kjfmcpwstubgezebmstt.supabase.co/rest/v1/";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZm1jcHdzdHViZ2V6ZWJtc3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1ODU3MTksImV4cCI6MjA5NDE2MTcxOX0.GF5QPVI4AUCfIqdmApplwOAEDBoESZTfadi-hbOb7Gs";
 var H={"apikey":SK,"Authorization":"Bearer "+SK};
+/* 代行なう（自社）の初乗り割引。index.html の OFF と同じ値にそろえる */
+var OFF=1500, OFF_CO="daikounaw";
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
 function yen(n){return Number(n).toLocaleString("ja-JP");}
 function telOf(p){return String(p||"").replace(/[^0-9+]/g,"");}
@@ -99,10 +101,13 @@ function render(c){
   document.getElementById("canon").href="https://daikounaw.com/g.html?id="+encodeURIComponent(c.id);
 
   var price='';
+  var own=(OFF>0&&c.id===OFF_CO);
   if(c.base_fare!=null){
-    price='<div class="price"><b>'+yen(c.base_fare)+'円</b><span>初乗り'+(c.per_km!=null?'／以降1kmごと'+yen(c.per_km)+'円':'')+'</span></div>';
+    var bf=own?Math.max(0,(c.base_fare||1900)-OFF):c.base_fare;
+    price='<div class="price"><b>'+yen(bf)+'円</b><span>初乗り'+(own?'（御願有）':'')+(c.per_km!=null?'／以降1kmごと'+yen(c.per_km)+'円':'')+'</span></div>';
   }
-  if(c.price_note) price+='<p class="pnote">'+esc(c.price_note)+'</p>';
+  if(own) price+='<p class="pnote">20kmを超えた分は1kmごと300円。高速代は当社負担で無料です。</p>';
+  else if(c.price_note) price+='<p class="pnote">'+esc(c.price_note)+'</p>';
   if(!price) price='<p class="pnote">料金はお電話でお問い合わせください</p>';
 
   var cert='';
