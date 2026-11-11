@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>料金プラン | 代行NOW 運転代行業者向け配車・集客システム</title>
+<meta name="description" content="代行NOWは運転代行業者向けの配車・集客システムです。月額0円のフリープランから。配車ボード、GPS追跡、顧客管理、全国ポータル掲載。福岡の合同会社中尊社が運営。">
+<link rel="canonical" href="https://daikounaw.com/ryoukin.html">
+<meta property="og:site_name" content="代行NOW">
+<meta property="og:title" content="料金プラン | 代行NOW">
+<meta property="og:description" content="運転代行業者向けの配車・集客システム。月額0円から始められます。">
+<meta property="og:url" content="https://daikounaw.com/ryoukin.html">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#EEF2F7; --panel:#FFFFFF; --ink:#15233B; --sub:#4A5872; --line:#C9D3E0;
+  --lamp:#F2B705; --lamp-ink:#15233B; --glow:rgba(242,183,5,.35); --ok:#1E7A4F; --no:#9AA6B8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0E1A2E; --panel:#15243D; --ink:#E8EEF6; --sub:#9BAAC2; --line:#2A3B57;
+    --glow:rgba(242,183,5,.45); --ok:#5FD39A; --no:#5B6B86;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0E1A2E; --panel:#15243D; --ink:#E8EEF6; --sub:#9BAAC2; --line:#2A3B57;
+  --glow:rgba(242,183,5,.45); --ok:#5FD39A; --no:#5B6B86;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px; line-height:1.75; -webkit-text-size-adjust:100%;
+}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--lamp); outline-offset:3px}
+.wrap{max-width:960px; margin:0 auto; padding:0 20px}
+.disp{font-family:"Dela Gothic One","Hiragino Kaku Gothic StdN",sans-serif; font-weight:400; letter-spacing:.02em}
+
+/* header */
+.top{display:flex; justify-content:space-between; align-items:center; padding:18px 0}
+.logo{font-size:20px; text-decoration:none}
+.top nav a{font-size:14px; color:var(--sub); text-decoration:none; margin-left:16px}
+
+/* hero */
+.hero{padding:28px 0 12px}
+.hero h1{font-size:clamp(28px,7vw,48px); line-height:1.3; margin:0 0 14px}
+.hero p{color:var(--sub); margin:0; max-width:36em}
+
+/* calculator */
+.calc{margin:28px 0 8px; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:22px 20px}
+.calc label{display:block; font-weight:700; margin-bottom:6px}
+.calc .now{font-size:40px; line-height:1}
+.calc .now small{font-family:"Zen Kaku Gothic New",sans-serif; font-size:16px; margin-left:4px}
+.calc input[type=range]{width:100%; margin:14px 0 18px; accent-color:var(--lamp); height:28px}
+.bars{display:grid; gap:10px}
+.bar{display:grid; grid-template-columns:7em 1fr auto; align-items:center; gap:10px; font-size:15px}
+.bar .track{height:10px; background:var(--line); border-radius:5px; overflow:hidden}
+.bar .fill{height:100%; background:var(--sub); width:0; transition:width .25s ease}
+.bar.best .fill{background:var(--lamp)}
+.bar.best .nm{font-weight:700}
+.bar .yen{font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right}
+.verdict{margin:16px 0 0; font-weight:700}
+
+/* plans */
+h2{font-size:clamp(22px,5vw,30px); margin:56px 0 18px; line-height:1.4}
+.plans{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start}
+.plan{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:0 18px 20px; position:relative}
+.lampbox{display:flex; justify-content:center; margin:-1px 0 16px}
+.lamp{
+  font-family:"Dela Gothic One",sans-serif; font-size:18px; color:var(--lamp-ink);
+  background:var(--lamp); padding:6px 22px 4px; border-radius:0 0 10px 10px;
+  clip-path:polygon(0 0,100% 0,92% 100%,8% 100%);
+}
+.plan.pick{border-color:var(--lamp); box-shadow:0 0 0 1px var(--lamp), 0 0 28px var(--glow)}
+.plan:not(.pick) .lamp{background:var(--line); color:var(--ink)}
+.price{text-align:center; margin-bottom:4px}
+.price .n{font-size:38px; line-height:1.1}
+.price .u{font-size:14px; color:var(--sub)}
+.fee{text-align:center; font-size:15px; color:var(--sub); margin:0 0 14px}
+.fee b{color:var(--ink)}
+.plan ul{list-style:none; margin:0; padding:14px 0 0; border-top:1px dashed var(--line)}
+.plan li{display:flex; gap:8px; padding:4px 0; font-size:15px}
+.plan li::before{content:"○"; color:var(--ok); font-weight:700; flex:none}
+.plan li.x{color:var(--no)}
+.plan li.x::before{content:"－"; color:var(--no)}
+.for{font-size:14px; color:var(--sub); margin:14px 0 0}
+
+/* tables */
+.tbl{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; min-width:420px; background:var(--panel); border:1px solid var(--line)}
+th,td{padding:12px 14px; border-bottom:1px solid var(--line); text-align:left; font-size:15px; vertical-align:top}
+td.y{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:700}
+tr:last-child td{border-bottom:0}
+.note{font-size:14px; color:var(--sub); margin:10px 0 0}
+
+.fc{background:var(--panel); border-left:6px solid var(--lamp); padding:18px 20px; border-radius:0 4px 4px 0}
+.fc p{margin:0}
+
+/* faq */
+details{border-bottom:1px solid var(--line); padding:14px 0}
+summary{font-weight:700; cursor:pointer}
+details p{margin:8px 0 0; color:var(--sub)}
+
+/* contact */
+.contact{margin:56px 0 0; padding:36px 0 44px; border-top:1px solid var(--line); text-align:center}
+.contact p{margin:0 0 18px; color:var(--sub)}
+.btn{
+  display:inline-block; background:var(--lamp); color:var(--lamp-ink); text-decoration:none;
+  font-weight:700; font-size:18px; padding:14px 28px; border-radius:4px;
+}
+.small{font-size:13px; color:var(--sub); margin-top:14px}
+footer{font-size:13px; color:var(--sub); text-align:center; padding:0 0 32px}
+
+@media (max-width:760px){
+  .plans{grid-template-columns:1fr}
+  .top nav a{margin-left:12px}
+}
+@media (prefers-reduced-motion:reduce){ .bar .fill{transition:none} }
+</style>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Product",
+  "name":"代行NOW 配車・集客システム",
+  "description":"運転代行業者向けの配車ボード・GPS追跡・顧客管理・ポータル掲載システム",
+  "brand":{"@type":"Brand","name":"代行NOW"},
+  "offers":[
+    {"@type":"Offer","name":"フリー","price":"0","priceCurrency":"JPY"},
+    {"@type":"Offer","name":"スタンダード","price":"5500","priceCurrency":"JPY"},
+    {"@type":"Offer","name":"プロ","price":"16500","priceCurrency":"JPY"}
+  ],
+  "provider":{"@type":"Organization","name":"合同会社中尊社","telephone":"050-1724-3179"}
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="logo disp" href="/">代行NOW</a>
+  <nav><a href="#plans">プラン</a><a href="#contact">お問い合わせ</a></nav>
+</header>
+
+<section class="hero">
+  <h1 class="disp">配車も集客も、<br>月0円から。</h1>
+  <p>代行NOWは運転代行業者のためのシステムです。予約の受付、ドライバーへの配車、GPSでの位置確認、お客様の管理までスマホひとつで行えます。</p>
+
+  <div class="calc" aria-live="polite">
+    <label for="n">月に何件くらい予約がありますか？</label>
+    <div class="now disp"><span id="nv">20</span><small>件／月</small></div>
+    <input type="range" id="n" min="0" max="150" step="5" value="20" aria-describedby="vd">
+    <div class="bars">
+      <div class="bar" id="b0"><span class="nm">フリー</span><span class="track"><span class="fill"></span></span><span class="yen"></span></div>
+      <div class="bar" id="b1"><span class="nm">スタンダード</span><span class="track"><span class="fill"></span></span><span class="yen"></span></div>
+      <div class="bar" id="b2"><span class="nm">プロ</span><span class="track"><span class="fill"></span></span><span class="yen"></span></div>
+    </div>
+    <p class="verdict" id="vd"></p>
+  </div>
+</section>
+
+<section id="plans">
+  <h2 class="disp">料金プラン</h2>
+  <div class="plans">
+
+    <article class="plan">
+      <div class="lampbox"><span class="lamp">フリー</span></div>
+      <div class="price"><span class="n disp">0</span><span class="u">円／月</span></div>
+      <p class="fee">成約手数料 <b>1件330円</b></p>
+      <ul>
+        <li>ポータル掲載</li>
+        <li>予約の受付</li>
+        <li class="x">配車ボード</li>
+        <li class="x">GPS追跡・顧客管理</li>
+        <li class="x">自社専用の集客ページ</li>
+        <li class="x">ポータル上位表示</li>
+      </ul>
+      <p class="for">まず試してみたい方、件数が少ない方に。</p>
+    </article>
+
+    <article class="plan pick">
+      <div class="lampbox"><span class="lamp">スタンダード</span></div>
+      <div class="price"><span class="n disp">5,500</span><span class="u">円／月</span></div>
+      <p class="fee">成約手数料 <b>1件110円</b></p>
+      <ul>
+        <li>ポータル掲載</li>
+        <li>予約の受付</li>
+        <li>配車ボード</li>
+        <li>GPS追跡・顧客管理</li>
+        <li>ドライバー3名まで</li>
+        <li class="x">自社専用の集客ページ</li>
+        <li class="x">ポータル上位表示</li>
+      </ul>
+      <p class="for">月25件以上の業者さまはこちらがお得です。</p>
+    </article>
+
+    <article class="plan">
+      <div class="lampbox"><span class="lamp">プロ</span></div>
+      <div class="price"><span class="n disp">16,500</span><span class="u">円／月</span></div>
+      <p class="fee">成約手数料 <b>0円</b></p>
+      <ul>
+        <li>ポータル掲載</li>
+        <li>予約の受付</li>
+        <li>配車ボード</li>
+        <li>GPS追跡・顧客管理</li>
+        <li>ドライバー無制限</li>
+        <li>自社専用の集客ページ</li>
+        <li>ポータル上位表示</li>
+      </ul>
+      <p class="for">月100件以上、複数台で営業する業者さまに。</p>
+    </article>
+
+  </div>
+  <p class="note">表示はすべて税込です。成約手数料は代行NOW経由で予約が成立した件数に対してかかります。</p>
+</section>
+
+<section>
+  <h2 class="disp">初期費用</h2>
+  <div class="tbl"><table>
+    <tr><td>導入設定（スタンダード・プロ）<br><span class="note">配車ボードの設定、ドライバー登録、使い方のご案内</span></td><td class="y">33,000円</td></tr>
+    <tr><td>先着5社さま</td><td class="y">無料</td></tr>
+    <tr><td>フリープラン</td><td class="y">0円</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2 class="disp">オプション</h2>
+  <div class="tbl"><table>
+    <tr><td>集客ページ制作代行<br><span class="note">お店の紹介・料金・電話ボタンを載せたページを作成します</span></td><td class="y">55,000円<br><span class="note">買い切り</span></td></tr>
+    <tr><td>ポータル上位表示<br><span class="note">スタンダードプラン向け</span></td><td class="y">3,300円／月</td></tr>
+    <tr><td>ナウページ掲載</td><td class="y">1,100円／月</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2 class="disp">FC加盟店さまは</h2>
+  <div class="fc"><p>代行なうのFC加盟店さまには、プロプラン相当の機能を追加料金なしでご利用いただけます。</p></div>
+</section>
+
+<section>
+  <h2 class="disp">よくある質問</h2>
+  <details><summary>途中でプランを変えられますか？</summary><p>はい。翌月から変更できます。件数が増えた月だけ上のプランにすることも可能です。</p></details>
+  <details><summary>自社で受けた電話予約にも手数料はかかりますか？</summary><p>かかりません。手数料の対象は代行NOWのサイト経由で成立した予約だけです。</p></details>
+  <details><summary>解約に違約金はありますか？</summary><p>ありません。月末までにご連絡いただければ翌月から停止します。</p></details>
+  <details><summary>スマホだけで使えますか？</summary><p>はい。配車ボードもドライバー用画面もスマホのブラウザで動きます。アプリのインストールは不要です。</p></details>
+</section>
+
+<section class="contact" id="contact">
+  <h2 class="disp" style="margin-top:0">導入のご相談</h2>
+  <p>夜間は運転中のため、出られない場合は折り返しご連絡します。</p>
+  <a class="btn" href="tel:05017243179">050-1724-3179 に電話する</a>
+  <p class="small">運営：合同会社中尊社（福岡県那珂川市）</p>
+</section>
+
+</div>
+<footer><a href="/">代行NOW トップへ戻る</a></footer>
+
+<script>
+(function(){
+  var plans=[
+    {m:0, f:330, name:"フリー"},
+    {m:5500, f:110, name:"スタンダード"},
+    {m:16500, f:0, name:"プロ"}
+  ];
+  var r=document.getElementById("n"), nv=document.getElementById("nv"), vd=document.getElementById("vd");
+  function yen(v){return v.toLocaleString("ja-JP")+"円"}
+  function draw(){
+    var n=+r.value; nv.textContent=n;
+    var costs=plans.map(function(p){return p.m+p.f*n});
+    var max=Math.max.apply(null,costs.concat([1]));
+    var min=Math.min.apply(null,costs);
+    var best=costs.indexOf(min);
+    costs.forEach(function(c,i){
+      var b=document.getElementById("b"+i);
+      b.querySelector(".fill").style.width=(c/max*100)+"%";
+      b.querySelector(".yen").textContent=yen(c);
+      b.classList.toggle("best",i===best);
+    });
+    vd.textContent="月"+n+"件なら、"+plans[best].name+"がいちばんお得です（月"+yen(min)+"）。";
+  }
+  r.addEventListener("input",draw);
+  draw();
+})();
+</script>
+</body>
+</html>
