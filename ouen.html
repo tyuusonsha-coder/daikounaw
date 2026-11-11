@@ -88,6 +88,10 @@ dialog h2{font-size:20px; margin:0 0 6px}
 .entries li{border-top:1px solid var(--line); padding:10px 0}
 .entries a{font-weight:700}
 .dlg-acts{display:flex; justify-content:flex-end; gap:8px; margin-top:12px}
+.line-card{display:flex; gap:14px; align-items:center; background:var(--panel); border:1px solid var(--line); border-left:6px solid #06C755; border-radius:6px; padding:14px 16px; margin:0 0 20px}
+.line-card p{margin:0; font-size:14px; color:var(--sub)}
+.line-card b{display:block; color:var(--ink); font-size:16px}
+.line-btn{flex:none; background:#06C755; color:#fff; text-decoration:none; font-weight:700; padding:10px 16px; border-radius:4px; white-space:nowrap}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -100,6 +104,11 @@ dialog h2{font-size:20px; margin:0 0 6px}
 
   <h1 class="disp">今夜、人が足りない。<br>今夜、手が空いている。</h1>
   <p class="lead">運転代行業者とドライバーをつなぐ応援ボードです。ドライバーは応募先の業者と直接契約して応援に入ります。</p>
+
+  <div class="line-card">
+    <div><b>業者さま向けグループLINE</b><p>「福岡 運転代行 助け合いの会」で、人手や依頼を融通し合えます。参加無料。</p></div>
+    <a class="line-btn" href="https://line.me/ti/g/HGb3GTHPBK" target="_blank" rel="noopener">参加する</a>
+  </div>
 
   <div class="tabs" role="tablist">
     <button role="tab" id="t-list" aria-selected="true" aria-controls="p-list">募集を見る</button>
